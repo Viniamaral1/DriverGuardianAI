@@ -1,0 +1,88 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+*.nbconvert.ipynb
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Editors
+.vscode/
+.idea/
+*.code-workspace
+
+# Secrets
+.env
+.env.*
+!.env.example
+credentials.json
+secrets.json
+*.pem
+*.key
+
+# Private datasets and runtime files
+data/
+logs/
+recordings/
+captures/
+videos/
+
+# Generated models
+models/
+*.joblib
+*.pkl
+*.pickle
+*.pth
+*.pt
+*.onnx
+
+# Generated outputs
+results/
+outputs/
+reports/generated/
+
+# Keep public assets
+!assets/
+!assets/**
+!examples/
+!examples/**
+!docs/**
+!README.md
+!LICENSE
+!requirements.txt
+
+# Operating system
+.DS_Store
+Thumbs.db
+desktop.ini
+.AppleDouble
+.LSOverride
+
+# Temporary files
+build/
+dist/
+*.egg-info/
+*.tmp
+*.temp
+*.bak
+*.orig
+*.log
+~$*
+
+# Video source files
+*.mp4
+*.mov
+*.avi
+*.mkv

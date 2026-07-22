@@ -1,0 +1,19 @@
+# Normalize text files in the repository
+* text=auto
+
+# Keep source and documentation files consistent
+*.py text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.gitignore text eol=lf
+*.gitattributes text eol=lf
+
+# Treat media as binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.mp4 binary

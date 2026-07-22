@@ -1,0 +1,81 @@
+# ======================================================
+# DriverGuardianAI Configuration
+# ======================================================
+
+project:
+  name: DriverGuardianAI
+  version: 1.0.0
+
+# ======================================================
+# Dataset
+# ======================================================
+
+dataset:
+  path: data/dataset_exp3.csv
+  target: fatigue_level
+  test_size: 0.20
+  random_state: 42
+
+# ======================================================
+# Training
+# ======================================================
+
+training:
+  epochs: 100
+  batch_size: 128
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  patience: 10
+  seed: 42
+
+# ======================================================
+# Learning Rate Scheduler
+# ======================================================
+
+scheduler:
+  enabled: true
+  factor: 0.5
+  patience: 5
+  min_lr: 0.000001
+
+# ======================================================
+# Model
+# ======================================================
+
+model:
+  input_dim: null
+
+  hidden_dims:
+    - 256
+    - 128
+    - 64
+
+  dropout: 0.30
+
+  num_classes: 3
+
+# ======================================================
+# Loss Function
+# ======================================================
+
+loss:
+  type: focal
+  gamma: 2.0
+
+# ======================================================
+# Evaluation
+# ======================================================
+
+evaluation:
+  experiment_name: experiment8_balanced_focal
+
+# ======================================================
+# Paths
+# ======================================================
+
+paths:
+  model: models/driver_guardian_best.pth
+
+  preprocessing: models/preprocessing.pkl
+
+  results: results/
