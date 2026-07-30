@@ -1,21 +1,10 @@
-@'
 numpy
 pandas
 matplotlib
 scikit-learn
-opencv-python
-mediapipe
-shap
-joblib
-pyyaml
-
-# Used by the earlier neural-network pipeline in src/legacy
 torch
 torchvision
-
-# Optional development and notebook tools
+pyyaml
+joblib
 jupyter
 ipykernel
-'@ | Set-Content -Encoding UTF8 requirements.txt
-
-git add requirements.txt
