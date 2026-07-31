@@ -2,25 +2,45 @@
 {% block content %}
 <div class="dashboard-grid">
   <section class="panel camera-panel">
-    <div class="panel-head"><div><p class="eyebrow">VISION FEED</p><h2>Driver camera</h2></div><span class="badge" id="camera-status">STANDBY</span></div>
-    <div class="camera-stage">
+    <div class="panel-head">
+      <div><p class="eyebrow">VISION FEED</p><h2>Driver camera</h2></div>
+      <span class="badge" id="camera-status">STANDBY</span>
+    </div>
+
+    <div class="camera-stage" id="camera-stage">
       <div class="scan-line"></div>
       <div class="face-frame"><span></span><span></span><span></span><span></span></div>
-      <div class="camera-placeholder"><div class="lens">◉</div><strong id="camera-message">Camera standing by</strong><small>Start monitoring to activate the live pipeline</small></div>
-      <div class="camera-overlay"><span>CAM 01</span><span id="face-status">NO FACE</span></div>
+      <div class="camera-placeholder">
+        <div class="lens">◉</div>
+        <strong id="camera-message">Camera standing by</strong>
+        <small>Start monitoring to activate the live pipeline</small>
+      </div>
+      <div class="camera-overlay">
+        <span>CAM 01</span>
+        <span id="face-status">NO FACE</span>
+      </div>
     </div>
+
     <div class="camera-actions">
       <button class="button primary" id="start-monitoring">Start monitoring</button>
-      <button class="button secondary" id="stop-monitoring">Stop</button>
+      <button class="button secondary" id="stop-monitoring" disabled>Stop</button>
     </div>
   </section>
 
   <section class="panel driver-panel">
-    <div class="panel-head"><div><p class="eyebrow">DRIVER STATE</p><h2>Live assessment</h2></div><span class="pulse-dot"></span></div>
+    <div class="panel-head">
+      <div><p class="eyebrow">DRIVER STATE</p><h2>Live assessment</h2></div>
+      <span class="pulse-dot"></span>
+    </div>
+
     <div class="risk-gauge" id="risk-gauge">
       <div><strong id="risk-value">0%</strong><span>fatigue probability</span></div>
     </div>
-    <div class="state-banner ready" id="state-banner"><span>STATE</span><strong id="driver-state">READY</strong></div>
+
+    <div class="state-banner ready" id="state-banner">
+      <span>STATE</span><strong id="driver-state">READY</strong>
+    </div>
+
     <div class="mini-stats">
       <div><span>Session</span><b id="session-time">00:00</b></div>
       <div><span>Alerts</span><b id="alert-count">0</b></div>
@@ -29,7 +49,11 @@
   </section>
 
   <section class="panel metrics-panel">
-    <div class="panel-head"><div><p class="eyebrow">BIOMETRICS</p><h2>Signal telemetry</h2></div><span class="badge success">LIVE</span></div>
+    <div class="panel-head">
+      <div><p class="eyebrow">BIOMETRICS</p><h2>Signal telemetry</h2></div>
+      <span class="badge success">LIVE</span>
+    </div>
+
     <div class="metric-list">
       <article><div><span>Eye aspect ratio</span><strong id="ear-value">0.000</strong></div><div class="meter"><i id="ear-meter"></i></div></article>
       <article><div><span>Blink rate</span><strong><b id="blink-value">0.0</b> /min</strong></div><div class="meter"><i id="blink-meter"></i></div></article>
@@ -40,12 +64,19 @@
 
   <section class="panel commander-card">
     <div class="commander-orb"><div></div></div>
-    <div><p class="eyebrow">COMMANDER</p><h2 id="commander-status-title">Assistant online</h2><p id="commander-status-detail">Ask about live status, reports, or monitoring.</p></div>
-    <a class="button secondary" href="/commander">Open Commander</a>
+    <div class="commander-card-copy">
+      <p class="eyebrow">COMMANDER</p>
+      <h2 id="commander-status-title">Assistant online</h2>
+      <p id="commander-status-detail">Ask about live status, reports, or monitoring.</p>
+    </div>
+    <a class="button secondary" href="/commander">Open Commander →</a>
   </section>
 
   <section class="panel events-panel">
-    <div class="panel-head"><div><p class="eyebrow">SYSTEM TIMELINE</p><h2>Recent activity</h2></div><span class="badge" id="event-count">0 events</span></div>
+    <div class="panel-head">
+      <div><p class="eyebrow">SYSTEM TIMELINE</p><h2>Recent activity</h2></div>
+      <span class="badge" id="event-count">0 events</span>
+    </div>
     <div class="event-list" id="event-list"></div>
   </section>
 </div>
