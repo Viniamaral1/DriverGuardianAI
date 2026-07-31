@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<form class="settings-grid" id="settings-form">
+  <section class="panel settings-section">
+    <div class="settings-icon">◐</div>
+    <div class="panel-head"><div><p class="eyebrow">APPEARANCE</p><h2>Interface theme</h2></div></div>
+    <label class="field"><span>Theme</span><select name="theme"><option value="dark">Dark</option><option value="light">Light</option></select></label>
+    <label class="field"><span>Accent colour</span><select name="accent"><option value="cyan">Cyan</option><option value="blue">Blue</option><option value="amber">Amber</option></select></label>
+    <div class="theme-preview"><i></i><i></i><i></i><span>Live theme preview</span></div>
+  </section>
+
+  <section class="panel settings-section">
+    <div class="settings-icon">◉</div>
+    <div class="panel-head"><div><p class="eyebrow">MONITORING</p><h2>Hardware & sensitivity</h2></div></div>
+    <label class="field"><span>Camera index</span><input name="camera_index" type="number" min="0" max="9"></label>
+    <label class="field"><span>Detection sensitivity <b id="sensitivity-output"></b></span><input name="sensitivity" type="range" min="1" max="100"></label>
+  </section>
+
+  <section class="panel settings-section">
+    <div class="settings-icon">◖</div>
+    <div class="panel-head"><div><p class="eyebrow">AUDIO</p><h2>Commander & alerts</h2></div></div>
+    <label class="switch-row">
+      <span><b>Voice responses</b><small>Allow browser speech synthesis</small></span>
+      <input name="voice_output" type="checkbox"><i></i>
+    </label>
+    <label class="field"><span>Alert volume <b id="volume-output"></b></span><input name="alert_volume" type="range" min="0" max="100"></label>
+  </section>
+
+  <section class="panel settings-section settings-information">
+    <div class="settings-icon">ⓘ</div>
+    <div><p class="eyebrow">CONFIGURATION</p><h2>Local preferences</h2><p class="muted">Preferences are saved in <code>config/web_settings.json</code>. The browser also remembers your active theme for immediate loading.</p></div>
+  </section>
+
+  <section class="panel settings-save">
+    <div>
+      <p class="eyebrow">SAVE CHANGES</p>
+      <h2>Apply application preferences</h2>
+      <p class="muted" id="settings-message">Review your choices, then save them.</p>
+    </div>
+    <button class="button primary" type="submit">Save settings</button>
+  </section>
+</form>
+{% endblock %}
+{% block scripts %}<script src="/static/js/settings.js"></script>{% endblock %}
