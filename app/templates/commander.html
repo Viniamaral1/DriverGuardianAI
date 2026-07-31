@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="commander-layout">
+  <section class="panel commander-console">
+    <div class="commander-hero">
+      <div class="commander-orb large"><div></div></div>
+      <div><p class="eyebrow">VOICE & INTELLIGENCE</p><h2>Commander</h2><p>Your interface to live monitoring and session intelligence.</p></div>
+      <div class="voice-state"><span class="status-dot"></span><div><strong id="wake-status">Wake word offline</strong><small id="wake-detail">Enable backend listening below</small></div></div>
+    </div>
+    <div class="conversation" id="conversation"></div>
+    <form class="composer" id="commander-form">
+      <button type="button" class="mic-button" id="browser-mic" aria-label="Browser microphone">🎙</button>
+      <input id="commander-input" autocomplete="off" placeholder="Ask Commander about the driver or latest report…">
+      <button class="button primary" type="submit">Send</button>
+    </form>
+  </section>
+  <aside class="commander-side">
+    <section class="panel">
+      <div class="panel-head"><div><p class="eyebrow">WAKE WORD</p><h2>Continuous listening</h2></div></div>
+      <p class="muted">Uses the existing V3 microphone listener on the FastAPI host. Say “Commander” followed by a command.</p>
+      <div class="button-row"><button class="button primary" id="wake-start">Enable</button><button class="button secondary" id="wake-stop">Disable</button></div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><div><p class="eyebrow">QUICK COMMANDS</p><h2>Suggested</h2></div></div>
+      <div class="quick-commands">
+        <button data-command="Start monitoring">Start monitoring</button>
+        <button data-command="What is my current status?">Current status</button>
+        <button data-command="Summarise the latest report">Latest report</button>
+        <button data-command="Explain calibration">Explain calibration</button>
+        <button data-command="Why did you alert me?">Explain alerts</button>
+      </div>
+    </section>
+    <button class="text-button" id="clear-chat">Clear conversation</button>
+  </aside>
+</div>
+{% endblock %}
+{% block scripts %}<script src="/static/js/commander.js"></script>{% endblock %}

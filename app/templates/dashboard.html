@@ -1,130 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="DriverGuardianAI intelligent driver monitoring dashboard">
-    <title>{{ page_title }} {{ version }}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', path='css/dashboard.css') }}">
-</head>
-<body>
-    <div class="dashboard-shell">
-        <header class="topbar">
-            <div class="brand">
-                <div class="brand-icon">DG</div>
-                <div>
-                    <div class="brand-title">DriverGuardian<span>AI</span></div>
-                    <div class="brand-subtitle">Intelligent Driver Monitoring System</div>
-                </div>
-            </div>
-            <div class="topbar-status">
-                <div class="system-clock">
-                    <span id="currentDate">--</span>
-                    <strong id="currentTime">--:--:--</strong>
-                </div>
-                <div id="systemBadge" class="status-badge standby">
-                    <span class="status-dot"></span>
-                    <span id="systemStatusText">Standby</span>
-                </div>
-            </div>
-        </header>
-
-        <main class="dashboard-grid">
-            <section class="panel camera-panel">
-                <div class="panel-header">
-                    <div><p class="eyebrow">Vision System</p><h2>Live Driver Camera</h2></div>
-                    <div id="cameraBadge" class="mini-status offline"><span></span><strong id="cameraStatusText">Offline</strong></div>
-                </div>
-                <div id="cameraViewport" class="camera-viewport">
-                    <div class="camera-grid-overlay"></div>
-                    <div class="camera-scan-line"></div>
-                    <div class="camera-placeholder">
-                        <div class="camera-icon">◉</div>
-                        <h3 id="cameraMessage">Camera offline</h3>
-                        <p>Camera streaming will be connected in the next stage. The dashboard currently uses simulated live metrics.</p>
-                    </div>
-                </div>
-                <div class="camera-footer">
-                    <div><span>Face Detection</span><strong id="faceDetectionText">Inactive</strong></div>
-                    <div><span>Confidence</span><strong id="faceConfidence">0%</strong></div>
-                    <div><span>Session Time</span><strong id="sessionTime">00:00:00</strong></div>
-                </div>
-            </section>
-
-            <section class="panel driver-panel">
-                <div class="panel-header">
-                    <div><p class="eyebrow">Driver Analysis</p><h2>Driver Condition</h2></div>
-                    <div id="alertBadge" class="alert-badge standby">Standby</div>
-                </div>
-                <div class="driver-summary">
-                    <div class="fatigue-gauge">
-                        <svg viewBox="0 0 200 120" aria-label="Fatigue probability gauge">
-                            <path class="gauge-background" d="M 25 100 A 75 75 0 0 1 175 100"></path>
-                            <path id="gaugeProgress" class="gauge-progress" d="M 25 100 A 75 75 0 0 1 175 100"></path>
-                        </svg>
-                        <div class="gauge-content"><strong id="fatigueProbability">0%</strong><span>Fatigue probability</span></div>
-                    </div>
-                    <div class="driver-state">
-                        <span>Current condition</span>
-                        <strong id="driverStatus">Unknown</strong>
-                        <p id="driverDescription">Start monitoring to analyse the driver.</p>
-                    </div>
-                </div>
-                <div class="metrics-grid">
-                    <article class="metric-card"><span>Eye Aspect Ratio</span><strong id="earValue">0.000</strong></article>
-                    <article class="metric-card"><span>Yawn Score</span><strong id="yawnValue">0.000</strong></article>
-                    <article class="metric-card"><span>Blink Rate</span><strong><span id="blinkValue">0</span><small>/min</small></strong></article>
-                    <article class="metric-card"><span>Head Tilt</span><strong><span id="headTiltValue">0.0</span><small>°</small></strong></article>
-                </div>
-            </section>
-
-            <section class="panel commander-panel">
-                <div class="panel-header commander-header">
-                    <div class="commander-title-wrap">
-                        <div class="commander-orb"><span></span></div>
-                        <div><p class="eyebrow">Voice and Command Assistant</p><h2>Commander</h2></div>
-                    </div>
-                    <div class="commander-tools">
-                        <button id="voiceToggleButton" class="icon-button active" type="button" title="Toggle spoken replies">🔊</button>
-                        <button id="clearChatButton" class="icon-button" type="button" title="Clear conversation">⌫</button>
-                        <div id="commanderBadge" class="mini-status ready"><span></span><strong id="commanderStatusText">Ready</strong></div>
-                    </div>
-                </div>
-
-                <div id="commanderChat" class="commander-chat" aria-live="polite"></div>
-
-                <form id="commanderForm" class="commander-form">
-                    <button id="microphoneButton" class="microphone-button" type="button" title="Speak a command">🎤</button>
-                    <input id="commanderInput" type="text" maxlength="500" autocomplete="off" placeholder="Ask Commander: “How tired is the driver?”">
-                    <button id="sendCommanderButton" class="send-button" type="submit">Send</button>
-                </form>
-                <div class="quick-commands">
-                    <button type="button" data-command="Start monitoring">Start monitoring</button>
-                    <button type="button" data-command="How tired is the driver?">Driver condition</button>
-                    <button type="button" data-command="What is the current EAR?">Current EAR</button>
-                    <button type="button" data-command="Summarise the latest report">Latest report</button>
-                </div>
-                <p id="speechSupportMessage" class="speech-support"></p>
-            </section>
-
-            <section class="panel event-panel">
-                <div class="panel-header compact"><div><p class="eyebrow">System Activity</p><h2>Live Event Log</h2></div></div>
-                <div id="eventLog" class="event-log"><div class="event-empty">Waiting for system events.</div></div>
-            </section>
-        </main>
-
-        <footer class="control-bar">
-            <div><span class="control-label">Monitoring controls</span><p id="controlMessage">System is ready.</p></div>
-            <div class="control-actions">
-                <button id="stopButton" class="control-button stop" type="button" disabled>Stop Monitoring</button>
-                <button id="startButton" class="control-button start" type="button">Start Monitoring</button>
-            </div>
-        </footer>
+{% extends "base.html" %}
+{% block content %}
+<div class="dashboard-grid">
+  <section class="panel camera-panel">
+    <div class="panel-head"><div><p class="eyebrow">VISION FEED</p><h2>Driver camera</h2></div><span class="badge" id="camera-status">STANDBY</span></div>
+    <div class="camera-stage">
+      <div class="scan-line"></div>
+      <div class="face-frame"><span></span><span></span><span></span><span></span></div>
+      <div class="camera-placeholder"><div class="lens">◉</div><strong id="camera-message">Camera standing by</strong><small>Start monitoring to activate the live pipeline</small></div>
+      <div class="camera-overlay"><span>CAM 01</span><span id="face-status">NO FACE</span></div>
     </div>
-    <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <script src="{{ url_for('static', path='js/dashboard.js') }}"></script>
-</body>
-</html>
+    <div class="camera-actions">
+      <button class="button primary" id="start-monitoring">Start monitoring</button>
+      <button class="button secondary" id="stop-monitoring">Stop</button>
+    </div>
+  </section>
+
+  <section class="panel driver-panel">
+    <div class="panel-head"><div><p class="eyebrow">DRIVER STATE</p><h2>Live assessment</h2></div><span class="pulse-dot"></span></div>
+    <div class="risk-gauge" id="risk-gauge">
+      <div><strong id="risk-value">0%</strong><span>fatigue probability</span></div>
+    </div>
+    <div class="state-banner ready" id="state-banner"><span>STATE</span><strong id="driver-state">READY</strong></div>
+    <div class="mini-stats">
+      <div><span>Session</span><b id="session-time">00:00</b></div>
+      <div><span>Alerts</span><b id="alert-count">0</b></div>
+      <div><span>Model</span><b id="model-status">READY</b></div>
+    </div>
+  </section>
+
+  <section class="panel metrics-panel">
+    <div class="panel-head"><div><p class="eyebrow">BIOMETRICS</p><h2>Signal telemetry</h2></div><span class="badge success">LIVE</span></div>
+    <div class="metric-list">
+      <article><div><span>Eye aspect ratio</span><strong id="ear-value">0.000</strong></div><div class="meter"><i id="ear-meter"></i></div></article>
+      <article><div><span>Blink rate</span><strong><b id="blink-value">0.0</b> /min</strong></div><div class="meter"><i id="blink-meter"></i></div></article>
+      <article><div><span>Yawn score</span><strong id="yawn-value">0.000</strong></div><div class="meter"><i id="yawn-meter"></i></div></article>
+      <article><div><span>Head tilt</span><strong><b id="tilt-value">0.0</b>°</strong></div><div class="meter"><i id="tilt-meter"></i></div></article>
+    </div>
+  </section>
+
+  <section class="panel commander-card">
+    <div class="commander-orb"><div></div></div>
+    <div><p class="eyebrow">COMMANDER</p><h2 id="commander-status-title">Assistant online</h2><p id="commander-status-detail">Ask about live status, reports, or monitoring.</p></div>
+    <a class="button secondary" href="/commander">Open Commander</a>
+  </section>
+
+  <section class="panel events-panel">
+    <div class="panel-head"><div><p class="eyebrow">SYSTEM TIMELINE</p><h2>Recent activity</h2></div><span class="badge" id="event-count">0 events</span></div>
+    <div class="event-list" id="event-list"></div>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="/static/js/dashboard.js"></script>{% endblock %}

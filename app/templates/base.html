@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en" data-theme="dark" data-accent="cyan">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }} · DriverGuardianAI</title>
+  <link rel="stylesheet" href="/static/css/app.css">
+  <script>
+    (() => {
+      const theme = localStorage.getItem("dg-theme") || "dark";
+      const accent = localStorage.getItem("dg-accent") || "cyan";
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.dataset.accent = accent;
+    })();
+  </script>
+</head>
+<body data-page="{{ page }}">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="/">
+        <span class="brand-mark">DG</span>
+        <span><strong>DriverGuardian</strong><small>AI V4</small></span>
+      </a>
+      <nav class="nav">
+        <a class="{{ 'active' if page == 'dashboard' else '' }}" href="/"><span>◫</span>Dashboard</a>
+        <a class="{{ 'active' if page == 'commander' else '' }}" href="/commander"><span>◉</span>Commander</a>
+        <a class="{{ 'active' if page == 'reports' else '' }}" href="/reports"><span>▤</span>Reports</a>
+        <a class="{{ 'active' if page == 'settings' else '' }}" href="/settings"><span>⚙</span>Settings</a>
+        <a class="{{ 'active' if page == 'about' else '' }}" href="/about"><span>ⓘ</span>About</a>
+      </nav>
+      <div class="sidebar-status">
+        <span class="status-dot"></span>
+        <div><strong id="side-system-state">System ready</strong><small>Local AI services</small></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">DRIVERGUARDIANAI / {{ title|upper }}</p>
+          <h1>{{ title }}</h1>
+        </div>
+        <div class="top-actions">
+          <button class="icon-button" id="theme-toggle" aria-label="Toggle theme">◐</button>
+          <div class="live-chip"><span></span><b id="top-state">READY</b></div>
+          <time id="clock">--:--:--</time>
+        </div>
+      </header>
+      <section class="page-content">
+        {% block content %}{% endblock %}
+      </section>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="/static/js/core.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

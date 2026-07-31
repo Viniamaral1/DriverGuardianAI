@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="reports-layout">
+  <section class="panel report-browser">
+    <div class="panel-head"><div><p class="eyebrow">SESSION ARCHIVE</p><h2>Generated reports</h2></div><span class="badge" id="report-count">0 reports</span></div>
+    <div id="report-list" class="report-list"><div class="empty-state">Loading reports…</div></div>
+  </section>
+  <section class="panel report-preview">
+    <div class="panel-head"><div><p class="eyebrow">REPORT VIEWER</p><h2 id="preview-title">Select a report</h2></div><a id="open-report" class="button secondary hidden" target="_blank">Open full report</a></div>
+    <div id="report-summary" class="report-summary empty-state">Choose a session to view its risk profile and open the complete HTML report.</div>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="/static/js/reports.js"></script>{% endblock %}
