@@ -1,27 +1,22 @@
 from __future__ import annotations
 
-import asyncio
 import json
-import math
-import random
 import threading
 import time
 from collections import deque
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 from typing import Any
+
+from app.services.live_monitoring_service import LiveMonitoringService
 
 
 class GuardianState:
     def __init__(self) -> None:
         self.root = Path.cwd()
         self.lock = threading.RLock()
-        self.started_at = time.monotonic()
-        self.monitoring_started_at: float | None = None
-        self.monitoring = False
-        self.alert_count = 0
         self.sequence = 0
-        self.events: deque[dict[str, Any]] = deque(maxlen=80)
+        self.events: deque[dict[str, Any]] = deque(maxlen=100)
         self.conversation: deque[dict[str, str]] = deque(maxlen=80)
         self.settings: dict[str, Any] = {
             "theme": "dark",
@@ -33,21 +28,27 @@ class GuardianState:
             "sensitivity": 65,
         }
         self.voice_service = None
-        self._last_state = "READY"
+        self.monitoring_service: LiveMonitoringService | None = None
 
     def initialise(self, root: Path) -> None:
         self.root = root
-        self.started_at = time.monotonic()
         self._load_settings()
-        self.add_event("SYSTEM", "DriverGuardianAI V4 services ready", "info")
+        self.monitoring_service = LiveMonitoringService(
+            root=root,
+            settings_provider=lambda: dict(self.settings),
+            event_callback=self.add_event,
+        )
+        self.add_event("SYSTEM", "Guardian OS V5 live services ready", "info")
         self.add_message(
             "assistant",
-            "Commander online. Start monitoring or ask me about the latest session report.",
+            "Commander online. Start monitoring to connect the real DriverGuardian V3 camera pipeline.",
         )
 
     def shutdown(self) -> None:
         if self.voice_service is not None:
             self.voice_service.stop()
+        if self.monitoring_service is not None:
+            self.monitoring_service.stop()
 
     @property
     def settings_path(self) -> Path:
@@ -91,77 +92,30 @@ class GuardianState:
                 }
             )
 
-    def start_monitoring(self) -> None:
-        with self.lock:
-            if self.monitoring:
-                return
-            self.monitoring = True
-            self.monitoring_started_at = time.monotonic()
-            self.alert_count = 0
-            self._last_state = "MONITORING"
-        self.add_event("MONITOR", "Live monitoring started", "success")
+    def start_monitoring(self) -> tuple[bool, str]:
+        if self.monitoring_service is None:
+            return False, "Monitoring service has not been initialised."
+        success, message = self.monitoring_service.start()
+        if success:
+            self.add_event("MONITOR", message, "success")
+        return success, message
 
-    def stop_monitoring(self) -> None:
-        with self.lock:
-            if not self.monitoring:
-                return
-            self.monitoring = False
-            self._last_state = "READY"
-        self.add_event("MONITOR", "Live monitoring stopped", "info")
+    def stop_monitoring(self) -> tuple[bool, str]:
+        if self.monitoring_service is None:
+            return True, "Monitoring is already stopped."
+        success, message = self.monitoring_service.stop()
+        self.add_event("MONITOR", message, "info")
+        return success, message
 
     def metrics(self) -> dict[str, Any]:
-        with self.lock:
-            monitoring = self.monitoring
-            started = self.monitoring_started_at
-            alerts = self.alert_count
-
-        elapsed = (time.monotonic() - started) if monitoring and started else 0.0
-        if monitoring:
-            phase = elapsed / 5.2
-            fatigue = max(0.04, min(0.97, 0.24 + 0.18 * math.sin(phase) + random.uniform(-0.025, 0.025)))
-            ear = max(0.14, min(0.36, 0.305 - fatigue * 0.105 + random.uniform(-0.006, 0.006)))
-            blink_rate = max(4.0, 12.0 + fatigue * 17.0 + random.uniform(-1.3, 1.3))
-            yawn = max(0.0, min(1.0, fatigue * 0.62 + random.uniform(-0.07, 0.07)))
-            tilt = max(0.0, fatigue * 16.0 + random.uniform(-1.4, 1.4))
-            face = True
-            if fatigue >= 0.78:
-                state = "CRITICAL"
-            elif fatigue >= 0.57:
-                state = "WARNING"
-            else:
-                state = "MONITORING"
-        else:
-            fatigue, ear, blink_rate, yawn, tilt, face, state = 0.0, 0.0, 0.0, 0.0, 0.0, False, "READY"
-
-        if state != self._last_state and monitoring:
-            level = "danger" if state == "CRITICAL" else "warning" if state == "WARNING" else "success"
-            self.add_event("AI", f"Driver state changed to {state}", level)
-            if state == "CRITICAL":
-                with self.lock:
-                    self.alert_count += 1
-                    alerts = self.alert_count
-            self._last_state = state
-
-        return {
-            "monitoring": monitoring,
-            "state": state,
-            "fatigue_probability": round(fatigue, 3),
-            "ear": round(ear, 3),
-            "blink_rate": round(blink_rate, 1),
-            "yawn_score": round(yawn, 3),
-            "head_tilt": round(tilt, 1),
-            "face_detected": face,
-            "session_seconds": round(elapsed),
-            "alert_count": alerts,
-            "camera_status": "CONNECTED" if monitoring else "STANDBY",
-            "model_status": "ACTIVE" if monitoring else "READY",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        }
+        if self.monitoring_service is None:
+            return LiveMonitoringService._empty_metrics()
+        return self.monitoring_service.snapshot()
 
     def snapshot(self) -> dict[str, Any]:
         return {
             "metrics": self.metrics(),
-            "events": list(self.events)[:12],
+            "events": list(self.events)[:20],
             "conversation": list(self.conversation),
             "settings": dict(self.settings),
             "voice": self.voice_status(),
@@ -173,7 +127,7 @@ class GuardianState:
                 "available": False,
                 "enabled": False,
                 "status": "OFFLINE",
-                "detail": "Wake-word service not initialised",
+                "detail": "Use browser hands-free mode, or enable the optional Python microphone service.",
             }
         return self.voice_service.status()
 

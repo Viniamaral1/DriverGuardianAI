@@ -6,7 +6,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from app.routers import commander, monitoring, pages, reports, settings, websocket
+from app.routers import camera, commander, monitoring, pages, reports, settings, websocket
 from app.services.app_state import guardian_state
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,6 +31,7 @@ app.mount("/static", StaticFiles(directory=APP_DIR / "static"), name="static")
 
 app.include_router(pages.router)
 app.include_router(monitoring.router, prefix="/api/monitoring", tags=["monitoring"])
+app.include_router(camera.router, prefix="/api/camera", tags=["camera"])
 app.include_router(commander.router, prefix="/api/commander", tags=["commander"])
 app.include_router(reports.router, prefix="/api/reports", tags=["reports"])
 app.include_router(settings.router, prefix="/api/settings", tags=["settings"])

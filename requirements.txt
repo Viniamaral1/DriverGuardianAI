@@ -8,3 +8,11 @@ pyyaml
 joblib
 jupyter
 ipykernel
+fastapi>=0.110
+uvicorn[standard]>=0.29
+jinja2>=3.1
+pydantic>=2.6
+opencv-python>=4.8
+mediapipe>=0.10
+SpeechRecognition>=3.10
+pyttsx3>=2.90

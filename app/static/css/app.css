@@ -696,3 +696,52 @@ html.sidebar-collapsed .sidebar-toggle {
     padding-right: 0;
   }
 }
+/* Guardian OS V5 live camera integration */
+.live-camera-feed {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  opacity:0;
+  transition:opacity .3s ease;
+  z-index:1;
+}
+
+.live-camera-feed.visible {
+  opacity:1;
+}
+
+.camera-stage.active .scan-line {
+  z-index:3;
+}
+
+.camera-stage.active .face-frame {
+  z-index:3;
+  pointer-events:none;
+}
+
+.camera-stage .camera-overlay {
+  z-index:4;
+  text-shadow:0 1px 5px rgba(0,0,0,.9);
+}
+
+.hidden-camera-placeholder {
+  opacity:0;
+  pointer-events:none;
+}
+
+.state-banner.calibrating {
+  color:var(--warning);
+  background:rgba(255,186,73,.11);
+}
+
+.state-banner.no-face {
+  color:var(--warning);
+  background:rgba(255,186,73,.11);
+}
+
+.state-banner.error {
+  color:var(--danger);
+  background:rgba(255,95,109,.12);
+}
