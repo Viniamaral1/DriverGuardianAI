@@ -20,30 +20,46 @@ function setCameraStream(active) {
   }
 
   image.classList.toggle("visible", active);
-  if (placeholder) placeholder.classList.toggle("hidden-camera-placeholder", active);
+  if (placeholder) {
+    placeholder.classList.toggle("hidden-camera-placeholder", active);
+  }
+}
+
+function isActiveLifecycle(metrics) {
+  return Boolean(metrics.monitoring || metrics.starting || metrics.stopping);
 }
 
 DG.subscribe(({metrics, events, voice}) => {
+  const activeLifecycle = isActiveLifecycle(metrics);
+
   el("camera-status").textContent = metrics.camera_status;
   el("camera-message").textContent =
     metrics.error ||
-    (metrics.monitoring
-      ? metrics.calibration_complete
-        ? "Live V3 pipeline active"
-        : `Personal calibration: ${Number(metrics.calibration_remaining || 0).toFixed(1)}s remaining`
-      : "Camera standing by");
+    (metrics.starting
+      ? "Connecting to the camera…"
+      : metrics.stopping
+        ? "Releasing the camera…"
+        : metrics.monitoring
+          ? metrics.calibration_complete
+            ? "Live V3 pipeline active"
+            : `Personal calibration: ${Number(metrics.calibration_remaining || 0).toFixed(1)}s remaining`
+          : "Camera standing by");
 
   el("face-status").textContent = metrics.face_detected ? "FACE LOCK" : "NO FACE";
   el("camera-fps").textContent = Number(metrics.fps || 0).toFixed(1);
   el("camera-stage").classList.toggle("active", metrics.monitoring);
   setCameraStream(metrics.monitoring && metrics.camera_status === "CONNECTED");
 
-  el("risk-value").textContent = pct(metrics.fatigue_probability);
-  el("risk-gauge").style.setProperty("--risk", `${metrics.fatigue_probability * 360}deg`);
+  el("risk-value").textContent = pct(Number(metrics.fatigue_probability || 0));
+  el("risk-gauge").style.setProperty(
+    "--risk",
+    `${Number(metrics.fatigue_probability || 0) * 360}deg`
+  );
   el("driver-state").textContent = metrics.state;
-  el("state-banner").className = `state-banner ${String(metrics.state).toLowerCase().replace(" ", "-")}`;
+  el("state-banner").className =
+    `state-banner ${String(metrics.state).toLowerCase().replaceAll(" ", "-")}`;
 
-  el("session-time").textContent = timeText(metrics.session_seconds);
+  el("session-time").textContent = timeText(Number(metrics.session_seconds || 0));
   el("alert-count").textContent = metrics.alert_count;
   el("model-status").textContent = metrics.model_status;
 
@@ -52,13 +68,17 @@ DG.subscribe(({metrics, events, voice}) => {
   el("yawn-value").textContent = Number(metrics.yawn_score || 0).toFixed(3);
   el("tilt-value").textContent = Number(metrics.head_tilt || 0).toFixed(1);
 
-  el("ear-meter").style.width = `${Math.min(100, Number(metrics.ear || 0) / .36 * 100)}%`;
-  el("blink-meter").style.width = `${Math.min(100, Number(metrics.blink_rate || 0) / 35 * 100)}%`;
-  el("yawn-meter").style.width = `${Math.min(100, Number(metrics.yawn_score || 0) * 100)}%`;
-  el("tilt-meter").style.width = `${Math.min(100, Number(metrics.head_tilt || 0) / 25 * 100)}%`;
+  el("ear-meter").style.width =
+    `${Math.min(100, Number(metrics.ear || 0) / .36 * 100)}%`;
+  el("blink-meter").style.width =
+    `${Math.min(100, Number(metrics.blink_rate || 0) / 35 * 100)}%`;
+  el("yawn-meter").style.width =
+    `${Math.min(100, Number(metrics.yawn_score || 0) * 100)}%`;
+  el("tilt-meter").style.width =
+    `${Math.min(100, Number(metrics.head_tilt || 0) / 25 * 100)}%`;
 
-  el("start-monitoring").disabled = metrics.monitoring || metrics.state === "STARTING";
-  el("stop-monitoring").disabled = !metrics.monitoring;
+  el("start-monitoring").disabled = activeLifecycle;
+  el("stop-monitoring").disabled = !activeLifecycle || metrics.stopping;
 
   el("event-count").textContent = `${events.length} events`;
   el("event-list").innerHTML = events.map(event => `
@@ -75,7 +95,8 @@ DG.subscribe(({metrics, events, voice}) => {
 
 el("start-monitoring").addEventListener("click", async () => {
   el("start-monitoring").disabled = true;
-  DG.toast("Connecting camera and loading V3…");
+  el("stop-monitoring").disabled = false;
+  DG.toast("Connecting to the real V3 camera pipeline…");
 
   try {
     const state = await DG.post("/api/monitoring/start");
@@ -89,20 +110,23 @@ el("start-monitoring").addEventListener("click", async () => {
     } catch (_) {}
     DG.toast(message, "error");
     el("start-monitoring").disabled = false;
+    el("stop-monitoring").disabled = true;
     console.error(error);
   }
 });
 
 el("stop-monitoring").addEventListener("click", async () => {
   el("stop-monitoring").disabled = true;
+  DG.toast("Stopping monitoring and releasing the camera…");
 
   try {
     const state = await DG.post("/api/monitoring/stop");
     setCameraStream(false);
     DG.emit(state);
-    DG.toast(state.message || "Monitoring stopped");
+    DG.toast(state.message || "Monitoring stopped", state.success ? "success" : "normal");
   } catch (error) {
     DG.toast("Monitoring could not stop", "error");
+    el("stop-monitoring").disabled = false;
     console.error(error);
   }
 });

@@ -38,7 +38,7 @@ class GuardianState:
             settings_provider=lambda: dict(self.settings),
             event_callback=self.add_event,
         )
-        self.add_event("SYSTEM", "Guardian OS V5 live services ready", "info")
+        self.add_event("SYSTEM", "Guardian OS V5 adapter services ready", "info")
         self.add_message(
             "assistant",
             "Commander online. Start monitoring to connect the real DriverGuardian V3 camera pipeline.",
@@ -109,7 +109,7 @@ class GuardianState:
 
     def metrics(self) -> dict[str, Any]:
         if self.monitoring_service is None:
-            return LiveMonitoringService._empty_metrics()
+            return LiveMonitoringService.empty_metrics()
         return self.monitoring_service.snapshot()
 
     def snapshot(self) -> dict[str, Any]:
