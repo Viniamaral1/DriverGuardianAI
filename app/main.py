@@ -6,7 +6,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from app.routers import camera, commander, monitoring, pages, reports, settings, websocket
+from app.routers import camera, commander, diagnostics, monitoring, pages, reports, settings, websocket
 from app.services.app_state import guardian_state
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -21,8 +21,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="DriverGuardianAI V4",
-    version="4.0.0",
+    title="Guardian OS V2",
+    version="2.0.0",
     description="Automotive driver-monitoring dashboard and Commander interface.",
     lifespan=lifespan,
 )
@@ -32,6 +32,7 @@ app.mount("/static", StaticFiles(directory=APP_DIR / "static"), name="static")
 app.include_router(pages.router)
 app.include_router(monitoring.router, prefix="/api/monitoring", tags=["monitoring"])
 app.include_router(camera.router, prefix="/api/camera", tags=["camera"])
+app.include_router(diagnostics.router, prefix="/api/diagnostics", tags=["diagnostics"])
 app.include_router(commander.router, prefix="/api/commander", tags=["commander"])
 app.include_router(reports.router, prefix="/api/reports", tags=["reports"])
 app.include_router(settings.router, prefix="/api/settings", tags=["settings"])
@@ -42,6 +43,6 @@ app.include_router(websocket.router, tags=["websocket"])
 def health() -> dict:
     return {
         "status": "ok",
-        "application": "DriverGuardianAI V4",
-        "version": "4.0.0",
+        "application": "Guardian OS V2",
+        "version": "2.0.0",
     }

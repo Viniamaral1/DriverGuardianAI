@@ -1,9 +1,11 @@
 {
-  "theme": "dark",
-  "accent": "cyan",
+  "theme": "light",
+  "accent": "blue",
   "voice_output": true,
   "wake_word_enabled": false,
   "camera_index": 0,
   "alert_volume": 80,
-  "sensitivity": 65
+  "sensitivity": 65,
+  "driver_name": "Vini",
+  "automatic_reports": true
 }

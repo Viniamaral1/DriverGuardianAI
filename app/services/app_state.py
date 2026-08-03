@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import json
 import threading
-import time
 from collections import deque
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from app.services.automatic_report_service import AutomaticReportService
 from app.services.live_monitoring_service import LiveMonitoringService
 
 
@@ -26,9 +26,12 @@ class GuardianState:
             "camera_index": 0,
             "alert_volume": 80,
             "sensitivity": 65,
+            "driver_name": "",
+            "automatic_reports": True,
         }
         self.voice_service = None
         self.monitoring_service: LiveMonitoringService | None = None
+        self.report_service: AutomaticReportService | None = None
 
     def initialise(self, root: Path) -> None:
         self.root = root
@@ -38,10 +41,16 @@ class GuardianState:
             settings_provider=lambda: dict(self.settings),
             event_callback=self.add_event,
         )
-        self.add_event("SYSTEM", "Guardian OS V5 adapter services ready", "info")
+        self.report_service = AutomaticReportService(
+            root=root,
+            event_callback=self.add_event,
+        )
+        self.add_event("SYSTEM", "Guardian OS V2 experience services ready", "info")
+        name = str(self.settings.get("driver_name", "")).strip()
+        greeting = f"Welcome back, {name}." if name else "Commander online."
         self.add_message(
             "assistant",
-            "Commander online. Start monitoring to connect the real DriverGuardian V3 camera pipeline.",
+            f"{greeting} Start monitoring when you are ready.",
         )
 
     def shutdown(self) -> None:
@@ -97,14 +106,26 @@ class GuardianState:
             return False, "Monitoring service has not been initialised."
         success, message = self.monitoring_service.start()
         if success:
-            self.add_event("MONITOR", message, "success")
+            name = str(self.settings.get("driver_name", "")).strip()
+            welcome = f" for {name}" if name else ""
+            self.add_event("MONITOR", f"{message}{welcome}", "success")
         return success, message
 
     def stop_monitoring(self) -> tuple[bool, str]:
         if self.monitoring_service is None:
             return True, "Monitoring is already stopped."
+
+        session_log = self.monitoring_service.snapshot().get("log_path")
         success, message = self.monitoring_service.stop()
         self.add_event("MONITOR", message, "info")
+
+        if (
+            success
+            and self.report_service is not None
+            and bool(self.settings.get("automatic_reports", True))
+        ):
+            self.report_service.generate_async(session_log)
+
         return success, message
 
     def metrics(self) -> dict[str, Any]:
@@ -119,6 +140,11 @@ class GuardianState:
             "conversation": list(self.conversation),
             "settings": dict(self.settings),
             "voice": self.voice_status(),
+            "report": (
+                self.report_service.snapshot()
+                if self.report_service is not None
+                else {"state": "IDLE"}
+            ),
         }
 
     def voice_status(self) -> dict[str, Any]:

@@ -26,11 +26,9 @@ fetch("/api/settings")
       const input = form.elements[key];
       if (!input || key === "theme" || key === "accent") return;
       if (input.type === "checkbox") input.checked = Boolean(value);
-      else input.value = value;
+      else input.value = value ?? "";
     });
 
-    // The browser's active appearance is the source of truth when this page opens.
-    // This prevents Settings from resetting a theme selected from the top bar.
     theme.value = document.documentElement.dataset.theme || "dark";
     accent.value = document.documentElement.dataset.accent || "cyan";
     updateOutputs();
@@ -52,7 +50,9 @@ form.addEventListener("submit", async event => {
     voice_output: form.elements.voice_output.checked,
     camera_index: Number(form.elements.camera_index.value),
     sensitivity: Number(sensitivity.value),
-    alert_volume: Number(volume.value)
+    alert_volume: Number(volume.value),
+    driver_name: form.elements.driver_name.value.trim(),
+    automatic_reports: form.elements.automatic_reports.checked,
   };
 
   try {

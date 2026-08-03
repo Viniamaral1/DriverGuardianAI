@@ -745,3 +745,373 @@ html.sidebar-collapsed .sidebar-toggle {
   color:var(--danger);
   background:rgba(255,95,109,.12);
 }
+/* =========================================================
+   Guardian OS V2 experience layer
+   ========================================================= */
+
+.camera-actions {
+  flex-wrap: wrap;
+}
+
+.calibration-overlay {
+  position:absolute;
+  inset:18px;
+  z-index:5;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:22px;
+  padding:22px;
+  border-radius:14px;
+  background:rgba(6,12,18,.82);
+  border:1px solid rgba(255,186,73,.28);
+  backdrop-filter:blur(14px);
+  opacity:0;
+  pointer-events:none;
+  transform:scale(.98);
+  transition:.25s ease;
+}
+
+.calibration-overlay.visible {
+  opacity:1;
+  transform:none;
+}
+
+.calibration-overlay h3 {
+  margin:0 0 7px;
+  font-size:18px;
+}
+
+.calibration-overlay p:last-child {
+  max-width:380px;
+  color:#a9b6c2;
+  font-size:12px;
+  line-height:1.55;
+}
+
+.calibration-ring {
+  --calibration:0deg;
+  width:112px;
+  height:112px;
+  border-radius:50%;
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  position:relative;
+  background:conic-gradient(var(--warning) var(--calibration),rgba(255,255,255,.08) 0);
+}
+
+.calibration-ring:after {
+  content:"";
+  position:absolute;
+  inset:9px;
+  border-radius:50%;
+  background:#0b1218;
+}
+
+.calibration-ring strong,
+.calibration-ring span {
+  position:relative;
+  z-index:1;
+  display:block;
+  text-align:center;
+}
+
+.calibration-ring strong {
+  font-size:26px;
+}
+
+.calibration-ring span {
+  color:var(--muted);
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+}
+
+.dashboard-grid {
+  grid-template-columns:minmax(330px,1.45fr) minmax(235px,.85fr) minmax(250px,.95fr);
+  grid-template-rows:minmax(455px,auto) minmax(205px,auto) minmax(210px,auto);
+}
+
+.trend-panel {
+  grid-column:1 / 3;
+  padding:16px 18px;
+}
+
+.trend-panel canvas {
+  display:block;
+  width:100%;
+  height:145px;
+  border-radius:10px;
+  background:var(--surface-2);
+  border:1px solid var(--line);
+}
+
+.dashboard-commander {
+  grid-column:3 / 4;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:11px;
+}
+
+.dashboard-commander-head {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.dashboard-commander-head > div:nth-child(2) {
+  min-width:0;
+  flex:1;
+}
+
+.dashboard-commander-head p:last-child {
+  color:var(--muted);
+  font-size:10px;
+  margin-top:3px;
+}
+
+.text-link {
+  color:var(--accent);
+  text-decoration:none;
+  font-size:10px;
+  font-weight:750;
+  white-space:nowrap;
+}
+
+.dashboard-commander-reply {
+  flex:1;
+  min-height:58px;
+  max-height:92px;
+  overflow:auto;
+  padding:11px 12px;
+  border-radius:10px;
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.5;
+}
+
+.dashboard-commander-form {
+  display:flex;
+  gap:7px;
+}
+
+.dashboard-commander-form input {
+  flex:1;
+  min-width:0;
+  border:1px solid var(--line);
+  background:var(--surface-2);
+  color:var(--text);
+  border-radius:9px;
+  padding:9px 10px;
+  outline:none;
+  font-size:11px;
+}
+
+.dashboard-commander-form input:focus {
+  border-color:var(--accent);
+}
+
+.dashboard-command-chips {
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+.dashboard-command-chips button {
+  border:1px solid var(--line);
+  background:var(--surface-2);
+  color:var(--muted);
+  border-radius:99px;
+  padding:6px 9px;
+  cursor:pointer;
+  font-size:9px;
+}
+
+.dashboard-command-chips button:hover {
+  color:var(--text);
+  border-color:var(--accent);
+}
+
+.events-panel {
+  grid-column:1 / 4;
+  min-height:210px;
+}
+
+.panel-head-actions {
+  display:flex;
+  gap:7px;
+  align-items:center;
+}
+
+.badge.danger {
+  color:var(--danger);
+  background:rgba(255,95,109,.12);
+}
+
+.profile-modal {
+  position:fixed;
+  inset:0;
+  z-index:120;
+  display:grid;
+  place-items:center;
+  padding:20px;
+  background:rgba(3,8,12,.72);
+  backdrop-filter:blur(12px);
+}
+
+.profile-modal.hidden {
+  display:none;
+}
+
+.profile-dialog {
+  width:min(430px,100%);
+  padding:28px;
+  border-radius:18px;
+  background:linear-gradient(145deg,var(--surface),var(--surface-2));
+  border:1px solid var(--line);
+  box-shadow:0 30px 90px rgba(0,0,0,.45);
+}
+
+.profile-dialog .brand-mark {
+  margin-bottom:18px;
+}
+
+.profile-dialog h2 {
+  font-size:23px;
+  margin-bottom:8px;
+}
+
+.profile-dialog input {
+  width:100%;
+  margin-top:18px;
+  padding:12px 13px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--surface-2);
+  color:var(--text);
+  outline:none;
+}
+
+.profile-dialog input:focus {
+  border-color:var(--accent);
+}
+
+.diagnostics-grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(320px,1fr));
+  gap:15px;
+  padding-bottom:12px;
+}
+
+.diagnostics-hero {
+  grid-column:1 / 3;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  padding:22px;
+}
+
+.diagnostic-card {
+  padding:18px;
+}
+
+.diagnostic-wide {
+  grid-column:1 / 3;
+}
+
+.diagnostic-list {
+  display:grid;
+  gap:7px;
+}
+
+.diagnostic-columns {
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+
+.diagnostic-row {
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:18px;
+  padding:10px 11px;
+  border-radius:9px;
+  background:var(--surface-2);
+  border:1px solid transparent;
+  font-size:11px;
+}
+
+.diagnostic-row span {
+  color:var(--muted);
+  white-space:nowrap;
+}
+
+.diagnostic-row strong {
+  text-align:right;
+  overflow-wrap:anywhere;
+  font-weight:700;
+}
+
+.diagnostic-row.ok {
+  border-color:rgba(70,214,140,.16);
+}
+
+.diagnostic-row.bad {
+  border-color:rgba(255,95,109,.22);
+}
+
+@media (max-width:1050px) {
+  .dashboard-grid {
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:auto;
+  }
+
+  .trend-panel,
+  .dashboard-commander,
+  .events-panel {
+    grid-column:1 / 3;
+  }
+
+  .dashboard-commander {
+    min-height:270px;
+  }
+}
+
+@media (max-width:700px) {
+  .calibration-overlay {
+    inset:10px;
+    flex-direction:column;
+    text-align:center;
+  }
+
+  .dashboard-grid {
+    display:block;
+  }
+
+  .trend-panel,
+  .dashboard-commander,
+  .events-panel {
+    margin-bottom:12px;
+  }
+
+  .diagnostics-grid {
+    display:block;
+  }
+
+  .diagnostics-grid > .panel {
+    margin-bottom:12px;
+  }
+
+  .diagnostics-hero {
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .diagnostic-columns {
+    grid-template-columns:1fr;
+  }
+}

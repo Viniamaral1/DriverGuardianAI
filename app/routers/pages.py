@@ -40,3 +40,8 @@ def settings(request: Request):
 @router.get("/about")
 def about(request: Request):
     return render(request, "about.html", "about", "About")
+
+
+@router.get("/diagnostics")
+def diagnostics_page(request: Request):
+    return render(request, "diagnostics.html", "diagnostics", "Diagnostics")

@@ -23,12 +23,15 @@ class CommanderService:
             self.state.start_monitoring()
             return "Monitoring started. Vision, temporal logic, and controlled alerts are now active."
 
-        if any(term in q for term in ("stop monitoring", "end monitoring", "stop session")):
+        if q in {"stop", "end", "cancel"} or any(term in q for term in ("stop monitoring", "end monitoring", "stop session")):
             self.state.stop_monitoring()
             return "Monitoring stopped. The current session is no longer collecting live metrics."
 
         if "status" in q or "how am i" in q:
+            name = str(self.state.settings.get("driver_name", "")).strip()
+            prefix = f"{name}, " if name else ""
             return (
+                prefix +
                 f"System state is {metrics['state']}. Fatigue probability is "
                 f"{metrics['fatigue_probability'] * 100:.1f} percent, EAR is {metrics['ear']:.3f}, "
                 f"and {metrics['alert_count']} controlled alerts have occurred."
