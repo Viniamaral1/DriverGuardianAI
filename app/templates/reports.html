@@ -1,31 +1,68 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="reports-overview">
-  <article class="overview-card"><div class="overview-icon">▤</div><div><span>Available sessions</span><strong id="overview-session-count">0</strong></div></article>
-  <article class="overview-card"><div class="overview-icon warning">⚠</div><div><span>Total alerts</span><strong id="overview-alert-count">0</strong></div></article>
-  <article class="overview-card"><div class="overview-icon accent">↗</div><div><span>Highest recorded risk</span><strong id="overview-max-risk">0%</strong></div></article>
-  <article class="overview-card"><div class="overview-icon success">✓</div><div><span>Report pipeline</span><strong>Ready</strong></div></article>
-</div>
-
-<div class="reports-layout">
-  <section class="panel report-browser">
-    <div class="panel-head">
-      <div><p class="eyebrow">SESSION ARCHIVE</p><h2>Generated reports</h2></div>
-      <span class="badge" id="report-count">0 reports</span>
+<div class="metrics-page">
+  <section class="metrics-hero panel">
+    <div>
+      <p class="eyebrow">REPORTS & METRICS</p>
+      <h2>Session evidence centre</h2>
+      <p class="muted">
+        Review complete session metrics, inspect risk and behavioural signals,
+        open the visual HTML report, or download JSON and PDF evidence.
+      </p>
     </div>
-    <div id="report-list" class="report-list"><div class="empty-state">Loading reports…</div></div>
-  </section>
-
-  <section class="panel report-preview">
-    <div class="panel-head">
-      <div><p class="eyebrow">REPORT VIEWER</p><h2 id="preview-title">Select a report</h2></div>
-      <a id="open-report" class="button secondary hidden" target="_blank">Open full report ↗</a>
-    </div>
-
-    <div id="report-summary" class="report-summary empty-state">
-      Choose a session to view its risk profile and open the complete HTML report.
+    <div class="metrics-hero-actions">
+      <a class="button primary" href="/monitoring">Start live session</a>
     </div>
   </section>
+
+  <div class="reports-overview">
+    <article class="overview-card">
+      <div class="overview-icon">▤</div>
+      <div><span>Available sessions</span><strong id="overview-session-count">0</strong></div>
+    </article>
+    <article class="overview-card">
+      <div class="overview-icon warning">⚠</div>
+      <div><span>Total alerts</span><strong id="overview-alert-count">0</strong></div>
+    </article>
+    <article class="overview-card">
+      <div class="overview-icon accent">↗</div>
+      <div><span>Highest recorded risk</span><strong id="overview-max-risk">0%</strong></div>
+    </article>
+    <article class="overview-card">
+      <div class="overview-icon success">✓</div>
+      <div><span>Export pipeline</span><strong>Ready</strong></div>
+    </article>
+  </div>
+
+  <div class="metrics-layout">
+    <section class="panel metrics-session-list">
+      <div class="panel-head">
+        <div><p class="eyebrow">SESSIONS</p><h2>Generated reports</h2></div>
+        <span class="badge" id="metrics-report-count">0</span>
+      </div>
+      <div id="metrics-report-list" class="report-list">
+        <div class="empty-state">Loading session reports…</div>
+      </div>
+    </section>
+
+    <section class="panel metrics-detail">
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow">SELECTED SESSION</p>
+          <h2 id="metrics-title">Choose a session</h2>
+        </div>
+        <div class="panel-head-actions">
+          <a class="button secondary hidden" id="metrics-json">Download JSON</a>
+          <a class="button secondary hidden" id="metrics-html" target="_blank">Open HTML</a>
+          <a class="button primary hidden" id="metrics-pdf">Download PDF</a>
+        </div>
+      </div>
+
+      <div id="metrics-content" class="empty-state">
+        Select a generated session to inspect its report and complete metrics.
+      </div>
+    </section>
+  </div>
 </div>
 {% endblock %}
-{% block scripts %}<script src="/static/js/reports.js"></script>{% endblock %}
+{% block scripts %}<script src="/static/js/metrics.js?v=3.3.0"></script>{% endblock %}

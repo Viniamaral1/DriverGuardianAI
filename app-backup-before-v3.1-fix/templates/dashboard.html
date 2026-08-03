@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="home-dashboard">
+  <section class="panel home-hero">
+    <div class="home-hero-copy">
+      <p class="eyebrow">GUARDIAN OS</p>
+      <h2 id="dashboard-greeting">Welcome back</h2>
+      <p>
+        Local driver-state intelligence, hands-free assistance and private
+        session reporting in one safety-focused workspace.
+      </p>
+      <div class="home-actions">
+        <a class="button primary" href="/monitoring">Open live monitoring</a>
+        <a class="button secondary" href="/metrics">View metrics</a>
+        <a class="button secondary" href="/reports">Session reports</a>
+      </div>
+    </div>
+
+    <div class="home-hero-visual" aria-hidden="true">
+      <div class="guardian-core">
+        <span></span>
+        <div>DG</div>
+      </div>
+      <small>LOCAL INTELLIGENCE READY</small>
+    </div>
+  </section>
+
+  <section class="home-status-grid">
+    <article class="panel home-status-card">
+      <div class="home-status-icon">◉</div>
+      <div>
+        <span>Monitoring system</span>
+        <strong id="home-monitoring-state">Ready</strong>
+        <small id="home-monitoring-detail">Camera is not active</small>
+      </div>
+      <a href="/monitoring">Open →</a>
+    </article>
+
+    <article class="panel home-status-card">
+      <div class="home-status-icon">✦</div>
+      <div>
+        <span>Commander</span>
+        <strong id="home-commander-state">Online</strong>
+        <small id="home-commander-detail">Local assistant ready</small>
+      </div>
+      <a href="/commander">Open →</a>
+    </article>
+
+    <article class="panel home-status-card">
+      <div class="home-status-icon">▤</div>
+      <div>
+        <span>Latest report</span>
+        <strong id="home-report-state">No new report</strong>
+        <small id="home-report-detail">Start a session to create one</small>
+      </div>
+      <a href="/reports">Open →</a>
+    </article>
+
+    <article class="panel home-status-card">
+      <div class="home-status-icon">⌁</div>
+      <div>
+        <span>System health</span>
+        <strong id="home-health-state">Ready</strong>
+        <small id="home-health-detail">Diagnostics available</small>
+      </div>
+      <a href="/diagnostics">Check →</a>
+    </article>
+  </section>
+
+  <section class="home-content-grid">
+    <article class="panel home-start-card">
+      <div>
+        <p class="eyebrow">START A SAFE SESSION</p>
+        <h2>Live monitoring belongs in its own focused workspace</h2>
+        <p class="muted">
+          Review how local camera processing works, complete personal
+          calibration, then view the live camera, signals, alerts and Commander
+          in one dedicated console.
+        </p>
+      </div>
+      <div class="home-step-list">
+        <div><b>1</b><span><strong>Review privacy notice</strong><small>Understand local camera and session-data handling.</small></span></div>
+        <div><b>2</b><span><strong>Complete calibration</strong><small>Guardian OS learns your current baseline.</small></span></div>
+        <div><b>3</b><span><strong>Begin monitoring</strong><small>Live risk, alerts and metrics update continuously.</small></span></div>
+      </div>
+      <a class="button primary" href="/monitoring">Continue to Monitoring →</a>
+    </article>
+
+    <article class="panel home-commander-card">
+      <div class="dashboard-commander-head">
+        <div class="commander-orb"><div></div></div>
+        <div>
+          <p class="eyebrow">COMMANDER</p>
+          <h2>Ask about Guardian OS</h2>
+          <p>Use Commander here for navigation and general questions.</p>
+        </div>
+        <button class="text-button compact" id="dashboard-stop-speaking" type="button">
+          Stop speaking
+        </button>
+      </div>
+
+      <div class="dashboard-commander-reply" id="dashboard-commander-reply">
+        Commander is ready.
+      </div>
+
+      <form id="dashboard-commander-form" class="dashboard-commander-form">
+        <button type="button" class="mic-button" id="dashboard-mic" title="Speak one command">🎙</button>
+        <input id="dashboard-commander-input" autocomplete="off" placeholder="Ask Commander…">
+        <button class="button primary" type="submit">Ask</button>
+      </form>
+
+      <div class="dashboard-command-chips">
+        <button type="button" data-dashboard-command="How do I start monitoring?">Start a session</button>
+        <button type="button" data-dashboard-command="What does Guardian OS record?">Data handling</button>
+        <button type="button" data-dashboard-command="Show me the latest report">Latest report</button>
+      </div>
+    </article>
+
+    <article class="panel home-activity-card">
+      <div class="panel-head">
+        <div><p class="eyebrow">RECENT ACTIVITY</p><h2>Guardian timeline</h2></div>
+        <span class="badge" id="event-count">0 events</span>
+      </div>
+      <div class="event-list home-event-list" id="event-list"></div>
+    </article>
+  </section>
+</div>
+
+<div class="profile-modal hidden" id="profile-modal">
+  <form class="profile-dialog" id="profile-form">
+    <div class="brand-mark">DG</div>
+    <p class="eyebrow">WELCOME TO GUARDIAN OS</p>
+    <h2>How should Commander address you?</h2>
+    <p class="muted">This name stays in your local settings and is used only for greetings.</p>
+    <input id="profile-name" maxlength="40" autocomplete="name" placeholder="Your preferred name">
+    <div class="button-row">
+      <button class="button secondary" type="button" id="profile-skip">Not now</button>
+      <button class="button primary" type="submit">Save greeting</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+{% block scripts %}<script src="/static/js/dashboard.js"></script>{% endblock %}

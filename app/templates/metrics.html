@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="metrics-page">
+  <section class="metrics-hero panel">
+    <div>
+      <p class="eyebrow">SESSION EVIDENCE</p>
+      <h2>Metrics and export centre</h2>
+      <p class="muted">Review generated sessions and download shareable evidence without including raw camera video.</p>
+    </div>
+    <div class="metrics-hero-actions">
+      <a class="button secondary" href="/reports">Report browser</a>
+      <a class="button primary" href="/monitoring">Start live session</a>
+    </div>
+  </section>
+
+  <div class="metrics-layout">
+    <section class="panel metrics-session-list">
+      <div class="panel-head">
+        <div><p class="eyebrow">SESSIONS</p><h2>Available reports</h2></div>
+        <span class="badge" id="metrics-report-count">0</span>
+      </div>
+      <div id="metrics-report-list" class="report-list">
+        <div class="empty-state">Loading session metrics…</div>
+      </div>
+    </section>
+
+    <section class="panel metrics-detail">
+      <div class="panel-head">
+        <div><p class="eyebrow">SELECTED SESSION</p><h2 id="metrics-title">Choose a session</h2></div>
+        <div class="panel-head-actions">
+          <a class="button secondary hidden" id="metrics-json">JSON</a>
+          <a class="button secondary hidden" id="metrics-html" target="_blank">HTML</a>
+          <a class="button primary hidden" id="metrics-pdf">Download PDF</a>
+        </div>
+      </div>
+
+      <div id="metrics-content" class="empty-state">
+        Select a generated report to inspect its full metrics.
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="/static/js/metrics.js"></script>{% endblock %}

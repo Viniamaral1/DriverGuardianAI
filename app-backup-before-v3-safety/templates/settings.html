@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<form class="settings-grid" id="settings-form">
+  <section class="panel settings-section">
+    <div class="settings-icon">◐</div>
+    <div class="panel-head"><div><p class="eyebrow">APPEARANCE</p><h2>Interface theme</h2></div></div>
+    <label class="field"><span>Theme</span><select name="theme"><option value="dark">Dark</option><option value="light">Light</option></select></label>
+    <label class="field"><span>Accent colour</span><select name="accent"><option value="cyan">Cyan</option><option value="blue">Blue</option><option value="amber">Amber</option></select></label>
+    <div class="theme-preview"><i></i><i></i><i></i><span>Live theme preview</span></div>
+  </section>
+
+  <section class="panel settings-section">
+    <div class="settings-icon">☺</div>
+    <div class="panel-head"><div><p class="eyebrow">DRIVER PROFILE</p><h2>Commander greeting</h2></div></div>
+    <label class="field"><span>Preferred name</span><input name="driver_name" maxlength="40" placeholder="How Commander should address you"></label>
+    <p class="muted">Stored locally in Guardian OS. It is not uploaded anywhere.</p>
+  </section>
+
+  <section class="panel settings-section">
+    <div class="settings-icon">◉</div>
+    <div class="panel-head"><div><p class="eyebrow">MONITORING</p><h2>Hardware & sensitivity</h2></div></div>
+    <label class="field"><span>Camera index</span><input name="camera_index" type="number" min="0" max="9"></label>
+    <label class="field"><span>Detection sensitivity <b id="sensitivity-output"></b></span><input name="sensitivity" type="range" min="1" max="100"></label>
+  </section>
+
+  <section class="panel settings-section">
+    <div class="settings-icon">◖</div>
+    <div class="panel-head"><div><p class="eyebrow">AUDIO</p><h2>Commander & alerts</h2></div></div>
+    <label class="switch-row">
+      <span><b>Voice responses</b><small>Allow browser speech synthesis</small></span>
+      <input name="voice_output" type="checkbox"><i></i>
+    </label>
+    <label class="field"><span>Alert volume <b id="volume-output"></b></span><input name="alert_volume" type="range" min="0" max="100"></label>
+  </section>
+
+  <section class="panel settings-section">
+    <div class="settings-icon">▤</div>
+    <div class="panel-head"><div><p class="eyebrow">SESSION OUTPUT</p><h2>Automatic reports</h2></div></div>
+    <label class="switch-row">
+      <span><b>Generate after Stop</b><small>Build the existing V3 HTML and JSON report automatically</small></span>
+      <input name="automatic_reports" type="checkbox"><i></i>
+    </label>
+    <p class="muted">Report generation runs in the background after the camera is released.</p>
+  </section>
+
+  <section class="panel settings-section settings-information">
+    <div class="settings-icon">ⓘ</div>
+    <div><p class="eyebrow">CONFIGURATION</p><h2>Local preferences</h2><p class="muted">Preferences are saved in <code>config/web_settings.json</code>. Your active theme is also remembered by the browser.</p></div>
+  </section>
+
+  <section class="panel settings-save">
+    <div>
+      <p class="eyebrow">SAVE CHANGES</p>
+      <h2>Apply application preferences</h2>
+      <p class="muted" id="settings-message">Review your choices, then save them.</p>
+    </div>
+    <button class="button primary" type="submit">Save settings</button>
+  </section>
+</form>
+{% endblock %}
+{% block scripts %}<script src="/static/js/settings.js"></script>{% endblock %}

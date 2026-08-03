@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="diagnostics-grid">
+  <section class="panel diagnostics-hero">
+    <div>
+      <p class="eyebrow">SYSTEM HEALTH</p>
+      <h2>Guardian OS diagnostics</h2>
+      <p class="muted">A human-readable view of the camera, AI model, voice, reports, and Python environment.</p>
+    </div>
+    <button class="button primary" id="refresh-diagnostics">Refresh checks</button>
+  </section>
+
+  <section class="panel diagnostic-card">
+    <div class="panel-head"><div><p class="eyebrow">CAMERA</p><h2>Vision pipeline</h2></div><span class="badge" id="diag-camera-badge">CHECKING</span></div>
+    <div class="diagnostic-list" id="diag-camera"></div>
+  </section>
+
+  <section class="panel diagnostic-card">
+    <div class="panel-head"><div><p class="eyebrow">MODEL</p><h2>AI runtime</h2></div><span class="badge" id="diag-model-badge">CHECKING</span></div>
+    <div class="diagnostic-list" id="diag-model"></div>
+  </section>
+
+  <section class="panel diagnostic-card">
+    <div class="panel-head"><div><p class="eyebrow">COMMANDER</p><h2>Voice services</h2></div><span class="badge" id="diag-voice-badge">CHECKING</span></div>
+    <div class="diagnostic-list" id="diag-voice"></div>
+  </section>
+
+  <section class="panel diagnostic-card">
+    <div class="panel-head"><div><p class="eyebrow">REPORTS</p><h2>Session pipeline</h2></div><span class="badge" id="diag-report-badge">CHECKING</span></div>
+    <div class="diagnostic-list" id="diag-report"></div>
+  </section>
+
+  <section class="panel diagnostic-card diagnostic-wide">
+    <div class="panel-head"><div><p class="eyebrow">ENVIRONMENT</p><h2>Python and packages</h2></div><span class="badge success">LOCAL</span></div>
+    <div class="diagnostic-list diagnostic-columns" id="diag-environment"></div>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="/static/js/diagnostics.js"></script>{% endblock %}

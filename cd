@@ -1,0 +1,20 @@
+ GUARDIAN_OS_V2_EXPERIENCE.md                       |  97 [32m++++++[m
+ app/main.py                                        |  11 [32m+[m[31m-[m
+ app/routers/diagnostics.py                         |  50 [32m+++[m
+ app/routers/pages.py                               |   5 [32m+[m
+ app/routers/settings.py                            |  21 [32m+[m[31m-[m
+ app/services/app_state.py                          |  34 [32m+[m[31m-[m
+ app/services/automatic_report_service.py           | 168 [32m++++++++++[m
+ app/services/commander_service.py                  |   5 [32m+[m[31m-[m
+ app/static/css/app.css                             | 370 [32m+++++++++++++++++++++[m
+ app/static/js/dashboard.js                         | 207 [32m+++++++++++[m[31m-[m
+ app/static/js/diagnostics.js                       |  82 [32m+++++[m
+ app/static/js/settings.js                          |   8 [32m+[m[31m-[m
+ app/templates/base.html                            |   1 [32m+[m
+ app/templates/dashboard.html                       |  70 [32m+++[m[31m-[m
+ app/templates/diagnostics.html                     |  39 [32m+++[m
+ app/templates/settings.html                        |  19 [32m+[m[31m-[m
+ config/web_settings.json                           |   8 [32m+[m[31m-[m
+ ...uardian_v3_20260803_101711_20260803_101922.html | 186 [32m+++++++++++[m
+ ...uardian_v3_20260803_101711_20260803_101922.json |  40 [32m+++[m
+ 19 files changed, 1377 insertions(+), 44 deletions(-)

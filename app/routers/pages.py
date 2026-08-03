@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from fastapi import APIRouter, Request
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 router = APIRouter()
@@ -22,6 +23,18 @@ def dashboard(request: Request):
     return render(request, "dashboard.html", "dashboard", "Dashboard")
 
 
+
+
+@router.get("/monitoring")
+def monitoring_page(request: Request):
+    return render(request, "monitoring.html", "monitoring", "Live Monitoring")
+
+
+@router.get("/metrics", include_in_schema=False)
+def metrics_page():
+    return RedirectResponse(url="/reports", status_code=307)
+
+
 @router.get("/commander")
 def commander(request: Request):
     return render(request, "commander.html", "commander", "Commander")
@@ -29,7 +42,7 @@ def commander(request: Request):
 
 @router.get("/reports")
 def reports(request: Request):
-    return render(request, "reports.html", "reports", "Reports")
+    return render(request, "reports.html", "reports", "Reports & Metrics")
 
 
 @router.get("/settings")

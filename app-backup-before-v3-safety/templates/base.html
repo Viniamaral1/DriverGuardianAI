@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en" data-theme="dark" data-accent="cyan">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }} · DriverGuardianAI</title>
+  <link rel="stylesheet" href="/static/css/app.css">
+  <script>
+    (() => {
+      const theme = localStorage.getItem("dg-theme") || "dark";
+      const accent = localStorage.getItem("dg-accent") || "cyan";
+      const collapsed = localStorage.getItem("dg-sidebar-collapsed") === "true";
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.dataset.accent = accent;
+      if (collapsed) document.documentElement.classList.add("sidebar-collapsed");
+    })();
+  </script>
+</head>
+<body data-page="{{ page }}">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <a class="brand" href="/">
+          <span class="brand-mark">DG</span>
+          <span class="brand-copy"><strong>Guardian OS</strong><small>BY DRIVERGUARDIANAI</small></span>
+        </a>
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Collapse sidebar" title="Collapse sidebar">‹</button>
+      </div>
+
+      <nav class="nav">
+        <a class="{{ 'active' if page == 'dashboard' else '' }}" href="/" title="Dashboard"><span>◫</span><b>Dashboard</b></a>
+        <a class="{{ 'active' if page == 'monitoring' else '' }}" href="/monitoring" title="Live Monitoring"><span>◉</span><b>Monitoring</b></a>
+        <a class="{{ 'active' if page == 'commander' else '' }}" href="/commander" title="Commander"><span>✦</span><b>Commander</b></a>
+        <a class="{{ 'active' if page == 'metrics' else '' }}" href="/metrics" title="Metrics"><span>⌁</span><b>Metrics</b></a>
+        <a class="{{ 'active' if page == 'reports' else '' }}" href="/reports" title="Reports"><span>▤</span><b>Reports</b></a>
+        <a class="{{ 'active' if page == 'diagnostics' else '' }}" href="/diagnostics" title="Diagnostics"><span>⌁</span><b>Diagnostics</b></a>
+        <a class="{{ 'active' if page == 'settings' else '' }}" href="/settings" title="Settings"><span>⚙</span><b>Settings</b></a>
+        <a class="{{ 'active' if page == 'about' else '' }}" href="/about" title="About"><span>ⓘ</span><b>About</b></a>
+      </nav>
+
+      <div class="sidebar-status">
+        <span class="status-dot"></span>
+        <div>
+          <strong id="side-system-state">System ready</strong>
+          <small>Local AI services</small>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="page-heading">
+          <p class="eyebrow">DRIVERGUARDIANAI / {{ title|upper }}</p>
+          <h1>{{ title }}</h1>
+        </div>
+
+        <div class="top-actions">
+          <div class="date-block">
+            <span id="calendar-date">--</span>
+            <time id="clock">--:--:--</time>
+          </div>
+          <button class="icon-button" id="theme-toggle" aria-label="Toggle light and dark theme" title="Toggle theme">◐</button>
+          <div class="live-chip"><span></span><b id="top-state">READY</b></div>
+        </div>
+      </header>
+
+      <section class="page-content">
+        {% block content %}{% endblock %}
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/static/js/core.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

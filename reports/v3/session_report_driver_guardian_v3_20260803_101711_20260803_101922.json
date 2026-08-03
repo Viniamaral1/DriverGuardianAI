@@ -1,0 +1,40 @@
+{
+  "generated_at": "2026-08-03T10:19:15",
+  "session_file": "C:\\Users\\Vinic\\DriverGuardianAI-GitHub\\logs\\v3\\driver_guardian_v3_20260803_101711.csv",
+  "alert_file": "C:\\Users\\Vinic\\DriverGuardianAI-GitHub\\logs\\v3\\alerts\\alert_events_20260803_101711.csv",
+  "duration_seconds": 113.295,
+  "logged_frames": 1034,
+  "estimated_fps": 9.126616355532018,
+  "baseline_ear": 0.242064,
+  "baseline_yawn": 0.004241,
+  "baseline_tilt": 2.809077,
+  "average_ear": 0.21932440909090908,
+  "minimum_ear": 0.064727,
+  "maximum_yawn_score": 0.010251,
+  "maximum_head_tilt": 3.35659,
+  "average_raw_model_probability": 0.7955723152804642,
+  "maximum_raw_model_probability": 0.999833,
+  "average_decision_probability": 0.20515798839458413,
+  "maximum_decision_probability": 0.937287,
+  "average_smoothed_probability": 0.20528313539651838,
+  "maximum_smoothed_probability": 0.933143,
+  "state_seconds": {
+    "MONITORING": 89.411,
+    "WARNING": 7.975999999999985,
+    "CRITICAL": 5.434999999999931,
+    "CALIBRATING": 10.061,
+    "NO FACE": 0.0
+  },
+  "state_percentages": {
+    "MONITORING": 78.91875193080013,
+    "WARNING": 7.040028244847509,
+    "CRITICAL": 4.7972108213071465,
+    "CALIBRATING": 8.880356591199964,
+    "NO FACE": 0.0
+  },
+  "warning_episodes": 6,
+  "critical_episodes": 2,
+  "alert_count": 2,
+  "dominant_risk_signal": "Eye closure",
+  "dominant_risk_mean": 0.14537780367504835
+}
