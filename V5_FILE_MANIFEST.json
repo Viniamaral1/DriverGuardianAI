@@ -1,0 +1,54 @@
+{
+  ".gitignore": {
+    "size": 849,
+    "sha256": "a2c3191920ec2d76b46e270b1e3b524a7ddc091c9345168d397fcb6938daecd3"
+  },
+  "app/main.py": {
+    "size": 1612,
+    "sha256": "6f3e8ab2c2cedaf45a2e6ef14ac76b1f4860ad1a5921b33870216bd06d02ee34"
+  },
+  "app/routers/edge.py": {
+    "size": 2265,
+    "sha256": "afb8c8ed9b42770ac5418506a773dc8779bafefc596464dfb330cd145ce710cc"
+  },
+  "app/routers/pages.py": {
+    "size": 1696,
+    "sha256": "d4b9b57c1e3954848bb4b69fd97856bff12c00e1a53c1fd44a05dc0868411907"
+  },
+  "app/services/app_state.py": {
+    "size": 6013,
+    "sha256": "3ee1f58a75374ede7252a8c0b8e911a743424a9d7a6be5b36fdac74aa5d6ba4f"
+  },
+  "app/services/commander_service.py": {
+    "size": 6500,
+    "sha256": "ad59baf0da345c37bb85616f3241d1f77c0e84a907c9dd05959194fa7c4faf7b"
+  },
+  "app/services/edge_memory_service.py": {
+    "size": 12797,
+    "sha256": "3ddc5eb91f10bd70e76cc0e7082974bdab74e0d11d9767257c6d2b8e2750c2fa"
+  },
+  "app/templates/base.html": {
+    "size": 3488,
+    "sha256": "0afce5da0b5e5bfd24cb7b04000904ddbfd045c0dbb974635b3b111caef7c986"
+  },
+  "app/templates/dashboard.html": {
+    "size": 5826,
+    "sha256": "5faedd9b8013d78f4ce29dc0623fd248446da44502bb377bd99a1f34e55b3433"
+  },
+  "app/templates/edge.html": {
+    "size": 7033,
+    "sha256": "cb303c53bb3f836b5579a1e857c1b3f1d2902045723c2dc12ac63564c2bceb76"
+  },
+  "app/static/js/edge.js": {
+    "size": 5950,
+    "sha256": "c9abf96b09e1de3d2b356958d55f34adf7d5b5e2df552ac9f1ae373e197835c1"
+  },
+  "app/static/css/app.css": {
+    "size": 62038,
+    "sha256": "a199cef06d8506cde80e828405ffc2b29e1f34f330d0cf6dca7321dba43f32c1"
+  },
+  "GUARDIAN_OS_V5_EDGE_INTELLIGENCE.md": {
+    "size": 2303,
+    "sha256": "14015f5b719ea09dd6ae9501c5f1a4e7784c53372f75cb0dda168211bb6190e8"
+  }
+}

@@ -15,6 +15,13 @@ class CommanderService:
         text = re.sub(r"\s+", " ", message.strip())
         q = text.lower()
         metrics = self.state.metrics()
+        edge = (
+            self.state.edge_memory_service.snapshot()
+            if self.state.edge_memory_service is not None
+            else {"available": False}
+        )
+        insights = edge.get("insights", {}) or {}
+        context = edge.get("context", {}) or {}
 
         if not q:
             return "I did not receive a command."
@@ -56,10 +63,80 @@ class CommanderService:
             seconds = int(metrics["session_seconds"])
             return f"The active monitoring session has run for {seconds // 60} minutes and {seconds % 60} seconds."
 
+        if any(term in q for term in (
+            "what have you learned",
+            "what do you remember",
+            "driver pattern",
+            "my patterns",
+            "edge memory",
+            "offline memory",
+        )):
+            session_count = int(insights.get("session_count", 0) or 0)
+            if not session_count:
+                return (
+                    "Guardian Edge Memory is ready, but there are no completed "
+                    "session reports to learn from yet."
+                )
+            return (
+                f"Guardian Edge Memory contains {session_count} completed sessions. "
+                f"Average recorded risk is {float(insights.get('average_risk', 0)) * 100:.1f} percent, "
+                f"highest risk is {float(insights.get('highest_risk', 0)) * 100:.1f} percent, "
+                f"and {int(insights.get('total_alerts', 0) or 0)} controlled alerts are stored. "
+                f"The highest-risk time period in the available records is "
+                f"{insights.get('highest_risk_period', 'not enough data')}."
+            )
+
+        if any(term in q for term in (
+            "last session",
+            "latest session",
+            "previous session",
+        )):
+            latest = insights.get("latest_session")
+            if not latest:
+                return "No completed session is available in local memory yet."
+            return (
+                f"The latest stored session lasted "
+                f"{float(latest.get('duration_seconds', 0)) / 60:.1f} minutes, "
+                f"reached {float(latest.get('maximum_risk', 0)) * 100:.1f} percent maximum risk, "
+                f"and recorded {int(latest.get('alert_count', 0) or 0)} alerts. "
+                f"The dominant signal was {latest.get('dominant_signal', 'unknown')}."
+            )
+
+        if any(term in q for term in (
+            "offline",
+            "internet",
+            "connection",
+            "sync queue",
+            "pending sync",
+        )):
+            return (
+                "Core monitoring and Guardian Edge Memory work locally without an internet connection. "
+                f"There are currently {int(edge.get('pending_sync', 0) or 0)} session records "
+                "waiting in the optional sync queue."
+            )
+
+        if any(term in q for term in (
+            "weather",
+            "road condition",
+            "journey context",
+            "lighting",
+            "glasses",
+            "hat",
+            "occlusion",
+        )):
+            return (
+                f"Current journey context is weather {context.get('weather', 'unknown')}, "
+                f"road condition {context.get('road_condition', 'unknown')}, "
+                f"external light {context.get('external_light', 'unknown')}, "
+                f"cabin light {context.get('cabin_light', 'unknown')}, and "
+                f"occlusion {context.get('occlusion', 'none')}. "
+                "These values provide context and do not directly determine fatigue."
+            )
+
         if any(term in q for term in ("help", "what can you do", "commands")):
             return (
                 "I can start or stop monitoring, report live fatigue metrics, explain the latest "
-                "session report, describe calibration, and summarise alert evidence."
+                "session report, describe calibration, summarise alert evidence, report local driving patterns, and describe journey context."
             )
 
         try:

@@ -45,6 +45,11 @@ def reports(request: Request):
     return render(request, "reports.html", "reports", "Reports & Metrics")
 
 
+@router.get("/edge")
+def edge_page(request: Request):
+    return render(request, "edge.html", "edge", "Edge Intelligence")
+
+
 @router.get("/settings")
 def settings(request: Request):
     return render(request, "settings.html", "settings", "Settings")

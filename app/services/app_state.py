@@ -9,6 +9,7 @@ from typing import Any
 
 from app.services.automatic_report_service import AutomaticReportService
 from app.services.live_monitoring_service import LiveMonitoringService
+from app.services.edge_memory_service import EdgeMemoryService
 
 
 class GuardianState:
@@ -32,6 +33,7 @@ class GuardianState:
         self.voice_service = None
         self.monitoring_service: LiveMonitoringService | None = None
         self.report_service: AutomaticReportService | None = None
+        self.edge_memory_service: EdgeMemoryService | None = None
 
     def initialise(self, root: Path) -> None:
         self.root = root
@@ -45,7 +47,8 @@ class GuardianState:
             root=root,
             event_callback=self.add_event,
         )
-        self.add_event("SYSTEM", "Guardian OS V2 experience services ready", "info")
+        self.edge_memory_service = EdgeMemoryService(root)
+        self.add_event("SYSTEM", "Guardian OS V5 edge intelligence ready", "info")
         name = str(self.settings.get("driver_name", "")).strip()
         greeting = f"Welcome back, {name}." if name else "Commander online."
         self.add_message(
@@ -144,6 +147,11 @@ class GuardianState:
                 self.report_service.snapshot()
                 if self.report_service is not None
                 else {"state": "IDLE"}
+            ),
+            "edge": (
+                self.edge_memory_service.snapshot()
+                if self.edge_memory_service is not None
+                else {"available": False}
             ),
         }
 
