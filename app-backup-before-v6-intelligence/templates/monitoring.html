@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="monitoring-simple-layout">
+  <section class="panel monitoring-camera-panel">
+    <div class="panel-head">
+      <div>
+        <p class="eyebrow">LIVE MONITORING</p>
+        <h2>Driver camera</h2>
+      </div>
+      <div class="panel-head-actions">
+        <span class="badge" id="camera-status">STANDBY</span>
+        <span class="badge" id="driver-state">READY</span>
+      </div>
+    </div>
+
+    <div class="camera-stage monitoring-camera-stage" id="camera-stage">
+      <img
+        id="live-camera-feed"
+        class="live-camera-feed"
+        alt="Live Guardian OS camera feed"
+      >
+
+      <div class="scan-line"></div>
+      <div class="face-frame">
+        <span></span><span></span><span></span><span></span>
+      </div>
+
+      <div class="calibration-overlay" id="calibration-overlay">
+        <div class="calibration-ring" id="calibration-ring">
+          <strong id="calibration-seconds">10.0</strong>
+          <span>seconds</span>
+        </div>
+        <div>
+          <p class="eyebrow">PERSONAL BASELINE</p>
+          <h3>Keep your face relaxed and look forward</h3>
+          <p id="calibration-message">
+            Guardian OS is learning your normal eye, mouth and head position.
+          </p>
+        </div>
+      </div>
+
+      <div class="camera-placeholder">
+        <div class="lens">◉</div>
+        <strong id="camera-message">Camera standing by</strong>
+        <small>Click Start camera to activate the working V3 pipeline</small>
+      </div>
+
+      <div class="camera-overlay">
+        <span><b id="camera-fps">0.0</b> FPS · CAM 01</span>
+        <span id="face-status">NO FACE</span>
+      </div>
+    </div>
+
+    <div class="camera-actions">
+      <button class="button primary" id="start-monitoring" type="button">
+        Start camera
+      </button>
+      <button class="button secondary" id="stop-monitoring" type="button" disabled>
+        Stop
+      </button>
+      <button class="button secondary" id="stop-speaking" type="button">
+        Stop Commander
+      </button>
+      <a class="button secondary" href="/reports">Reports & Metrics</a>
+      <a class="button secondary" href="/diagnostics">Diagnostics</a>
+    </div>
+
+<section class="monitoring-voice-control" aria-label="Commander voice control">
+  <div class="monitoring-voice-copy">
+    <p class="eyebrow">VOICE COMMANDER</p>
+    <div class="commander-listening-state" id="commander-listening-state" data-state="off">
+      <span class="commander-state-dot"></span>
+      <div>
+        <strong id="commander-state-title">Voice commands off</strong>
+        <small id="commander-state-detail">Turn on hands-free Commander when you are ready.</small>
+      </div>
+    </div>
+  </div>
+  <div class="monitoring-voice-actions">
+    <button class="button primary" id="commander-voice-toggle" type="button">
+      Turn Commander on
+    </button>
+  </div>
+</section>
+  </section>
+
+  <aside class="panel monitoring-summary-panel">
+    <div class="panel-head">
+      <div>
+        <p class="eyebrow">CURRENT ASSESSMENT</p>
+        <h2>Live driver state</h2>
+      </div>
+      <span class="pulse-dot"></span>
+    </div>
+
+    <div class="risk-gauge" id="risk-gauge">
+      <div>
+        <strong id="risk-value">0%</strong>
+        <span>fatigue probability</span>
+      </div>
+    </div>
+
+    <div class="state-banner ready" id="state-banner">
+      <span>STATE</span>
+      <strong id="state-value">READY</strong>
+    </div>
+
+    <div class="monitor-kpis">
+      <div><span>EAR</span><b id="ear-value">0.000</b></div>
+      <div><span>Blinks/min</span><b id="blink-value">0.0</b></div>
+      <div><span>Yawn</span><b id="yawn-value">0.000</b></div>
+      <div><span>Head tilt</span><b id="tilt-value">0.0°</b></div>
+    </div>
+
+    <div class="monitoring-consent-summary">
+      <p class="eyebrow">CAMERA DATA</p>
+      <p>
+        Camera frames are processed locally. Raw video is not saved by default.
+        Session metrics and alerts may be stored locally for reports.
+      </p>
+    </div>
+  </aside>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/monitoring.js?v=4.3.0"></script>
+{% endblock %}

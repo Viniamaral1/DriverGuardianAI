@@ -1,0 +1,50 @@
+{
+  "release": "Guardian OS V6 Intelligence",
+  "files": {
+    "app/main.py": {
+      "sha256": "e947f2e0933b08d7eacc36aa3dfed104430e015de88471befc46131f0dd09f14",
+      "bytes": 1717
+    },
+    "app/routers/pages.py": {
+      "sha256": "ff1a43cdd13e514369c290e286c6f65014dfd7a67be3f3a08ee530fcd47fac19",
+      "bytes": 1897
+    },
+    "app/routers/intelligence.py": {
+      "sha256": "cee87efe63c641a4d74ce51cd468f8bef2ec4f0c6fb8e99057da4c441a188cdc",
+      "bytes": 358
+    },
+    "app/services/intelligence_service.py": {
+      "sha256": "ae389af44fe78efce24620785b8e6c543168a9482cba5b687f5785b696ac9d47",
+      "bytes": 12216
+    },
+    "app/services/commander_service.py": {
+      "sha256": "b621002aa9c929c8b3d52317a2c0ee864321b40981ef154790dede7ce9d61805",
+      "bytes": 10173
+    },
+    "app/templates/base.html": {
+      "sha256": "18005b0f30370907c1be60b75ae16f79f493f4495dc975aec22d93d0aa6b6f52",
+      "bytes": 3647
+    },
+    "app/templates/intelligence.html": {
+      "sha256": "2cacc10b52a73c5ce2aa4fb57b1a5220e8b21e8aad880fe518e5f35cb384ecb5",
+      "bytes": 7249
+    },
+    "app/static/js/intelligence.js": {
+      "sha256": "07617d8f2c924364afb8b8701bae81f27d9cbaa2ad36555128c5f52b3c6e8248",
+      "bytes": 6337
+    },
+    "app/static/css/app.css": {
+      "sha256": "187b5d6554d4df32f9a3b2322d5412b2149ab69d6efcf2c53925d11961983ffb",
+      "bytes": 68994
+    },
+    "GUARDIAN_OS_V6_INTELLIGENCE.md": {
+      "sha256": "71955fa99f884f40280e3af4f86098f9058b06ee82de4ff0964d98f8092fd9db",
+      "bytes": 2130
+    }
+  },
+  "protected_files_not_included": [
+    "app/templates/monitoring.html",
+    "app/static/js/monitoring.js",
+    "app/services/live_monitoring_service.py"
+  ]
+}
