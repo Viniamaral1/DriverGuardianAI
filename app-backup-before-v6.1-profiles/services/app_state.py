@@ -122,13 +122,8 @@ class GuardianState:
             return False, "Monitoring service has not been initialised."
         success, message = self.monitoring_service.start()
         if success:
-            profile = (
-                self.driver_profile_service.active_profile()
-                if self.driver_profile_service is not None
-                else None
-            )
-            profile_name = str((profile or {}).get("name") or "").strip()
-            welcome = f" for {profile_name}" if profile_name else " in Guest mode"
+            name = str(self.settings.get("driver_name", "")).strip()
+            welcome = f" for {name}" if name else ""
             self.add_event("MONITOR", f"{message}{welcome}", "success")
         return success, message
 
@@ -151,41 +146,8 @@ class GuardianState:
 
     def metrics(self) -> dict[str, Any]:
         if self.monitoring_service is None:
-            metrics = LiveMonitoringService.empty_metrics()
-        else:
-            metrics = self.monitoring_service.snapshot()
-
-        if not (
-            metrics.get("monitoring")
-            or metrics.get("starting")
-            or metrics.get("stopping")
-        ):
-            profile = (
-                self.driver_profile_service.active_profile()
-                if self.driver_profile_service is not None
-                else None
-            )
-            calibration = (profile or {}).get("calibration") or {}
-            metrics.update(
-                {
-                    "driver_profile_id": (profile or {}).get("id"),
-                    "driver_profile_name": str(
-                        (profile or {}).get("name") or "Guest"
-                    ),
-                    "calibration_mode": (
-                        "quick" if profile and calibration else "full"
-                    ),
-                    "calibration_status": (
-                        "VERIFYING SAVED PROFILE"
-                        if profile and calibration
-                        else "FULL CALIBRATION"
-                    ),
-                    "calibration_required_seconds": (
-                        3.0 if profile and calibration else 10.0
-                    ),
-                }
-            )
-        return metrics
+            return LiveMonitoringService.empty_metrics()
+        return self.monitoring_service.snapshot()
 
     def snapshot(self) -> dict[str, Any]:
         return {

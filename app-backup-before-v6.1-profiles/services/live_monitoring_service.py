@@ -96,34 +96,6 @@ class LiveMonitoringService:
             "log_path": None,
         }
 
-    def _current_profile_metrics(self) -> dict[str, Any]:
-        try:
-            profile = self.profile_provider()
-        except Exception:
-            profile = None
-
-        if not profile:
-            return {
-                "driver_profile_id": None,
-                "driver_profile_name": "Guest",
-                "calibration_mode": "full",
-                "calibration_status": "FULL CALIBRATION",
-                "calibration_required_seconds": 10.0,
-            }
-
-        has_calibration = bool(profile.get("calibration"))
-        return {
-            "driver_profile_id": profile.get("id"),
-            "driver_profile_name": str(profile.get("name") or "Guest"),
-            "calibration_mode": "quick" if has_calibration else "full",
-            "calibration_status": (
-                "VERIFYING SAVED PROFILE"
-                if has_calibration
-                else "FULL CALIBRATION"
-            ),
-            "calibration_required_seconds": 3.0 if has_calibration else 10.0,
-        }
-
     @property
     def active(self) -> bool:
         with self._lock:
@@ -151,7 +123,6 @@ class LiveMonitoringService:
             self._startup_event.clear()
             self._stop_event.clear()
             self._metrics = self.empty_metrics()
-            self._metrics.update(self._current_profile_metrics())
             self._metrics.update(
                 {
                     "starting": True,
@@ -230,8 +201,6 @@ class LiveMonitoringService:
     def snapshot(self) -> dict[str, Any]:
         with self._lock:
             result = dict(self._metrics)
-            if not self.active:
-                result.update(self._current_profile_metrics())
             result.update(
                 {
                     "monitoring": self._running,
@@ -302,7 +271,6 @@ class LiveMonitoringService:
         self._thread = None
         self._stop_event.clear()
         self._metrics = self.empty_metrics()
-        self._metrics.update(self._current_profile_metrics())
         self._frame_condition.notify_all()
 
     def _publish_metrics(self, values: dict[str, Any]) -> None:

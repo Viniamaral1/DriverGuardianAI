@@ -1,0 +1,17 @@
+{
+  "release": "V6.1.2",
+  "files": {
+    "app/services/app_state.py": {
+      "sha256": "344f55b0ed929c6839ddc837ed1ee73516b8cfa0e3b9efd33d2b51f41f217de7",
+      "bytes": 8297
+    },
+    "app/services/live_monitoring_service.py": {
+      "sha256": "7b60ea8bf7486936c8e7cd99d13e4d734c567be753521571dae45581cfd88aba",
+      "bytes": 32554
+    },
+    "GUARDIAN_OS_V6_1_2_PROFILE_SYNC.md": {
+      "sha256": "404eac5016a524b2d34e4613ccd009f7da954aca91a0a4b83772d468d61b5e10",
+      "bytes": 371
+    }
+  }
+}

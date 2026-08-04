@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="profiles-page">
+  <section class="panel profiles-hero">
+    <div>
+      <p class="eyebrow">PERSISTENT DRIVER PROFILES</p>
+      <h2>Faster calibration without trusting an old baseline blindly</h2>
+      <p class="muted">
+        A known driver receives a three-second baseline verification. If the
+        current measurements match the saved profile, Guardian continues
+        immediately. If they differ, the original ten-second calibration runs
+        automatically. Profiles are selected manually and stored only locally.
+      </p>
+      <div class="button-row">
+        <a class="button primary" href="/monitoring">Open Monitoring</a>
+        <button class="button secondary" id="profiles-refresh" type="button">
+          Refresh profiles
+        </button>
+      </div>
+    </div>
+    <div class="profiles-privacy">
+      <span>✓</span>
+      <strong>NO FACE IDENTITY RECOGNITION</strong>
+      <small>No face embeddings, identity templates or raw video are stored.</small>
+    </div>
+  </section>
+
+  <section class="profiles-layout">
+    <article class="panel profiles-active-card">
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow">ACTIVE DRIVER</p>
+          <h2 id="profiles-active-name">Guest</h2>
+        </div>
+        <span class="badge" id="profiles-active-status">FULL CALIBRATION</span>
+      </div>
+
+      <div class="profiles-active-summary" id="profiles-active-summary">
+        Guest mode always uses the existing full calibration and saves nothing.
+      </div>
+
+      <div class="profiles-calibration-grid">
+        <div><span>Baseline EAR</span><b id="profile-baseline-ear">—</b></div>
+        <div><span>Baseline yawn</span><b id="profile-baseline-yawn">—</b></div>
+        <div><span>Baseline head tilt</span><b id="profile-baseline-tilt">—</b></div>
+        <div><span>Saved observations</span><b id="profile-observations">0</b></div>
+        <div><span>Quick verifications</span><b id="profile-verifications">0</b></div>
+        <div><span>Full recalibrations</span><b id="profile-full-count">0</b></div>
+      </div>
+
+      <div class="profiles-active-actions">
+        <button class="button secondary" id="profiles-use-guest" type="button">
+          Use Guest mode
+        </button>
+        <button class="button secondary" id="profiles-reset-active" type="button" disabled>
+          Reset saved calibration
+        </button>
+      </div>
+    </article>
+
+    <article class="panel profiles-create-card">
+      <div class="panel-head">
+        <div><p class="eyebrow">NEW PROFILE</p><h2>Add a local driver</h2></div>
+      </div>
+      <form id="profile-create-form" class="profile-create-form">
+        <label class="field">
+          <span>Driver name</span>
+          <input name="name" maxlength="40" required placeholder="Example: Vinicius">
+        </label>
+        <button class="button primary" type="submit">Create and select</button>
+      </form>
+      <p class="muted">
+        The first session performs the full calibration. Guardian saves only
+        the resulting behavioural baseline and verification metadata.
+      </p>
+    </article>
+
+    <article class="panel profiles-list-card">
+      <div class="panel-head">
+        <div><p class="eyebrow">LOCAL PROFILES</p><h2>Choose who is driving</h2></div>
+        <span class="badge" id="profiles-count">0 profiles</span>
+      </div>
+      <div class="profiles-list" id="profiles-list">
+        <div class="empty-state">Loading local profiles…</div>
+      </div>
+    </article>
+
+    <article class="panel profiles-flow-card">
+      <p class="eyebrow">CALIBRATION FLOW</p>
+      <h2>Safe reuse, never blind reuse</h2>
+      <div class="profile-flow">
+        <div><b>1</b><span><strong>Profile selected</strong><small>Guardian loads the saved baseline locally.</small></span></div>
+        <i>→</i>
+        <div><b>2</b><span><strong>3-second verification</strong><small>Current neutral EAR is compared with history.</small></span></div>
+        <i>→</i>
+        <div><b>3</b><span><strong>Match or fallback</strong><small>Continue quickly, or run the original 10-second calibration.</small></span></div>
+      </div>
+    </article>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/profiles.js?v=6.1.0"></script>
+{% endblock %}

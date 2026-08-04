@@ -1,0 +1,21 @@
+{
+  "release": "Guardian OS V6.1.1 Driver Profile Fix",
+  "files": {
+    "app/services/driver_profile_service.py": {
+      "bytes": 9849,
+      "sha256": "76e673d2fc9dd48eb4028f89b7eb172119c2cdfad8daf2b58d6f1297105858de"
+    },
+    "app/routers/profiles.py": {
+      "bytes": 3013,
+      "sha256": "8e7734d9115dcb32d1a3d37b2d53324f9d0d61af911eefa0b5b05a9e0e66d119"
+    },
+    "app/static/js/profiles.js": {
+      "bytes": 7366,
+      "sha256": "60d13eafc1b72d2e2f2d6c2ac12d4530a84774e5365c58ea504dd6ee64e073bf"
+    },
+    "GUARDIAN_OS_V6_1_1_PROFILE_FIX.md": {
+      "bytes": 989,
+      "sha256": "42cb325918726fc79146f213c23bdcbebac3faa30e167caaebff1c5eeb8af228"
+    }
+  }
+}

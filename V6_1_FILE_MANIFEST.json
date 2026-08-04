@@ -1,0 +1,85 @@
+{
+  "release": "Guardian OS V6.1 Persistent Driver Profiles",
+  "files": {
+    "app/main.py": {
+      "bytes": 1810,
+      "sha256": "a126a3e3e6949704ca465101bff6eab1642d16c8fc263db6777d3665ef4c5968"
+    },
+    "app/routers/pages.py": {
+      "bytes": 2076,
+      "sha256": "6667ebabb0498d434fee691b9f2e53d526aec07112bad5e4cf1d6477906e2813"
+    },
+    "app/routers/profiles.py": {
+      "bytes": 2901,
+      "sha256": "a1bd7629bbd4043d93009595aa83a554f142d9c69d415f19d5f0fc59be5582f1"
+    },
+    "app/routers/settings.py": {
+      "bytes": 1145,
+      "sha256": "faba7e69711e7d87fbceed98e54cd4a6a5234f21a5edde0544738a343c86cbaa"
+    },
+    "app/services/app_state.py": {
+      "bytes": 6861,
+      "sha256": "10cf77ec785e596f3ccd3615370531c1ecfd58ba43dbadbe2cf3034f37dc00ff"
+    },
+    "app/services/commander_service.py": {
+      "bytes": 12111,
+      "sha256": "016a7759867e07694b4fe0a81d9f8aa2905d19cb91341ef2289e4dea9f086c92"
+    },
+    "app/services/driver_profile_service.py": {
+      "bytes": 9178,
+      "sha256": "ed20b895990b4c9bc71ca957871eb9dc921fcd9f98135090975a708cb9b4fe48"
+    },
+    "app/services/persistent_calibration.py": {
+      "bytes": 9587,
+      "sha256": "8ea18fdb6d0d93513dbe29ee5e671c5a25556059512850d3ceccd5702008b844"
+    },
+    "app/services/live_monitoring_service.py": {
+      "bytes": 31324,
+      "sha256": "aa4f250cde557b62a0ca4460807072a5aa6e20b94ac0124b9098db64e6acfa0f"
+    },
+    "app/templates/base.html": {
+      "bytes": 3795,
+      "sha256": "3a1578da9b5b43f574875ca855959d286636adb131f05d579e4505a71328dccc"
+    },
+    "app/templates/profiles.html": {
+      "bytes": 4353,
+      "sha256": "fab127d8b3e4eec7cb276d84e3cd4bdb43fb810edf78416ebc6d1126dc869062"
+    },
+    "app/templates/settings.html": {
+      "bytes": 4227,
+      "sha256": "87638c830522bf5b55d4cfe80028532c6349d6c2c5d051f4576a729b50c8afed"
+    },
+    "app/templates/monitoring.html": {
+      "bytes": 4314,
+      "sha256": "7266e07ded94fde61d8ab773a8b859db876b209400c93f2c1ec3768f631e3620"
+    },
+    "app/static/js/profiles.js": {
+      "bytes": 6844,
+      "sha256": "1a4be5d743fd8f572b528f8868d2b07104f0c5f3c246d04fcff50fcf02a3c084"
+    },
+    "app/static/js/settings.js": {
+      "bytes": 2724,
+      "sha256": "10192e00637558a5fa188964615342726de9e4fc4f5dac0514eb88a7193d116b"
+    },
+    "app/static/js/monitoring.js": {
+      "bytes": 12686,
+      "sha256": "b12451eeeefdca5622d087beaac3b25f12a3f83ff82bbaaaeb1403c7141be251"
+    },
+    "app/static/css/app.css": {
+      "bytes": 73983,
+      "sha256": "b514b7b595523562a19bea5e8b869d027c3d671cf1fce0180853ba1d1e76ae53"
+    },
+    "GUARDIAN_OS_V6_1_PERSISTENT_PROFILES.md": {
+      "bytes": 3110,
+      "sha256": "e6cda8bddcb3a0482658511b4dcddebef4d99d479c027d926ec5d45deed65b6e"
+    }
+  },
+  "verified_unchanged_functions": [
+    "LiveMonitoringService.start",
+    "LiveMonitoringService.stop",
+    "LiveMonitoringService._open_camera",
+    "monitoring.js startCamera",
+    "monitoring.js stopCamera"
+  ],
+  "new_local_data_file_created_at_runtime": "guardian_data/driver_profiles.json"
+}

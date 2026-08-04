@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="edge-page">
+  <section class="panel edge-hero">
+    <div>
+      <p class="eyebrow">GUARDIAN EDGE INTELLIGENCE</p>
+      <h2>Offline-first memory for completed driving sessions</h2>
+      <p class="muted">
+        Guardian OS keeps session summaries, behavioural patterns and journey
+        context on this device. Raw camera video is not stored in Edge Memory.
+        Cloud synchronisation is optional and never required for monitoring.
+      </p>
+      <div class="button-row">
+        <button class="button primary" id="edge-refresh" type="button">Refresh local memory</button>
+        <a class="button secondary" href="/api/edge/export">Download memory bundle</a>
+      </div>
+    </div>
+    <div class="edge-readiness">
+      <span class="edge-readiness-ring">✓</span>
+      <strong>OFFLINE READY</strong>
+      <small id="edge-updated">Waiting for memory status…</small>
+    </div>
+  </section>
+
+  <section class="edge-summary-grid">
+    <article class="panel edge-kpi">
+      <span>Stored sessions</span>
+      <strong id="edge-session-count">0</strong>
+      <small>Generated reports imported locally</small>
+    </article>
+    <article class="panel edge-kpi">
+      <span>Average risk</span>
+      <strong id="edge-average-risk">0%</strong>
+      <small>Across completed sessions</small>
+    </article>
+    <article class="panel edge-kpi">
+      <span>Highest risk</span>
+      <strong id="edge-highest-risk">0%</strong>
+      <small>Maximum recorded session risk</small>
+    </article>
+    <article class="panel edge-kpi">
+      <span>Pending sync</span>
+      <strong id="edge-pending-sync">0</strong>
+      <small>Optional cloud queue</small>
+    </article>
+  </section>
+
+  <section class="edge-main-grid">
+    <article class="panel edge-insights">
+      <div class="panel-head">
+        <div><p class="eyebrow">PERSONALISED PATTERNS</p><h2>What Guardian has learned</h2></div>
+        <span class="badge success">LOCAL</span>
+      </div>
+
+      <div class="edge-summary-message" id="edge-summary-message">
+        Complete a session to begin building local patterns.
+      </div>
+
+      <div class="edge-insight-list">
+        <div><span>Total driving time</span><b id="edge-total-time">0m</b></div>
+        <div><span>Average session</span><b id="edge-average-duration">0m</b></div>
+        <div><span>Total alerts</span><b id="edge-total-alerts">0</b></div>
+        <div><span>Alert-session rate</span><b id="edge-alert-rate">0%</b></div>
+        <div><span>Average baseline EAR</span><b id="edge-baseline-ear">0.000</b></div>
+        <div><span>Highest-risk period</span><b id="edge-risk-period">Not enough data</b></div>
+      </div>
+
+      <div class="edge-latest-session" id="edge-latest-session">
+        <p class="eyebrow">LATEST SESSION</p>
+        <p class="muted">No completed session is available.</p>
+      </div>
+    </article>
+
+    <article class="panel edge-context">
+      <div class="panel-head">
+        <div><p class="eyebrow">JOURNEY CONTEXT</p><h2>Current driving conditions</h2></div>
+        <span class="badge">CONTEXT ONLY</span>
+      </div>
+      <p class="muted">
+        Context changes the explanation and caution level. It does not directly
+        label the driver as fatigued and does not alter the trained model.
+      </p>
+
+      <form id="edge-context-form" class="edge-context-form">
+        <label class="field">
+          <span>Weather</span>
+          <select name="weather">
+            <option value="unknown">Unknown</option>
+            <option value="clear">Clear</option>
+            <option value="rain">Rain</option>
+            <option value="snow">Snow</option>
+            <option value="fog">Fog</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Road condition</span>
+          <select name="road_condition">
+            <option value="unknown">Unknown</option>
+            <option value="dry">Dry</option>
+            <option value="wet">Wet</option>
+            <option value="snow_or_ice">Snow or ice</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>External light</span>
+          <select name="external_light">
+            <option value="unknown">Unknown</option>
+            <option value="daylight">Daylight</option>
+            <option value="dusk">Dusk</option>
+            <option value="night">Night</option>
+            <option value="bright_glare">Bright glare</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Cabin light</span>
+          <select name="cabin_light">
+            <option value="unknown">Unknown</option>
+            <option value="normal">Normal</option>
+            <option value="low_light">Low light</option>
+            <option value="too_bright">Too bright</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Face or eye occlusion</span>
+          <select name="occlusion">
+            <option value="none">None</option>
+            <option value="glasses">Glasses</option>
+            <option value="sunglasses">Sunglasses</option>
+            <option value="hat">Hat</option>
+            <option value="glasses_and_hat">Glasses and hat</option>
+          </select>
+        </label>
+        <label class="field edge-notes">
+          <span>Optional note</span>
+          <input name="notes" maxlength="240" placeholder="Example: heavy rain began halfway through the journey">
+        </label>
+        <button class="button primary" type="submit">Save context locally</button>
+      </form>
+    </article>
+
+    <article class="panel edge-sessions">
+      <div class="panel-head">
+        <div><p class="eyebrow">RECENT MEMORY</p><h2>Completed sessions</h2></div>
+        <span class="badge" id="edge-recent-count">0 records</span>
+      </div>
+      <div class="edge-session-list" id="edge-session-list">
+        <div class="empty-state">Loading local memory…</div>
+      </div>
+    </article>
+
+    <article class="panel edge-sync">
+      <div class="panel-head">
+        <div><p class="eyebrow">OFFLINE QUEUE</p><h2>Optional synchronisation</h2></div>
+        <span class="badge" id="edge-sync-status">LOCAL ONLY</span>
+      </div>
+      <p class="muted">
+        New sessions are queued locally. A future cloud connector can upload
+        them in order when connectivity returns. Monitoring never depends on
+        this queue.
+      </p>
+      <div class="edge-sync-visual">
+        <div><span>DEVICE</span><b>Guardian Edge</b></div>
+        <i>→</i>
+        <div><span>QUEUE</span><b id="edge-queue-label">0 pending</b></div>
+        <i>→</i>
+        <div class="disabled"><span>CLOUD</span><b>Not configured</b></div>
+      </div>
+      <button class="button secondary" id="edge-mark-synced" type="button">
+        Mark pending records as synced
+      </button>
+    </article>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="/static/js/edge.js"></script>{% endblock %}
