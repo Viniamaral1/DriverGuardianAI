@@ -7,6 +7,8 @@ from pathlib import Path
 from statistics import mean
 from typing import Any
 
+from app.services.automatic_context_service import AutomaticContextService
+
 
 class EdgeMemoryService:
     """Persistent, offline-first memory derived from completed session reports.
@@ -24,6 +26,7 @@ class EdgeMemoryService:
         self.data_dir = root / "guardian_data"
         self.path = self.data_dir / "edge_memory.json"
         self._lock = threading.RLock()
+        self.automatic_context_service = AutomaticContextService()
         self._data: dict[str, Any] = self._empty()
         self._load()
         self.refresh_from_reports()
@@ -39,6 +42,9 @@ class EdgeMemoryService:
             "sessions": {},
             "sync_queue": [],
             "context": {
+                "automatic_enabled": True,
+                "location": "",
+                "manual_override": False,
                 "weather": "unknown",
                 "external_light": "unknown",
                 "cabin_light": "unknown",
@@ -160,6 +166,9 @@ class EdgeMemoryService:
 
     def set_context(self, updates: dict[str, Any]) -> dict[str, Any]:
         allowed = {
+            "automatic_enabled",
+            "location",
+            "manual_override",
             "weather",
             "external_light",
             "cabin_light",
@@ -171,11 +180,70 @@ class EdgeMemoryService:
             context = self._data.setdefault("context", {})
             for key, value in updates.items():
                 if key in allowed and value is not None:
-                    context[key] = str(value).strip()[:240]
+                    if key in {"automatic_enabled", "manual_override"}:
+                        context[key] = bool(value)
+                    else:
+                        context[key] = str(value).strip()[:240]
             context["updated_at"] = self._now()
             self._save()
             return dict(context)
 
+
+    def resolved_context(self, force_weather: bool = False) -> dict[str, Any]:
+        with self._lock:
+            manual = dict(self._data.get("context", {}))
+
+        automatic_enabled = bool(manual.get("automatic_enabled", True))
+        manual_override = bool(manual.get("manual_override", False))
+        location = str(manual.get("location", "") or "").strip()
+        automatic = (
+            self.automatic_context_service.snapshot(location, force=force_weather)
+            if automatic_enabled
+            else self.automatic_context_service.unknown(
+                "Automatic weather is disabled.", location=location
+            )
+        )
+
+        now = datetime.now()
+        period = (
+            "morning" if 5 <= now.hour < 12 else
+            "afternoon" if 12 <= now.hour < 17 else
+            "evening" if 17 <= now.hour < 21 else "night"
+        )
+        time_light = "daylight" if 7 <= now.hour < 18 else "dusk" if 5 <= now.hour < 21 else "night"
+
+        def value(name: str, fallback: str = "unknown") -> dict[str, Any]:
+            manual_value = str(manual.get(name, fallback) or fallback)
+            auto_value = str(automatic.get(name, fallback) or fallback)
+            if manual_override and manual_value not in {"", "unknown"}:
+                return {"value": manual_value, "source": "Manual override", "confidence": 1.0, "updated_at": manual.get("updated_at"), "fresh": True}
+            if automatic_enabled and automatic.get("available") and auto_value != "unknown":
+                return {"value": auto_value, "source": automatic.get("source", "Automatic"), "confidence": automatic.get("confidence", 0.0), "updated_at": automatic.get("updated_at"), "fresh": automatic.get("fresh", False)}
+            return {"value": fallback, "source": "Unknown", "confidence": 0.0, "updated_at": None, "fresh": False}
+
+        weather = value("weather")
+        road = value("road_condition")
+        external = value("external_light")
+        if external["value"] == "unknown":
+            external = {"value": time_light, "source": "Local clock estimate", "confidence": 0.65, "updated_at": self._now(), "fresh": True}
+
+        cabin = {"value": str(manual.get("cabin_light", "unknown") or "unknown"), "source": "Manual context", "confidence": 1.0 if manual.get("cabin_light") not in {None, "unknown"} else 0.0, "updated_at": manual.get("updated_at"), "fresh": bool(manual.get("updated_at"))}
+        occlusion = {"value": str(manual.get("occlusion", "none") or "none"), "source": "Manual context", "confidence": 1.0, "updated_at": manual.get("updated_at"), "fresh": bool(manual.get("updated_at"))}
+
+        return {
+            "automatic_enabled": automatic_enabled,
+            "manual_override": manual_override,
+            "location": location,
+            "automatic_weather": automatic,
+            "local_period": {"value": period, "source": "Local clock", "confidence": 1.0, "updated_at": self._now(), "fresh": True},
+            "weather": weather,
+            "road_condition": road,
+            "external_light": external,
+            "cabin_light": cabin,
+            "occlusion": occlusion,
+            "notes": manual.get("notes", ""),
+            "manual_context": manual,
+        }
     def pending_count(self) -> int:
         return sum(
             1
@@ -314,7 +382,8 @@ class EdgeMemoryService:
                 "available": True,
                 "offline_ready": True,
                 "updated_at": self._data.get("updated_at"),
-                "context": dict(self._data.get("context", {})),
+                "context": self.resolved_context(),
+                "manual_context": dict(self._data.get("context", {})),
                 "insights": insights,
                 "recent_sessions": sessions[:12],
                 "pending_sync": self.pending_count(),

@@ -10,6 +10,9 @@ router = APIRouter()
 
 
 class ContextUpdate(BaseModel):
+    automatic_enabled: bool | None = None
+    location: str | None = Field(default=None, max_length=120)
+    manual_override: bool | None = None
     weather: str | None = Field(default=None, max_length=60)
     external_light: str | None = Field(default=None, max_length=60)
     cabin_light: str | None = Field(default=None, max_length=60)
@@ -53,6 +56,13 @@ def update_context(payload: ContextUpdate):
         "Journey context updated locally",
         "success",
     )
+    return {"context": context, "snapshot": service().snapshot()}
+
+
+@router.post("/context/refresh-weather")
+def refresh_weather():
+    context = service().resolved_context(force_weather=True)
+    guardian_state.add_event("CONTEXT", "Automatic weather context refreshed", "success" if context.get("automatic_weather", {}).get("available") else "warning")
     return {"context": context, "snapshot": service().snapshot()}
 
 

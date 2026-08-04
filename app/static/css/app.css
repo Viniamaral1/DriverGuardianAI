@@ -3348,3 +3348,8 @@ html.sidebar-collapsed .sidebar-toggle {
     grid-template-columns:1fr;
   }
 }
+
+
+/* Guardian OS V6.3 — Automatic Journey Context */
+.automatic-context-status{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:9px;margin:14px 0;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}
+.automatic-context-status>div{min-width:0}.automatic-context-status span,.automatic-context-status b,.automatic-context-status small{display:block}.automatic-context-status span{color:var(--muted);font-size:9px}.automatic-context-status b{font-size:14px;text-transform:capitalize;margin-top:4px}.automatic-context-status small{color:var(--muted);font-size:9px;margin-top:4px;overflow-wrap:anywhere}.automatic-context-status[data-state="fresh"]{border-color:rgba(70,214,140,.35)}.automatic-context-status[data-state="stale"]{border-color:rgba(255,186,73,.4)}.automatic-context-status[data-state="offline"]{border-color:rgba(255,95,109,.35)}.edge-context-wide{grid-column:1/-1}.context-disabled{opacity:.42;pointer-events:none}.intelligence-context-grid small{display:block;color:var(--muted);font-size:8px;margin-top:5px;overflow-wrap:anywhere}@media(max-width:900px){.automatic-context-status{grid-template-columns:repeat(2,minmax(0,1fr))}.automatic-context-status .button{grid-column:1/-1}}@media(max-width:560px){.automatic-context-status{grid-template-columns:1fr}}

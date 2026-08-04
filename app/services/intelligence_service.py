@@ -257,7 +257,8 @@ class IntelligenceService:
         metrics = self.state.metrics()
         edge = self._edge_snapshot()
         insights = edge.get("insights", {}) or {}
-        manual_context = edge.get("context", {}) or {}
+        resolved_context = edge.get("context", {}) or {}
+        manual_context = edge.get("manual_context", {}) or {}
 
         now = datetime.now()
         period = self._period(now.hour)
@@ -271,25 +272,40 @@ class IntelligenceService:
             else "No calibrated risk contribution is currently active."
         )
 
+        def resolved_value(name: str, fallback: str = "unknown") -> str:
+            item = resolved_context.get(name, {}) or {}
+            return str(item.get("value", fallback) or fallback)
+
         effective_context = {
-            **manual_context,
+            "weather": resolved_value("weather"),
+            "road_condition": resolved_value("road_condition"),
+            "external_light": resolved_value("external_light", automatic_light),
+            "cabin_light": resolved_value("cabin_light"),
+            "occlusion": resolved_value("occlusion", "none"),
             "automatic_time_period": period,
-            "automatic_external_light": automatic_light,
+            "automatic_external_light": resolved_value("external_light", automatic_light),
             "local_time": now.isoformat(timespec="seconds"),
+            "sources": {
+                key: resolved_context.get(key, {})
+                for key in ("weather", "road_condition", "external_light", "cabin_light", "occlusion", "local_period")
+            },
+            "automatic_weather": resolved_context.get("automatic_weather", {}),
+            "location": resolved_context.get("location", ""),
+            "manual_override": bool(resolved_context.get("manual_override")),
         }
 
         caution_reasons: list[str] = []
         if automatic_light in {"night", "dusk"}:
             caution_reasons.append(f"automatic {automatic_light} time context")
-        if manual_context.get("weather") in {"rain", "snow", "fog"}:
-            caution_reasons.append(str(manual_context.get("weather")))
-        if manual_context.get("road_condition") in {"wet", "snow_or_ice"}:
+        if effective_context.get("weather") in {"rain", "snow", "fog"}:
+            caution_reasons.append(str(effective_context.get("weather")))
+        if effective_context.get("road_condition") in {"wet", "snow_or_ice"}:
             caution_reasons.append(
-                str(manual_context.get("road_condition")).replace("_", " ")
+                str(effective_context.get("road_condition")).replace("_", " ")
             )
-        if manual_context.get("occlusion") in {"sunglasses", "glasses_and_hat"}:
+        if effective_context.get("occlusion") in {"sunglasses", "glasses_and_hat"}:
             caution_reasons.append(
-                str(manual_context.get("occlusion")).replace("_", " ")
+                str(effective_context.get("occlusion")).replace("_", " ")
             )
 
         return {

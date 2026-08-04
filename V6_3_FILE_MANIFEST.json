@@ -1,0 +1,49 @@
+{
+  "release": "Guardian OS V6.3 Automatic Journey Context",
+  "files": {
+    "GUARDIAN_OS_V6_3_AUTOMATIC_JOURNEY_CONTEXT.md": {
+      "bytes": 1638,
+      "sha256": "d1be9a40de53803af7312a33e3f8efc2dbd36e3c1b799e42034e1732a1ceccbf"
+    },
+    "app/main.py": {
+      "bytes": 1810,
+      "sha256": "511f68b8e22ad7e760ded7cfcc7514ff4dd7f1608846ec8467c6f4af47b67040"
+    },
+    "app/routers/edge.py": {
+      "bytes": 2765,
+      "sha256": "a705833b776fb3a483d1a341c7d05d145b89bb33f59c2117d5248e20e1ef1130"
+    },
+    "app/templates/edge.html": {
+      "bytes": 7790,
+      "sha256": "ed508cf50030eaeac616d73c9bdbbd22b98f9a3c63381e7b2b1fee47126ed007"
+    },
+    "app/templates/intelligence.html": {
+      "bytes": 8710,
+      "sha256": "2dc49a067834db2bc09ea900bcbedc33ecde1f0e26d254802c5a705673b8e5d6"
+    },
+    "app/services/edge_memory_service.py": {
+      "bytes": 16588,
+      "sha256": "2e97430baeeb41414c4c95600dc15448df4a0d13270eb2d6c529c5f3388d15aa"
+    },
+    "app/services/automatic_context_service.py": {
+      "bytes": 7742,
+      "sha256": "ab79b73ba0eb304e893a009b8fa254d6fb76d16586ff0155f9d2afbe48e38b66"
+    },
+    "app/services/intelligence_service.py": {
+      "bytes": 15770,
+      "sha256": "23806a148ea3eafca368770a0ae5b1f15b5424fbefaa8444539026fcf5b1af8a"
+    },
+    "app/static/js/intelligence.js": {
+      "bytes": 8136,
+      "sha256": "7c59ab1acb96b3775f10f2df6793d5f0ecb70182418de572fc166f30ec6fa765"
+    },
+    "app/static/js/edge.js": {
+      "bytes": 8535,
+      "sha256": "0014c606d68554b5265da95ee50d6b9a7e2b099a266805df3f2c761f7f99d7c6"
+    },
+    "app/static/css/app.css": {
+      "bytes": 76602,
+      "sha256": "a9241da295de6a0954412310ffb296007bfc9520e0b73de40df76a1667c58b14"
+    }
+  }
+}

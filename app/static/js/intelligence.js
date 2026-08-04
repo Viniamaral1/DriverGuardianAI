@@ -106,8 +106,14 @@ function renderIntelligence(snapshot) {
     intelligenceLabel(context.automatic_external_light);
   intelligenceEl("context-weather").textContent =
     intelligenceLabel(context.weather);
+  intelligenceEl("context-weather-source").textContent =
+    context.sources?.weather?.source || "Unknown source";
   intelligenceEl("context-road").textContent =
     intelligenceLabel(context.road_condition);
+  intelligenceEl("context-road-source").textContent =
+    context.sources?.road_condition?.source || "Unknown source";
+  intelligenceEl("context-light-source").textContent =
+    context.sources?.external_light?.source || "Local clock estimate";
   intelligenceEl("context-cabin").textContent =
     intelligenceLabel(context.cabin_light);
   intelligenceEl("context-occlusion").textContent =

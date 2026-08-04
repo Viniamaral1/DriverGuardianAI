@@ -136,9 +136,9 @@
       </div>
       <div class="intelligence-context-grid">
         <div><span>Local period</span><b id="context-period">—</b></div>
-        <div><span>Automatic external light</span><b id="context-auto-light">—</b></div>
-        <div><span>Recorded weather</span><b id="context-weather">Unknown</b></div>
-        <div><span>Road condition</span><b id="context-road">Unknown</b></div>
+        <div><span>Automatic external light</span><b id="context-auto-light">—</b><small id="context-light-source">Local clock</small></div>
+        <div><span>Current weather</span><b id="context-weather">Unknown</b><small id="context-weather-source">Unknown source</small></div>
+        <div><span>Road condition</span><b id="context-road">Unknown</b><small id="context-road-source">Unknown source</small></div>
         <div><span>Cabin light</span><b id="context-cabin">Unknown</b></div>
         <div><span>Occlusion</span><b id="context-occlusion">None</b></div>
       </div>
@@ -213,5 +213,5 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="/static/js/intelligence.js?v=6.2.0"></script>
+<script src="/static/js/intelligence.js?v=6.3.0"></script>
 {% endblock %}
