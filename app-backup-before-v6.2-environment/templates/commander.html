@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="commander-layout">
+  <section class="panel commander-console">
+    <div class="commander-hero">
+      <div class="commander-orb large"><div></div></div>
+      <div class="commander-title">
+        <p class="eyebrow">VOICE & INTELLIGENCE</p>
+        <h2>Commander</h2>
+        <p>Your hands-free interface to monitoring and session intelligence.</p>
+      </div>
+      <div class="voice-state">
+        <span class="status-dot"></span>
+        <div>
+          <strong id="wake-status">Voice ready</strong>
+          <small id="wake-detail">Use the microphone or enable hands-free mode</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="conversation" id="conversation"></div>
+
+    <div class="listening-strip" id="listening-strip">
+      <span class="voice-wave"><i></i><i></i><i></i><i></i><i></i></span>
+      <div><b id="listening-title">Commander is standing by</b><small id="heard-text">Say “Commander” followed by your command</small></div>
+    </div>
+
+    <form class="composer" id="commander-form">
+      <button type="button" class="mic-button" id="browser-mic" aria-label="Listen for one command" title="Listen once">🎙</button>
+      <input id="commander-input" autocomplete="off" placeholder="Ask Commander about the driver or latest report…">
+      <button class="button primary" type="submit">Send</button>
+    </form>
+  </section>
+
+  <aside class="commander-side">
+    <section class="panel">
+      <div class="panel-head">
+        <div><p class="eyebrow">HANDS-FREE MODE</p><h2>“Commander” trigger</h2></div>
+        <span class="badge" id="handsfree-badge">OFF</span>
+      </div>
+      <p class="muted">Keeps browser speech recognition active while this page is open. Commands are accepted only after the word “Commander”.</p>
+      <div class="button-row">
+        <button class="button primary" id="handsfree-start">Start listening</button>
+        <button class="button secondary" id="handsfree-stop" disabled>Stop</button>
+      </div>
+      <p class="support-note" id="speech-support-note"></p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div><p class="eyebrow">HOST MICROPHONE</p><h2>Backend listener</h2></div>
+      </div>
+      <p class="muted">Optional Python microphone service. This requires SpeechRecognition and a working PyAudio installation.</p>
+      <div class="button-row">
+        <button class="button secondary" id="wake-start">Enable backend</button>
+        <button class="button secondary" id="wake-stop">Disable</button>
+      </div>
+    </section>
+
+    <section class="panel quick-panel">
+      <div class="panel-head">
+        <div><p class="eyebrow">QUICK COMMANDS</p><h2>Suggested</h2></div>
+      </div>
+      <div class="quick-commands">
+        <button data-command="Start monitoring">▶ Start monitoring</button>
+        <button data-command="What is my current status?">◉ Current status</button>
+        <button data-command="Summarise the latest report">▤ Latest report</button>
+        <button data-command="Explain calibration">◎ Explain calibration</button>
+        <button data-command="Why did you alert me?">⚠ Explain alerts</button>
+      </div>
+    </section>
+
+    <button class="text-button" id="stop-speaking">Stop Commander speaking</button>
+    <button class="text-button" id="clear-chat">Clear conversation</button>
+  </aside>
+</div>
+{% endblock %}
+{% block scripts %}<script src="/static/js/commander.js"></script>{% endblock %}

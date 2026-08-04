@@ -9,9 +9,6 @@ from collections import deque
 from pathlib import Path
 from typing import Any, Callable, Iterator
 
-from app.services.persistent_calibration import PersistentCalibrationAdapter
-from app.services.environmental_perception_service import EnvironmentalPerceptionService
-
 
 class LiveMonitoringService:
     """Thread-safe adapter around the existing V3 monitoring components.
@@ -26,14 +23,10 @@ class LiveMonitoringService:
         root: Path,
         settings_provider: Callable[[], dict[str, Any]],
         event_callback: Callable[[str, str, str], None],
-        profile_provider: Callable[[], dict[str, Any] | None] | None = None,
-        profile_service: Any | None = None,
     ) -> None:
         self.root = root
         self.settings_provider = settings_provider
         self.event_callback = event_callback
-        self.profile_provider = profile_provider or (lambda: None)
-        self.profile_service = profile_service
 
         self._lock = threading.RLock()
         self._frame_condition = threading.Condition(self._lock)
@@ -80,12 +73,6 @@ class LiveMonitoringService:
             "calibration_complete": False,
             "calibration_remaining": 0.0,
             "baseline_ear": 0.0,
-            "calibration_mode": "full",
-            "calibration_status": "FULL CALIBRATION",
-            "calibration_required_seconds": 10.0,
-            "calibration_fallback_reason": None,
-            "driver_profile_id": None,
-            "driver_profile_name": "Guest",
             "fps": 0.0,
             "critical_duration": 0.0,
             "cooldown_remaining": 0.0,
@@ -93,50 +80,8 @@ class LiveMonitoringService:
             "eye_risk": 0.0,
             "yawn_risk": 0.0,
             "tilt_risk": 0.0,
-            "environment_available": False,
-            "frame_brightness": 0.0,
-            "frame_contrast": 0.0,
-            "frame_blur_variance": 0.0,
-            "underexposed_ratio": 0.0,
-            "overexposed_ratio": 0.0,
-            "glare_ratio": 0.0,
-            "automatic_cabin_light": "unknown",
-            "automatic_sharpness": "unknown",
-            "automatic_perception_quality": "standby",
-            "automatic_perception_score": 0.0,
-            "automatic_perception_summary": (
-                "Start Monitoring to analyse camera image quality."
-            ),
             "error": None,
             "log_path": None,
-        }
-
-    def _current_profile_metrics(self) -> dict[str, Any]:
-        try:
-            profile = self.profile_provider()
-        except Exception:
-            profile = None
-
-        if not profile:
-            return {
-                "driver_profile_id": None,
-                "driver_profile_name": "Guest",
-                "calibration_mode": "full",
-                "calibration_status": "FULL CALIBRATION",
-                "calibration_required_seconds": 10.0,
-            }
-
-        has_calibration = bool(profile.get("calibration"))
-        return {
-            "driver_profile_id": profile.get("id"),
-            "driver_profile_name": str(profile.get("name") or "Guest"),
-            "calibration_mode": "quick" if has_calibration else "full",
-            "calibration_status": (
-                "VERIFYING SAVED PROFILE"
-                if has_calibration
-                else "FULL CALIBRATION"
-            ),
-            "calibration_required_seconds": 3.0 if has_calibration else 10.0,
         }
 
     @property
@@ -166,7 +111,6 @@ class LiveMonitoringService:
             self._startup_event.clear()
             self._stop_event.clear()
             self._metrics = self.empty_metrics()
-            self._metrics.update(self._current_profile_metrics())
             self._metrics.update(
                 {
                     "starting": True,
@@ -245,8 +189,6 @@ class LiveMonitoringService:
     def snapshot(self) -> dict[str, Any]:
         with self._lock:
             result = dict(self._metrics)
-            if not self.active:
-                result.update(self._current_profile_metrics())
             result.update(
                 {
                     "monitoring": self._running,
@@ -317,7 +259,6 @@ class LiveMonitoringService:
         self._thread = None
         self._stop_event.clear()
         self._metrics = self.empty_metrics()
-        self._metrics.update(self._current_profile_metrics())
         self._frame_condition.notify_all()
 
     def _publish_metrics(self, values: dict[str, Any]) -> None:
@@ -433,14 +374,6 @@ class LiveMonitoringService:
             camera_index = int(settings.get("camera_index", 0))
             alert_volume = int(settings.get("alert_volume", 80))
             sound_enabled = alert_volume > 0
-            persistent_enabled = bool(
-                settings.get("persistent_calibration_enabled", True)
-            )
-            active_profile = (
-                self.profile_provider()
-                if persistent_enabled
-                else None
-            )
 
             # Open the real webcam before loading the model so the user receives
             # a definite camera result instead of waiting behind joblib loading.
@@ -477,27 +410,6 @@ class LiveMonitoringService:
                         "camera_status": "CONNECTED",
                         "camera_backend": backend_name,
                         "model_status": "LOADING",
-                        "driver_profile_id": (
-                            active_profile.get("id") if active_profile else None
-                        ),
-                        "driver_profile_name": (
-                            active_profile.get("name") if active_profile else "Guest"
-                        ),
-                        "calibration_mode": (
-                            "quick"
-                            if active_profile and active_profile.get("calibration")
-                            else "full"
-                        ),
-                        "calibration_status": (
-                            "VERIFYING SAVED PROFILE"
-                            if active_profile and active_profile.get("calibration")
-                            else "FULL CALIBRATION"
-                        ),
-                        "calibration_required_seconds": (
-                            3.0
-                            if active_profile and active_profile.get("calibration")
-                            else 10.0
-                        ),
                         "error": None,
                     }
                 )
@@ -541,26 +453,9 @@ class LiveMonitoringService:
                 self.event_callback("MODEL", self._model_warning, "warning")
 
             temporal_engine = v3.TemporalStateEngine()
-            environmental_perception = EnvironmentalPerceptionService()
-            calibration = PersistentCalibrationAdapter(
-                v3.PersonalCalibration,
-                profile=active_profile,
-                profile_service=self.profile_service,
-                event_callback=self.event_callback,
-                camera_index=camera_index,
-                quick_seconds=3.0,
-                quick_minimum_samples=20,
-                match_tolerance=0.12,
-                full_seconds=10.0,
-                full_minimum_samples=80,
-            )
-            self.event_callback(
-                "PROFILE",
-                (
-                    f"Active driver: {calibration.profile_name}. "
-                    f"{'Quick verification ready.' if calibration.mode == 'quick' else 'Full calibration required.'}"
-                ),
-                "info",
+            calibration = v3.PersonalCalibration(
+                required_seconds=10.0,
+                minimum_samples=80,
             )
             alert_event_logger = v3.AlertEventLogger()
             alert_manager = v3.AlertManager(
@@ -580,8 +475,6 @@ class LiveMonitoringService:
             start_time = time.perf_counter()
             previous_time = start_time
             displayed_fps = 0.0
-            last_environment_analysis = 0.0
-            environment_metrics = environmental_perception.empty()
 
             while not self._stop_event.is_set():
                 success, frame = capture.read()
@@ -603,13 +496,6 @@ class LiveMonitoringService:
                 )
 
                 frame = cv2.flip(frame, 1)
-                if now - last_environment_analysis >= 0.5:
-                    environment_metrics = environmental_perception.analyse(
-                        frame,
-                        cv2,
-                    )
-                    last_environment_analysis = now
-
                 features, face_landmarks = v3.extract_features(frame, face_mesh)
 
                 if face_landmarks is not None:
@@ -751,14 +637,6 @@ class LiveMonitoringService:
                         "calibration_complete": calibration.complete,
                         "calibration_remaining": round(calibration.remaining(now), 1),
                         "baseline_ear": round(calibration.baseline_ear, 4),
-                        "calibration_mode": calibration.mode,
-                        "calibration_status": calibration.status,
-                        "calibration_required_seconds": (
-                            3.0 if calibration.mode == "quick" else 10.0
-                        ),
-                        "calibration_fallback_reason": calibration.fallback_reason,
-                        "driver_profile_id": calibration.profile_id,
-                        "driver_profile_name": calibration.profile_name,
                         "fps": round(displayed_fps, 1),
                         "critical_duration": round(
                             alert_manager.current_critical_duration,
@@ -772,7 +650,6 @@ class LiveMonitoringService:
                         "eye_risk": round(risk_evidence["eye_risk"], 4),
                         "yawn_risk": round(risk_evidence["yawn_risk"], 4),
                         "tilt_risk": round(risk_evidence["tilt_risk"], 4),
-                        **environment_metrics,
                         "error": None,
                         "log_path": self._log_path,
                     }
