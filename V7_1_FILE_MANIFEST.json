@@ -1,0 +1,51 @@
+{
+  "release": "Guardian OS V7.1 AI Lifecycle Dashboard",
+  "files": {
+    "GUARDIAN_OS_V7_1_AI_LIFECYCLE.md": {
+      "bytes": 955,
+      "sha256": "56d46ae2e5685d07ca935f896fbd746b92e95003a989c78283761f59fdd1b2a2"
+    },
+    "app/main.py": {
+      "bytes": 1845,
+      "sha256": "88b551a0d84e95501e51ad9e484425b085e49a3c1d438e98d50fc17d673d9bfb"
+    },
+    "app/__pycache__/main.cpython-313.pyc": {
+      "bytes": 2899,
+      "sha256": "feac10a12d1ac443d17ca1bad80cf9b2343ea5a1766ccf88586271a2507673a4"
+    },
+    "app/templates/research_lab.html": {
+      "bytes": 7179,
+      "sha256": "908941aad417473d579dd5cba4e06d7a6fd64aba32c9171d00844cc31e9afe7b"
+    },
+    "app/services/research_lab_service.py": {
+      "bytes": 15218,
+      "sha256": "f71b506e095d4e3f77612a5a1a38ac3124c3118d81b9a8c8fb3a2cbeac25b20e"
+    },
+    "app/routers/research_lab.py": {
+      "bytes": 1721,
+      "sha256": "4a8452e85876641fc027f32e67218b02faf70e35d886eb6e97d3e29a5f73afd7"
+    },
+    "app/static/css/app.css": {
+      "bytes": 85401,
+      "sha256": "845cd4d8789c0c91749c4b440ac1480524036d9f582505ab614b0b8132cab9b3"
+    },
+    "app/static/js/research_lab.js": {
+      "bytes": 7225,
+      "sha256": "1733b6ed13dab8f10b6a6523ec8ffee76f911c0f0cec59c4cc15337faa8b2235"
+    },
+    "app/routers/__pycache__/research_lab.cpython-313.pyc": {
+      "bytes": 2977,
+      "sha256": "4b3c8532f8ddcd20bcfa5930184917c661b872b6ef472a5c36164e9a04c03a9b"
+    },
+    "app/services/__pycache__/research_lab_service.cpython-313.pyc": {
+      "bytes": 20292,
+      "sha256": "87d5bea39bb246f611c5f277d035554761a10335bb37e69e0b3e67305858a912"
+    }
+  },
+  "protected_files_not_included": [
+    "app/services/live_monitoring_service.py",
+    "app/static/js/monitoring.js",
+    "app/templates/monitoring.html",
+    "app/services/persistent_calibration.py"
+  ]
+}

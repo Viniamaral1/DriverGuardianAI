@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
@@ -241,6 +242,118 @@ class ResearchLabService:
 
         return result
 
+    def deployment_mode(self) -> dict[str, Any]:
+        mode = str(os.getenv("GUARDIAN_DEPLOYMENT_MODE", "research")).strip().lower()
+        enabled_value = str(os.getenv("GUARDIAN_RESEARCH_ENABLED", "true")).strip().lower()
+        enabled = enabled_value not in {"0", "false", "no", "off"}
+        return {
+            "mode": mode if mode in {"research", "production"} else "research",
+            "research_enabled": enabled,
+            "recommended_public_setting": {
+                "GUARDIAN_DEPLOYMENT_MODE": "production",
+                "GUARDIAN_RESEARCH_ENABLED": "false",
+            },
+            "public_boundary": (
+                "Research Lab should be disabled on a public driver-facing deployment. "
+                "Expose aggregate model-card information only; never publish raw rows, "
+                "participant identifiers, session identifiers or local dataset paths."
+            ),
+        }
+
+    def model_lifecycle(self) -> dict[str, Any]:
+        model_path = (
+            self.root / "models" / "v2" / "ablation"
+            / "driver_guardian_core_behaviour.joblib"
+        )
+        split_root = self.root / "data" / "splits" / "v2"
+        split_status = {
+            name: (split_root / f"{name}.csv").exists()
+            for name in ("train", "calibration", "test")
+        }
+        return {
+            "model_card": {
+                "name": "Driver Guardian Core Behaviour",
+                "family": "Histogram Gradient Boosting classifier",
+                "task": "Binary fatigue-risk classification",
+                "features": ["ear", "yawn_score", "head_tilt"],
+                "target_mapping": {
+                    "Alert": 0,
+                    "Mild Fatigue": 1,
+                    "Moderate Fatigue": 1,
+                },
+                "expected_path": str(model_path),
+                "artifact_available": model_path.exists(),
+                "packaging_note": (
+                    "Model artifacts are intentionally excluded from clean source ZIPs."
+                    if not model_path.exists() else
+                    "The expected trained model artifact is available locally."
+                ),
+            },
+            "training_protocol": {
+                "participant_and_session_aware": True,
+                "train_only_preprocessing": True,
+                "threshold_selected_on_calibration_split": True,
+                "untouched_test_split": True,
+                "deployment_transfer_evaluation": True,
+                "split_files_available": split_status,
+                "source_script": "src/v2/train_ablation_models_v2.py",
+            },
+            "live_decision_layer": {
+                "personal_calibration": True,
+                "temporal_smoothing": True,
+                "controlled_alert_state_machine": True,
+                "explanation": (
+                    "The trained model produces risk evidence. Personal baseline "
+                    "calibration and deterministic temporal logic then create the "
+                    "final operational decision."
+                ),
+            },
+        }
+
+    def deployment_evidence(self) -> dict[str, Any]:
+        reports_dir = self.root / "reports" / "v3"
+        reports: list[dict[str, Any]] = []
+        if reports_dir.exists():
+            for path in sorted(reports_dir.glob("session_report_*.json")):
+                try:
+                    payload = json.loads(path.read_text(encoding="utf-8"))
+                    reports.append(payload)
+                except (OSError, json.JSONDecodeError):
+                    continue
+
+        if not reports:
+            return {
+                "session_count": 0,
+                "total_alerts": 0,
+                "total_duration_seconds": 0.0,
+                "highest_smoothed_risk": 0.0,
+                "dominant_signals": [],
+                "summary": "No local deployment reports are available in this export.",
+            }
+
+        signal_counts: dict[str, int] = {}
+        for report in reports:
+            signal = str(report.get("dominant_risk_signal") or "Unknown")
+            signal_counts[signal] = signal_counts.get(signal, 0) + 1
+
+        dominant = sorted(
+            ({"label": key, "count": value} for key, value in signal_counts.items()),
+            key=lambda item: item["count"],
+            reverse=True,
+        )
+        return {
+            "session_count": len(reports),
+            "total_alerts": sum(int(item.get("alert_count", 0) or 0) for item in reports),
+            "total_duration_seconds": round(sum(float(item.get("duration_seconds", 0) or 0) for item in reports), 2),
+            "highest_smoothed_risk": round(max(float(item.get("maximum_smoothed_probability", 0) or 0) for item in reports), 6),
+            "average_baseline_ear": round(sum(float(item.get("baseline_ear", 0) or 0) for item in reports) / len(reports), 6),
+            "dominant_signals": dominant,
+            "summary": (
+                "Aggregate local deployment evidence from generated session reports. "
+                "These observations are not a substitute for held-out model validation."
+            ),
+        }
+
     def snapshot(self) -> dict[str, Any]:
         with self._lock:
             last = self._last
@@ -249,4 +362,7 @@ class ResearchLabService:
             "last_audit": last,
             "reference": self.reference(),
             "candidate_paths": self.candidate_paths(),
+            "deployment": self.deployment_mode(),
+            "lifecycle": self.model_lifecycle(),
+            "deployment_evidence": self.deployment_evidence(),
         }

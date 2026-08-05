@@ -18,6 +18,11 @@ def status():
 
 @router.post("/audit")
 def audit(payload: AuditRequest):
+    if not _lab.deployment_mode()["research_enabled"]:
+        raise HTTPException(
+            status_code=403,
+            detail="Research Lab is disabled in this deployment.",
+        )
     try:
         return _lab.analyse(payload.dataset_path)
     except FileNotFoundError as error:
@@ -32,6 +37,11 @@ def audit(payload: AuditRequest):
 
 @router.get("/export")
 def export_latest():
+    if not _lab.deployment_mode()["research_enabled"]:
+        raise HTTPException(
+            status_code=403,
+            detail="Research Lab export is disabled in this deployment.",
+        )
     path = ROOT / "guardian_data" / "research_lab" / "latest_research_audit.json"
     if not path.exists():
         raise HTTPException(status_code=404, detail="Run an audit before exporting.")

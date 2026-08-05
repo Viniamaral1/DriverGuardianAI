@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="research-page">
-  <section class="panel research-hero">
+  <section class="panel research-hero lifecycle-hero">
     <div>
-      <p class="eyebrow">GUARDIAN AI RESEARCH LAB</p>
-      <h2>Inspect the evidence behind Guardian’s AI</h2>
+      <p class="eyebrow">GUARDIAN AI LIFECYCLE</p>
+      <h2>From participant evidence to the model running at the edge</h2>
       <p class="muted">
-        Analyse the cleaned participant dataset, compare conditions, inspect
-        feature–target association and identify which future AI models the
-        available evidence can genuinely support.
+        Research Mode documents the dataset, training protocol, validation
+        boundaries, live decision layer and deployment evidence behind Guardian.
+        It is isolated from Monitoring and should be disabled on public deployments.
       </p>
       <form id="research-audit-form" class="research-path-form">
         <label class="field">
@@ -17,53 +17,87 @@
             value="data\processed\driver_guardian_v2_clean.csv"
             placeholder="C:\Users\Vinic\DriverGuardianAI\data\processed\driver_guardian_v2_clean.csv">
         </label>
-        <button class="button primary" type="submit">Run research audit</button>
-        <a class="button secondary" href="/api/research-lab/export">Export latest JSON</a>
+        <button class="button primary" type="submit">Run evidence audit</button>
+        <a class="button secondary" id="research-export" href="/api/research-lab/export">Export latest JSON</a>
       </form>
-      <p class="research-boundary">
-        Research Lab is isolated from live monitoring. It does not modify the
-        camera, model, calibration, profiles, thresholds or alerts.
+      <p class="research-boundary" id="research-deployment-boundary">
+        No raw dataset is exposed by the driver-facing application.
       </p>
     </div>
-    <div class="research-hero-stat">
-      <span>REFERENCE DATASET</span>
-      <strong id="research-reference-rows">39,426</strong>
-      <small>cleaned timestamped observations</small>
+    <div class="research-mode-card">
+      <span>DEPLOYMENT MODE</span>
+      <strong id="research-mode">RESEARCH</strong>
+      <small id="research-mode-status">Research tools enabled locally</small>
     </div>
   </section>
 
-  <section class="research-kpis">
+  <section class="lifecycle-track">
+    <article class="panel lifecycle-stage"><span>01</span><div><small>DATASET</small><b id="life-data">39,426 observations</b></div></article>
+    <i>→</i>
+    <article class="panel lifecycle-stage"><span>02</span><div><small>TRAINING</small><b id="life-training">Core behaviour model</b></div></article>
+    <i>→</i>
+    <article class="panel lifecycle-stage"><span>03</span><div><small>VALIDATION</small><b id="life-validation">Grouped evaluation</b></div></article>
+    <i>→</i>
+    <article class="panel lifecycle-stage"><span>04</span><div><small>EDGE DECISION</small><b id="life-edge">Personal calibration</b></div></article>
+    <i>→</i>
+    <article class="panel lifecycle-stage"><span>05</span><div><small>DEPLOYMENT</small><b id="life-deployment">Local reports</b></div></article>
+  </section>
+
+  <section class="research-kpis lifecycle-kpis">
     <article class="panel"><span>Rows</span><strong id="research-rows">—</strong><small id="research-file">No audit loaded</small></article>
     <article class="panel"><span>Participants</span><strong id="research-participants">—</strong><small>identity groups</small></article>
     <article class="panel"><span>Sessions</span><strong id="research-sessions">—</strong><small>sequence groups</small></article>
-    <article class="panel"><span>Conditions</span><strong id="research-conditions">—</strong><small>recorded contexts</small></article>
-    <article class="panel"><span>Missing cells</span><strong id="research-missing">—</strong><small>dataset completeness</small></article>
+    <article class="panel"><span>Live reports</span><strong id="deployment-sessions">—</strong><small>local deployment evidence</small></article>
+    <article class="panel"><span>Total alerts</span><strong id="deployment-alerts">—</strong><small>across stored reports</small></article>
   </section>
 
-  <section class="research-grid">
+  <section class="research-grid lifecycle-grid">
     <article class="panel research-card">
-      <div class="panel-head"><div><p class="eyebrow">DATASET STRUCTURE</p><h2>Class and condition balance</h2></div></div>
-      <div id="research-distributions" class="research-distributions">
-        <div class="empty-state">Run the audit to inspect distributions.</div>
+      <div class="panel-head"><div><p class="eyebrow">MODEL CARD</p><h2>Current fatigue AI</h2></div><span class="badge" id="model-artifact-badge">CHECKING</span></div>
+      <div class="model-card-grid">
+        <div><span>Name</span><b id="model-name">—</b></div>
+        <div><span>Family</span><b id="model-family">—</b></div>
+        <div><span>Task</span><b id="model-task">—</b></div>
+        <div><span>Features</span><b id="model-features">—</b></div>
       </div>
+      <p class="muted" id="model-packaging-note"></p>
     </article>
 
     <article class="panel research-card">
-      <div class="panel-head"><div><p class="eyebrow">FEATURE ASSOCIATION</p><h2>What is associated with the labels?</h2></div><span class="badge warning">NOT CAUSAL</span></div>
-      <p class="muted">Mutual information is calculated from the dataset. It is not the trained model’s feature importance.</p>
-      <div id="research-association" class="research-bars">
-        <div class="empty-state">No association analysis loaded.</div>
+      <div class="panel-head"><div><p class="eyebrow">TRAINING PROTOCOL</p><h2>Leakage controls</h2></div><span class="badge success">DOCUMENTED</span></div>
+      <div id="training-protocol" class="protocol-list"></div>
+    </article>
+
+    <article class="panel research-card">
+      <div class="panel-head"><div><p class="eyebrow">LIVE DECISION LAYER</p><h2>Model plus safety logic</h2></div></div>
+      <div id="decision-layer" class="decision-pipeline"></div>
+      <p class="muted" id="decision-explanation"></p>
+    </article>
+
+    <article class="panel research-card">
+      <div class="panel-head"><div><p class="eyebrow">DEPLOYMENT EVIDENCE</p><h2>What local sessions show</h2></div><span class="badge warning">NOT VALIDATION</span></div>
+      <div class="deployment-evidence-grid">
+        <div><span>Duration</span><b id="deployment-duration">—</b></div>
+        <div><span>Highest risk</span><b id="deployment-highest-risk">—</b></div>
+        <div><span>Average baseline EAR</span><b id="deployment-baseline">—</b></div>
       </div>
+      <p class="muted" id="deployment-summary"></p>
+    </article>
+
+    <article class="panel research-card">
+      <div class="panel-head"><div><p class="eyebrow">DATASET STRUCTURE</p><h2>Class and condition balance</h2></div></div>
+      <div id="research-distributions" class="research-distributions"><div class="empty-state">Run the audit to inspect distributions.</div></div>
+    </article>
+
+    <article class="panel research-card">
+      <div class="panel-head"><div><p class="eyebrow">DATA ASSOCIATION</p><h2>What is associated with state labels?</h2></div><span class="badge warning">NOT MODEL IMPORTANCE</span></div>
+      <p class="muted">Mutual information describes the dataset. It does not explain an individual live prediction.</p>
+      <div id="research-association" class="research-bars"><div class="empty-state">No association analysis loaded.</div></div>
     </article>
 
     <article class="panel research-card research-wide">
       <div class="panel-head"><div><p class="eyebrow">CONDITION ROBUSTNESS</p><h2>Recorded conditions and signal profiles</h2></div></div>
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead><tr><th>Condition</th><th>Rows</th><th>Participants</th><th>Sessions</th><th>Mean EAR</th><th>Mean yawn</th><th>Mean tilt</th><th>Drowsy share</th></tr></thead>
-          <tbody id="research-condition-table"><tr><td colspan="8">Run the audit to build the condition profile.</td></tr></tbody>
-        </table>
-      </div>
+      <div class="table-wrap"><table class="data-table"><thead><tr><th>Condition</th><th>Rows</th><th>Participants</th><th>Sessions</th><th>Mean EAR</th><th>Mean yawn</th><th>Mean tilt</th><th>Drowsy share</th></tr></thead><tbody id="research-condition-table"><tr><td colspan="8">Run the audit to build the condition profile.</td></tr></tbody></table></div>
     </article>
 
     <article class="panel research-card">
@@ -72,12 +106,11 @@
     </article>
 
     <article class="panel research-card">
-      <div class="panel-head"><div><p class="eyebrow">SCIENTIFIC BOUNDARIES</p><h2>What the data does not prove</h2></div></div>
+      <div class="panel-head"><div><p class="eyebrow">PUBLIC DEPLOYMENT</p><h2>Research-data boundary</h2></div><span class="badge success">PRIVACY</span></div>
       <ul id="research-boundaries" class="research-boundary-list"></ul>
+      <div class="production-command"><span>Recommended public environment</span><code>GUARDIAN_DEPLOYMENT_MODE=production<br>GUARDIAN_RESEARCH_ENABLED=false</code></div>
     </article>
   </section>
 </div>
 {% endblock %}
-{% block scripts %}
-<script src="/static/js/research_lab.js?v=7.0.0"></script>
-{% endblock %}
+{% block scripts %}<script src="/static/js/research_lab.js?v=7.1.0"></script>{% endblock %}
