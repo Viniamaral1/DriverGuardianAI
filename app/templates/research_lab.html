@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="research-page">
+  <section class="panel research-hero">
+    <div>
+      <p class="eyebrow">GUARDIAN AI RESEARCH LAB</p>
+      <h2>Inspect the evidence behind Guardian’s AI</h2>
+      <p class="muted">
+        Analyse the cleaned participant dataset, compare conditions, inspect
+        feature–target association and identify which future AI models the
+        available evidence can genuinely support.
+      </p>
+      <form id="research-audit-form" class="research-path-form">
+        <label class="field">
+          <span>Cleaned dataset CSV</span>
+          <input id="research-dataset-path" name="dataset_path" required
+            value="data\processed\driver_guardian_v2_clean.csv"
+            placeholder="C:\Users\Vinic\DriverGuardianAI\data\processed\driver_guardian_v2_clean.csv">
+        </label>
+        <button class="button primary" type="submit">Run research audit</button>
+        <a class="button secondary" href="/api/research-lab/export">Export latest JSON</a>
+      </form>
+      <p class="research-boundary">
+        Research Lab is isolated from live monitoring. It does not modify the
+        camera, model, calibration, profiles, thresholds or alerts.
+      </p>
+    </div>
+    <div class="research-hero-stat">
+      <span>REFERENCE DATASET</span>
+      <strong id="research-reference-rows">39,426</strong>
+      <small>cleaned timestamped observations</small>
+    </div>
+  </section>
+
+  <section class="research-kpis">
+    <article class="panel"><span>Rows</span><strong id="research-rows">—</strong><small id="research-file">No audit loaded</small></article>
+    <article class="panel"><span>Participants</span><strong id="research-participants">—</strong><small>identity groups</small></article>
+    <article class="panel"><span>Sessions</span><strong id="research-sessions">—</strong><small>sequence groups</small></article>
+    <article class="panel"><span>Conditions</span><strong id="research-conditions">—</strong><small>recorded contexts</small></article>
+    <article class="panel"><span>Missing cells</span><strong id="research-missing">—</strong><small>dataset completeness</small></article>
+  </section>
+
+  <section class="research-grid">
+    <article class="panel research-card">
+      <div class="panel-head"><div><p class="eyebrow">DATASET STRUCTURE</p><h2>Class and condition balance</h2></div></div>
+      <div id="research-distributions" class="research-distributions">
+        <div class="empty-state">Run the audit to inspect distributions.</div>
+      </div>
+    </article>
+
+    <article class="panel research-card">
+      <div class="panel-head"><div><p class="eyebrow">FEATURE ASSOCIATION</p><h2>What is associated with the labels?</h2></div><span class="badge warning">NOT CAUSAL</span></div>
+      <p class="muted">Mutual information is calculated from the dataset. It is not the trained model’s feature importance.</p>
+      <div id="research-association" class="research-bars">
+        <div class="empty-state">No association analysis loaded.</div>
+      </div>
+    </article>
+
+    <article class="panel research-card research-wide">
+      <div class="panel-head"><div><p class="eyebrow">CONDITION ROBUSTNESS</p><h2>Recorded conditions and signal profiles</h2></div></div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Condition</th><th>Rows</th><th>Participants</th><th>Sessions</th><th>Mean EAR</th><th>Mean yawn</th><th>Mean tilt</th><th>Drowsy share</th></tr></thead>
+          <tbody id="research-condition-table"><tr><td colspan="8">Run the audit to build the condition profile.</td></tr></tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="panel research-card">
+      <div class="panel-head"><div><p class="eyebrow">AI READINESS</p><h2>What can be built honestly?</h2></div></div>
+      <div id="research-readiness" class="research-readiness"></div>
+    </article>
+
+    <article class="panel research-card">
+      <div class="panel-head"><div><p class="eyebrow">SCIENTIFIC BOUNDARIES</p><h2>What the data does not prove</h2></div></div>
+      <ul id="research-boundaries" class="research-boundary-list"></ul>
+    </article>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/research_lab.js?v=7.0.0"></script>
+{% endblock %}

@@ -72,6 +72,13 @@ def profiles_page(request: Request):
     )
 
 
+
+
+@router.get("/research-lab")
+def research_lab_page(request: Request):
+    return render(request, "research_lab.html", "research_lab", "AI Research Lab")
+
+
 @router.get("/settings")
 def settings(request: Request):
     return render(request, "settings.html", "settings", "Settings")

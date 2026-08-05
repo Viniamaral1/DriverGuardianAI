@@ -1,16 +1,13 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
-from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from app.routers import camera, commander, diagnostics, edge, intelligence, monitoring, pages, profiles, reports, settings, websocket
+from app.routers import camera, commander, diagnostics, edge, intelligence, monitoring, pages, profiles, reports, research_lab, settings, websocket
 from app.services.app_state import guardian_state
-
-ROOT = Path(__file__).resolve().parents[1]
-APP_DIR = Path(__file__).resolve().parent
+from app.main_paths import ROOT, APP_DIR
 
 
 @asynccontextmanager
@@ -21,8 +18,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Guardian OS V6.3",
-    version="6.3.0",
+    title="Guardian OS V7.0",
+    version="7.0.0",
     description="Automotive driver-monitoring dashboard and Commander interface.",
     lifespan=lifespan,
 )
@@ -38,6 +35,7 @@ app.include_router(intelligence.router, prefix="/api/intelligence", tags=["intel
 app.include_router(profiles.router, prefix="/api/profiles", tags=["profiles"])
 app.include_router(commander.router, prefix="/api/commander", tags=["commander"])
 app.include_router(reports.router, prefix="/api/reports", tags=["reports"])
+app.include_router(research_lab.router, prefix="/api/research-lab", tags=["research-lab"])
 app.include_router(settings.router, prefix="/api/settings", tags=["settings"])
 app.include_router(websocket.router, tags=["websocket"])
 
@@ -46,6 +44,6 @@ app.include_router(websocket.router, tags=["websocket"])
 def health() -> dict:
     return {
         "status": "ok",
-        "application": "Guardian OS V6.3",
-        "version": "6.3.0",
+        "application": "Guardian OS V7.0",
+        "version": "7.0.0",
     }

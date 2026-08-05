@@ -1,0 +1,56 @@
+{
+  "release": "Guardian OS V7.0 AI Research Lab",
+  "files": {
+    "app/main.py": {
+      "bytes": 1845,
+      "sha256": "e98e37498117364aefd91e3e122cd65fa8fb1221ccd5c19dcaa1343b2e33fcd9"
+    },
+    "app/main_paths.py": {
+      "bytes": 110,
+      "sha256": "6368af998b9ff4b8b5c07071ba80250a78a0790adcded151d9950e3ad3bebf83"
+    },
+    "app/routers/pages.py": {
+      "bytes": 2233,
+      "sha256": "2f711ffb57d3bea920885e380a6a5c57f4d144edba3fc0036bb3ef6d50bf47ea"
+    },
+    "app/routers/research_lab.py": {
+      "bytes": 1334,
+      "sha256": "226ce1a88539feb8f49af6ae07af0655e23cbfb9ab4fb52d957364652d16d581"
+    },
+    "app/services/research_lab_service.py": {
+      "bytes": 9894,
+      "sha256": "4040bba92a28ec66323ce90fec6317c7013b3f5db13e901da3ae84c53803b17f"
+    },
+    "app/templates/base.html": {
+      "bytes": 3951,
+      "sha256": "09381e96982de89f0a689f3d7113038fba76af82df33a636f6ae8d8356e3a6bf"
+    },
+    "app/templates/research_lab.html": {
+      "bytes": 4354,
+      "sha256": "ba254f244509f829439e91a36f876cc0b05a29526536c83d578ea486b0af2914"
+    },
+    "app/static/js/research_lab.js": {
+      "bytes": 4211,
+      "sha256": "f92fd1c2a9959fc80bf89c3e834cd7fc6e374555987ab238ae358e90154a4291"
+    },
+    "app/static/css/app.css": {
+      "bytes": 82130,
+      "sha256": "aba563382a7a19d945e101d536219d49c54804957293063f70b15604760bd263"
+    },
+    "guardian_data/research_audit_reference.json": {
+      "bytes": 8229,
+      "sha256": "ce3a06c3d4c5a5ae20184a564c325fa0b422d1fd8c49c67ec85f49d693a46eab"
+    },
+    "GUARDIAN_OS_V7_RESEARCH_LAB.md": {
+      "bytes": 2565,
+      "sha256": "9be438f28439303837003a490fc7aed98e8389a2684fa4e380729c7b39f160d2"
+    }
+  },
+  "protected_not_included": [
+    "app/templates/monitoring.html",
+    "app/static/js/monitoring.js",
+    "app/services/live_monitoring_service.py",
+    "app/services/persistent_calibration.py",
+    "app/services/driver_profile_service.py"
+  ]
+}
