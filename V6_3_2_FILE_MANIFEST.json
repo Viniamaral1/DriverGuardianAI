@@ -1,0 +1,25 @@
+{
+  "release": "Guardian OS V6.3.2 Context Reliability",
+  "files": {
+    "app/services/automatic_context_service.py": {
+      "bytes": 7812,
+      "sha256": "b4b15025b367c793bb640b512e1f7e55edb81a597044a5773061b0c1c2ba1db3"
+    },
+    "app/templates/edge.html": {
+      "bytes": 8616,
+      "sha256": "f7fb6971f5ab63a4b7247f028ddb01c629ead9cdcf9240f0bccbad06b51fdb49"
+    },
+    "app/static/js/edge.js": {
+      "bytes": 10893,
+      "sha256": "41e46ebc6e4461fd55b7d8cded83170747b9303317f6507e1c2954b66b80c0ce"
+    },
+    "app/static/css/app.css": {
+      "bytes": 78417,
+      "sha256": "aec2e8bffbe8513c9287015275ff3205f338f219c9280eee44a66991f53994f9"
+    },
+    "GUARDIAN_OS_V6_3_2_CONTEXT_RELIABILITY.md": {
+      "bytes": 713,
+      "sha256": "8cb1fe073310714b6ba844381c29c38e0364c05ac228f87a76d90570fbe52e0f"
+    }
+  }
+}

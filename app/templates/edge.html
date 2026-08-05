@@ -46,6 +46,7 @@
   </section>
 
   <section class="edge-main-grid">
+    <div class="edge-column">
     <article class="panel edge-insights">
       <div class="panel-head">
         <div><p class="eyebrow">PERSONALISED PATTERNS</p><h2>What Guardian has learned</h2></div>
@@ -71,6 +72,19 @@
       </div>
     </article>
 
+    <article class="panel edge-sessions">
+      <div class="panel-head">
+        <div><p class="eyebrow">RECENT MEMORY</p><h2>Completed sessions</h2></div>
+        <span class="badge" id="edge-recent-count">0 records</span>
+      </div>
+      <div class="edge-session-list" id="edge-session-list">
+        <div class="empty-state">Loading local memory…</div>
+      </div>
+    </article>
+
+    </div>
+
+    <div class="edge-column">
     <article class="panel edge-context">
       <div class="panel-head">
         <div><p class="eyebrow">JOURNEY CONTEXT</p><h2>Current driving conditions</h2></div>
@@ -99,28 +113,41 @@
     <input name="location" maxlength="120" placeholder="Example: London, UK">
   </label>
   <label class="switch-row edge-context-wide">
-    <span><b>Use manual override</b><small>Only enable when you intentionally want to replace automatic values</small></span>
+    <span><b>Use manual override</b><small>Only enable when you intentionally want to replace automatic weather, road and external-light values</small></span>
     <input name="manual_override" type="checkbox"><i></i>
   </label>
-  <label class="field manual-context-field"><span>Weather override</span><select name="weather"><option value="unknown">Unknown</option><option value="clear">Clear</option><option value="cloudy">Cloudy</option><option value="rain">Rain</option><option value="snow">Snow</option><option value="fog">Fog</option></select></label>
-  <label class="field manual-context-field"><span>Road override</span><select name="road_condition"><option value="unknown">Unknown</option><option value="dry">Dry</option><option value="wet">Wet</option><option value="snow_or_ice">Snow or ice</option></select></label>
-  <label class="field manual-context-field"><span>External-light override</span><select name="external_light"><option value="unknown">Unknown</option><option value="daylight">Daylight</option><option value="dusk">Dusk</option><option value="night">Night</option><option value="bright_glare">Bright glare</option></select></label>
-  <label class="field"><span>Cabin light note</span><select name="cabin_light"><option value="unknown">Unknown</option><option value="normal">Normal</option><option value="low_light">Low light</option><option value="too_bright">Too bright</option></select></label>
-  <label class="field"><span>Face or eye occlusion</span><select name="occlusion"><option value="none">None</option><option value="glasses">Glasses</option><option value="sunglasses">Sunglasses</option><option value="hat">Hat</option><option value="glasses_and_hat">Glasses and hat</option></select></label>
-  <label class="field edge-notes"><span>Optional note</span><input name="notes" maxlength="240" placeholder="Example: unusual conditions during this journey"></label>
-  <button class="button primary" type="submit">Save context settings</button>
+
+  <div class="manual-override-inactive edge-context-wide" id="manual-override-inactive">
+    <strong>Automatic context is active</strong>
+    <span>
+      Weather, road condition and external light come from the automatic system.
+      Previous manual selections are stored but are not being used.
+    </span>
+  </div>
+
+  <div class="manual-override-fields edge-context-wide" id="manual-override-fields">
+    <label class="field"><span>Weather override</span><select name="weather"><option value="unknown">Unknown</option><option value="clear">Clear</option><option value="cloudy">Cloudy</option><option value="rain">Rain</option><option value="snow">Snow</option><option value="fog">Fog</option></select></label>
+    <label class="field"><span>Road override</span><select name="road_condition"><option value="unknown">Unknown</option><option value="dry">Dry</option><option value="wet">Wet</option><option value="snow_or_ice">Snow or ice</option></select></label>
+    <label class="field"><span>External-light override</span><select name="external_light"><option value="unknown">Unknown</option><option value="daylight">Daylight</option><option value="dusk">Dusk</option><option value="night">Night</option><option value="bright_glare">Bright glare</option></select></label>
+  </div>
+
+  <label class="field">
+    <span>Cabin light <small class="field-source-label">Manual note</small></span>
+    <select name="cabin_light"><option value="unknown">Unknown</option><option value="normal">Normal</option><option value="low_light">Low light</option><option value="too_bright">Too bright</option></select>
+  </label>
+  <label class="field">
+    <span>Face or eye occlusion <small class="field-source-label">Manual note</small></span>
+    <select name="occlusion"><option value="none">None</option><option value="glasses">Glasses</option><option value="sunglasses">Sunglasses</option><option value="hat">Hat</option><option value="glasses_and_hat">Glasses and hat</option></select>
+  </label>
+  <label class="field edge-notes"><span>Optional manual note</span><input name="notes" maxlength="240" placeholder="Example: unusual conditions during this journey"></label>
+
+  <div class="edge-context-actions edge-context-wide">
+    <button class="button primary" id="edge-save-context" type="submit">Save and refresh automatic context</button>
+    <button class="button secondary" id="edge-clear-manual-context" type="button">Clear manual context</button>
+  </div>
 </form>
     </article>
 
-    <article class="panel edge-sessions">
-      <div class="panel-head">
-        <div><p class="eyebrow">RECENT MEMORY</p><h2>Completed sessions</h2></div>
-        <span class="badge" id="edge-recent-count">0 records</span>
-      </div>
-      <div class="edge-session-list" id="edge-session-list">
-        <div class="empty-state">Loading local memory…</div>
-      </div>
-    </article>
 
     <article class="panel edge-sync">
       <div class="panel-head">
@@ -143,7 +170,8 @@
         Mark pending records as synced
       </button>
     </article>
+    </div>
   </section>
 </div>
 {% endblock %}
-{% block scripts %}<script src="/static/js/edge.js?v=6.3.0"></script>{% endblock %}
+{% block scripts %}<script src="/static/js/edge.js?v=6.3.3"></script>{% endblock %}

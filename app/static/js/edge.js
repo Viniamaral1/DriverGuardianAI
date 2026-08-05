@@ -1,6 +1,15 @@
 const edgeEl = id => document.getElementById(id);
 let edgeSnapshot = null;
 
+async function edgeApiError(response, fallback) {
+  try {
+    const payload = await response.json();
+    return payload.detail || fallback;
+  } catch (_) {
+    return fallback;
+  }
+}
+
 const edgePercent = value => `${(Number(value || 0) * 100).toFixed(1)}%`;
 
 function edgeDuration(seconds) {
@@ -24,16 +33,22 @@ function edgeDate(value) {
   });
 }
 
+function setManualOverrideVisibility(enabled) {
+  edgeEl("manual-override-inactive")?.classList.toggle("hidden", enabled);
+  edgeEl("manual-override-fields")?.classList.toggle("visible", enabled);
+}
+
 function setContextForm(context) {
   const form = edgeEl("edge-context-form");
   Object.entries(context || {}).forEach(([key, value]) => {
     if (!form.elements[key]) return;
-    if (form.elements[key].type === "checkbox") form.elements[key].checked = Boolean(value);
-    else form.elements[key].value = value ?? "";
+    if (form.elements[key].type === "checkbox") {
+      form.elements[key].checked = Boolean(value);
+    } else {
+      form.elements[key].value = value ?? "";
+    }
   });
-  document.querySelectorAll(".manual-context-field").forEach(field => {
-    field.classList.toggle("context-disabled", !form.elements.manual_override.checked);
-  });
+  setManualOverrideVisibility(Boolean(form.elements.manual_override.checked));
 }
 
 function contextAge(seconds) {
@@ -44,13 +59,36 @@ function contextAge(seconds) {
 
 function renderAutomaticContext(context) {
   const automatic = context.automatic_weather || {};
-  edgeEl("auto-weather-value").textContent = String((context.weather || {}).value || "unknown").replaceAll("_", " ");
-  edgeEl("auto-weather-source").textContent = `${(context.weather || {}).source || "Unknown"}${automatic.location ? ` · ${automatic.location}` : ""}`;
-  edgeEl("auto-road-value").textContent = String((context.road_condition || {}).value || "unknown").replaceAll("_", " ");
-  edgeEl("auto-road-source").textContent = (context.road_condition || {}).source || "Unknown";
-  edgeEl("auto-temperature").textContent = automatic.temperature_c === null || automatic.temperature_c === undefined ? "—" : `${Number(automatic.temperature_c).toFixed(1)}°C`;
-  edgeEl("auto-weather-age").textContent = automatic.error || contextAge(automatic.age_seconds);
-  edgeEl("automatic-context-status").dataset.state = automatic.available ? (automatic.fresh ? "fresh" : "stale") : "offline";
+  const weather = context.weather || {};
+  const road = context.road_condition || {};
+
+  edgeEl("auto-weather-value").textContent =
+    String(weather.value || "unknown").replaceAll("_", " ");
+  edgeEl("auto-weather-source").textContent =
+    `${weather.source || "Unknown"}${automatic.location ? ` · ${automatic.location}` : ""}`;
+
+  edgeEl("auto-road-value").textContent =
+    String(road.value || "unknown").replaceAll("_", " ");
+  edgeEl("auto-road-source").textContent = road.source || "Unknown";
+
+  edgeEl("auto-temperature").textContent =
+    automatic.temperature_c === null || automatic.temperature_c === undefined
+      ? "—"
+      : `${Number(automatic.temperature_c).toFixed(1)}°C`;
+
+  edgeEl("auto-weather-age").textContent =
+    automatic.error || contextAge(automatic.age_seconds);
+
+  edgeEl("automatic-context-status").dataset.state =
+    automatic.available ? (automatic.fresh ? "fresh" : "stale") : "offline";
+
+  const refreshButton = edgeEl("edge-refresh-weather");
+  const automaticEnabled = Boolean(context.automatic_enabled);
+  const hasLocation = Boolean(String(context.location || "").trim());
+  refreshButton.disabled = !(automaticEnabled && hasLocation);
+  refreshButton.title = refreshButton.disabled
+    ? "Enable automatic weather and enter a location first"
+    : "Refresh the configured location now";
 }
 
 function renderEdge(snapshot) {
@@ -144,42 +182,94 @@ edgeEl("edge-refresh").addEventListener("click", async () => {
 edgeEl("edge-context-form").addEventListener("submit", async event => {
   event.preventDefault();
   const form = event.currentTarget;
+  const saveButton = edgeEl("edge-save-context");
   const payload = Object.fromEntries(new FormData(form).entries());
-  payload.automatic_enabled = form.elements.automatic_enabled.checked;
-  payload.manual_override = form.elements.manual_override.checked;
+  payload.automatic_enabled = Boolean(form.elements.automatic_enabled.checked);
+  payload.manual_override = Boolean(form.elements.manual_override.checked);
 
+  saveButton.disabled = true;
   try {
     const response = await fetch("/api/edge/context", {
       method: "PUT",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify(payload),
     });
-    if (!response.ok) throw new Error(await response.text());
+    if (!response.ok) {
+      throw new Error(await edgeApiError(response, "Journey context could not be saved."));
+    }
+
     const result = await response.json();
     renderEdge(result.snapshot);
-    DG.toast("Journey context saved locally", "success");
+    DG.toast(
+      result.context?.automatic_weather?.available
+        ? "Context saved and current weather updated"
+        : "Context settings saved; weather is currently unavailable",
+      "success"
+    );
   } catch (error) {
-    DG.toast("Journey context could not be saved", "error");
+    DG.toast(error.message || "Journey context could not be saved", "error");
     console.error(error);
+  } finally {
+    saveButton.disabled = false;
   }
 });
 
 edgeEl("edge-refresh-weather").addEventListener("click", async event => {
+  const button = event.currentTarget;
+  button.disabled = true;
+  try {
+    const response = await fetch("/api/edge/context/refresh-weather", {method: "POST"});
+    if (!response.ok) {
+      throw new Error(await edgeApiError(response, "Automatic weather refresh failed."));
+    }
+    const result = await response.json();
+    renderEdge(result.snapshot);
+    DG.toast(
+      result.context?.automatic_weather?.available
+        ? "Current weather refreshed"
+        : "Weather unavailable; saved settings were kept",
+      result.context?.automatic_weather?.available ? "success" : "warning"
+    );
+  } catch (error) {
+    DG.toast(error.message || "Automatic weather refresh failed", "error");
+    console.error(error);
+  } finally {
+    button.disabled = false;
+    await loadEdge();
+  }
+});
+
+edgeEl("edge-context-form").elements.automatic_enabled.addEventListener(
+  "change",
+  event => {
+    const location = edgeEl("edge-context-form").elements.location.value.trim();
+    edgeEl("edge-refresh-weather").disabled = !(event.currentTarget.checked && location);
+  }
+);
+
+edgeEl("edge-context-form").elements.location.addEventListener("input", event => {
+  const enabled = edgeEl("edge-context-form").elements.automatic_enabled.checked;
+  edgeEl("edge-refresh-weather").disabled = !(enabled && event.currentTarget.value.trim());
+});
+
+edgeEl("edge-context-form").elements.manual_override.addEventListener(
+  "change",
+  event => setManualOverrideVisibility(Boolean(event.currentTarget.checked))
+);
+
+edgeEl("edge-clear-manual-context").addEventListener("click", async event => {
   event.currentTarget.disabled = true;
   try {
-    const result = await DG.post("/api/edge/context/refresh-weather");
+    const result = await DG.post("/api/edge/context/clear-manual");
     renderEdge(result.snapshot);
-    DG.toast(result.context.automatic_weather?.available ? "Current weather refreshed" : "Weather unavailable; context set to Unknown", result.context.automatic_weather?.available ? "success" : "warning");
+    await loadEdge();
+    DG.toast("Manual journey context cleared", "success");
   } catch (error) {
-    DG.toast("Automatic weather refresh failed", "error");
+    DG.toast("Manual context could not be cleared", "error");
     console.error(error);
   } finally {
     event.currentTarget.disabled = false;
   }
-});
-
-edgeEl("edge-context-form").elements.manual_override.addEventListener("change", event => {
-  document.querySelectorAll(".manual-context-field").forEach(field => field.classList.toggle("context-disabled", !event.currentTarget.checked));
 });
 
 edgeEl("edge-mark-synced").addEventListener("click", async () => {

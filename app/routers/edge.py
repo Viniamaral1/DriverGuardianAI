@@ -50,13 +50,42 @@ def refresh():
 
 @router.put("/context")
 def update_context(payload: ContextUpdate):
-    context = service().set_context(payload.model_dump(exclude_none=True))
+    updates = payload.model_dump(exclude_none=True)
+    context = service().set_context(updates)
+
+    resolved = service().resolved_context(
+        force_weather=bool(
+            context.get("automatic_enabled", True)
+            and str(context.get("location", "") or "").strip()
+        )
+    )
+
     guardian_state.add_event(
         "CONTEXT",
-        "Journey context updated locally",
+        "Journey context updated and automatic values refreshed",
         "success",
     )
-    return {"context": context, "snapshot": service().snapshot()}
+    return {
+        "context": resolved,
+        "manual_context": context,
+        "snapshot": service().snapshot(),
+    }
+
+
+@router.post("/context/clear-manual")
+def clear_manual_context():
+    manual = service().clear_manual_context()
+    resolved = service().resolved_context(force_weather=False)
+    guardian_state.add_event(
+        "CONTEXT",
+        "Manual journey context cleared",
+        "info",
+    )
+    return {
+        "manual_context": manual,
+        "context": resolved,
+        "snapshot": service().snapshot(),
+    }
 
 
 @router.post("/context/refresh-weather")

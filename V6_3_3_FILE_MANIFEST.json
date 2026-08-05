@@ -1,0 +1,17 @@
+{
+  "release": "Guardian OS V6.3.3 Edge Layout Balance",
+  "files": {
+    "app/templates/edge.html": {
+      "bytes": 8617,
+      "sha256": "c815f7e63d44ddf6a31002660c597fbfba7f3f9913556ce8a7cbefa0429fd303"
+    },
+    "app/static/css/app.css": {
+      "bytes": 79154,
+      "sha256": "ab86ca22bad025549dda4d50428f0ea7e1d8166de34cb84374f67cb1a13c30d9"
+    },
+    "GUARDIAN_OS_V6_3_3_EDGE_LAYOUT.md": {
+      "bytes": 433,
+      "sha256": "171ec0427f4179436ec8b4706b6e20f9804c3621dfb90fa92ebd477d75760441"
+    }
+  }
+}

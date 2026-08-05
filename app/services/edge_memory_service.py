@@ -189,6 +189,25 @@ class EdgeMemoryService:
             return dict(context)
 
 
+    def clear_manual_context(self) -> dict[str, Any]:
+        """Clear optional manual context without touching automatic settings."""
+        with self._lock:
+            context = self._data.setdefault("context", {})
+            context.update(
+                {
+                    "manual_override": False,
+                    "weather": "unknown",
+                    "road_condition": "unknown",
+                    "external_light": "unknown",
+                    "cabin_light": "unknown",
+                    "occlusion": "none",
+                    "notes": "",
+                    "updated_at": self._now(),
+                }
+            )
+            self._save()
+            return dict(context)
+
     def resolved_context(self, force_weather: bool = False) -> dict[str, Any]:
         with self._lock:
             manual = dict(self._data.get("context", {}))

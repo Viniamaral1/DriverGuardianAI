@@ -92,7 +92,8 @@ class AutomaticContextService:
         precipitation = float(current.get("precipitation", 0) or 0)
         snowfall = float(current.get("snowfall", 0) or 0)
         temperature = float(current.get("temperature_2m", 0) or 0)
-        weather_code = int(current.get("weather_code", -1) or -1)
+        raw_weather_code = current.get("weather_code")
+        weather_code = -1 if raw_weather_code is None else int(raw_weather_code)
         weather = self._weather_label(weather_code, precipitation, snowfall)
         is_day = int(current.get("is_day", 1) or 0)
         external_light = "daylight" if is_day else "night"
