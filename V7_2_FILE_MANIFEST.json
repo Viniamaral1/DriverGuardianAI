@@ -1,0 +1,46 @@
+{
+  "release": "Guardian OS V7.2 Model Evaluation Engine",
+  "files": {
+    "app/main.py": {
+      "bytes": 1845,
+      "sha256": "beb2e3fc5d26637a6a742809a8471b4f813924e4fe78f12e90c4872cd959331f"
+    },
+    "app/routers/research_lab.py": {
+      "bytes": 3847,
+      "sha256": "1561ebf7e2f548b29b3af6d8b5cc632935a726a4e551861cacc85b01b1054ac0"
+    },
+    "app/services/model_evaluation_service.py": {
+      "bytes": 16450,
+      "sha256": "0e94e98d8e79c57eaac671b3b5c6eee5f96ce59c935bb1d019a1a18696f5731e"
+    },
+    "app/templates/research_lab.html": {
+      "bytes": 11637,
+      "sha256": "418feaf333828c86109f1c0635475a9b943996831e769104b1099ffcc52b969e"
+    },
+    "app/static/js/research_lab.js": {
+      "bytes": 13448,
+      "sha256": "29dda27116511923dad0ae1f0e229876e03e4685c7ebf69ff8e2ad6c677293d1"
+    },
+    "app/static/css/app.css": {
+      "bytes": 88338,
+      "sha256": "8814cd5fe939e203d5c9863b427d607a7cdd82ba186a51088f8070f97dc106be"
+    },
+    "GUARDIAN_OS_V7_2_MODEL_EVALUATION.md": {
+      "bytes": 2011,
+      "sha256": "b3e60aa8f53a240edc8e751f96fc48793f961a302051d0e1bf1df03d5cfe455f"
+    }
+  },
+  "protected_files_not_included": [
+    "app/services/live_monitoring_service.py",
+    "app/templates/monitoring.html",
+    "app/static/js/monitoring.js",
+    "app/services/persistent_calibration.py",
+    "app/services/driver_profile_service.py"
+  ],
+  "validation": {
+    "python_syntax": "passed",
+    "javascript_syntax": "passed",
+    "synthetic_model_evaluation": "passed",
+    "application_routes": "passed"
+  }
+}

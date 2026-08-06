@@ -1,0 +1,17 @@
+{
+  "release": "Guardian OS V7.2.1",
+  "files": {
+    "app/services/model_evaluation_service.py": {
+      "bytes": 17442,
+      "sha256": "0167c2118ba2317bdb2adad5ad5719abb8dab5963f883cd632cdb449379e8aac"
+    },
+    "app/static/js/research_lab.js": {
+      "bytes": 13848,
+      "sha256": "357e19e3cd6819da4e910677887c75bb524cf1b0fc6bbc317cb5c2f6bc8d1926"
+    },
+    "GUARDIAN_OS_V7_2_1_EVALUATION_JSON_FIX.md": {
+      "bytes": 631,
+      "sha256": "d1b2492ce735ace4b43dd81549cea83d85cdb24ec29038a7faf79796ab8345cf"
+    }
+  }
+}

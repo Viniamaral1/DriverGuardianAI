@@ -100,6 +100,113 @@
       <div class="table-wrap"><table class="data-table"><thead><tr><th>Condition</th><th>Rows</th><th>Participants</th><th>Sessions</th><th>Mean EAR</th><th>Mean yawn</th><th>Mean tilt</th><th>Drowsy share</th></tr></thead><tbody id="research-condition-table"><tr><td colspan="8">Run the audit to build the condition profile.</td></tr></tbody></table></div>
     </article>
 
+<article class="panel research-card research-wide evaluation-engine-card">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">MODEL EVALUATION ENGINE</p>
+      <h2>Rerun the held-out evidence</h2>
+    </div>
+    <span class="badge" id="evaluation-status-badge">NOT RUN</span>
+  </div>
+
+  <p class="muted">
+    Load the saved core-behaviour model and the original participant-aware
+    split files. Guardian calculates reproducible held-out metrics without
+    changing the live monitoring pipeline.
+  </p>
+
+  <form id="evaluation-form" class="evaluation-path-grid">
+    <label class="field evaluation-wide">
+      <span>Saved model bundle</span>
+      <input id="evaluation-model-path" required
+        value="models\v2\ablation\driver_guardian_core_behaviour.joblib"
+        placeholder="C:\Users\Vinic\DriverGuardianAI\models\v2\ablation\driver_guardian_core_behaviour.joblib">
+    </label>
+    <label class="field">
+      <span>Held-out test split</span>
+      <input id="evaluation-test-path" required
+        value="data\splits\v2\test.csv"
+        placeholder="C:\Users\Vinic\DriverGuardianAI\data\splits\v2\test.csv">
+    </label>
+    <label class="field">
+      <span>Calibration split <small class="field-source-label">Optional</small></span>
+      <input id="evaluation-calibration-path"
+        value="data\splits\v2\calibration.csv"
+        placeholder="C:\Users\Vinic\DriverGuardianAI\data\splits\v2\calibration.csv">
+    </label>
+    <div class="button-row evaluation-wide">
+      <button class="button primary" type="submit">Run held-out evaluation</button>
+      <a class="button secondary disabled" id="evaluation-export"
+        href="/api/research-lab/evaluation/export">Export evaluation JSON</a>
+    </div>
+  </form>
+
+  <div class="evaluation-metrics-grid">
+    <div><span>Balanced accuracy</span><b id="eval-balanced-accuracy">—</b></div>
+    <div><span>Accuracy</span><b id="eval-accuracy">—</b></div>
+    <div><span>Precision</span><b id="eval-precision">—</b></div>
+    <div><span>Recall</span><b id="eval-recall">—</b></div>
+    <div><span>F1 score</span><b id="eval-f1">—</b></div>
+    <div><span>ROC-AUC</span><b id="eval-roc-auc">—</b></div>
+  </div>
+
+  <div class="evaluation-detail-grid">
+    <section>
+      <h3>Confusion matrix</h3>
+      <div class="confusion-matrix" id="evaluation-confusion">
+        <div><small>True normal</small><b>—</b></div>
+        <div><small>False alert</small><b>—</b></div>
+        <div><small>Missed fatigue</small><b>—</b></div>
+        <div><small>True fatigue</small><b>—</b></div>
+      </div>
+    </section>
+    <section>
+      <h3>Evaluation contract</h3>
+      <div class="evaluation-contract" id="evaluation-contract">
+        <div><span>Model</span><b>—</b></div>
+        <div><span>Features</span><b>—</b></div>
+        <div><span>Threshold</span><b>—</b></div>
+        <div><span>Test rows</span><b>—</b></div>
+      </div>
+    </section>
+  </div>
+</article>
+
+<article class="panel research-card research-wide">
+  <div class="panel-head">
+    <div><p class="eyebrow">CONDITION PERFORMANCE</p><h2>Does the model remain reliable?</h2></div>
+    <span class="badge warning">HELD-OUT TEST</span>
+  </div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Condition</th><th>Rows</th><th>Balanced accuracy</th><th>Precision</th><th>Recall</th><th>F1</th><th>False positives</th><th>False negatives</th></tr></thead>
+      <tbody id="evaluation-condition-table"><tr><td colspan="8">Run the model evaluation to compare conditions.</td></tr></tbody>
+    </table>
+  </div>
+</article>
+
+<article class="panel research-card">
+  <div class="panel-head">
+    <div><p class="eyebrow">PARTICIPANT ROBUSTNESS</p><h2>Held-out group variation</h2></div>
+  </div>
+  <div id="evaluation-participant-bars" class="research-bars">
+    <div class="empty-state">No participant evaluation loaded.</div>
+  </div>
+</article>
+
+<article class="panel research-card">
+  <div class="panel-head">
+    <div><p class="eyebrow">PROBABILITY CALIBRATION</p><h2>Confidence versus observed outcomes</h2></div>
+  </div>
+  <div id="evaluation-calibration-bars" class="calibration-bars">
+    <div class="empty-state">No probability calibration loaded.</div>
+  </div>
+  <p class="muted">
+    A well-calibrated model has predicted probability close to the observed
+    fatigue rate. This does not include the live personal-baseline adjustment.
+  </p>
+</article>
+
     <article class="panel research-card">
       <div class="panel-head"><div><p class="eyebrow">AI READINESS</p><h2>What can be built honestly?</h2></div></div>
       <div id="research-readiness" class="research-readiness"></div>
@@ -113,4 +220,4 @@
   </section>
 </div>
 {% endblock %}
-{% block scripts %}<script src="/static/js/research_lab.js?v=7.1.0"></script>{% endblock %}
+{% block scripts %}<script src="/static/js/research_lab.js?v=7.2.0"></script>{% endblock %}

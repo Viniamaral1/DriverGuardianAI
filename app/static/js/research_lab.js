@@ -105,3 +105,168 @@ researchEl("research-audit-form")?.addEventListener("submit", async event => {
 });
 
 loadResearchStatus().catch(error => console.error(error));
+async function evaluationResponsePayload(response) {
+  const text = await response.text();
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch (_) {
+    return {
+      detail: text.startsWith("Internal Server Error")
+        ? "Guardian returned an invalid evaluation response. Install the V7.2.1 compatibility fix and run again."
+        : text,
+    };
+  }
+}
+
+function metricValue(value) {
+  return value === null || value === undefined ? "—" : pct(value);
+}
+
+function renderConfusion(matrix) {
+  const values = [
+    ["True normal", matrix?.true_negative],
+    ["False alert", matrix?.false_positive],
+    ["Missed fatigue", matrix?.false_negative],
+    ["True fatigue", matrix?.true_positive],
+  ];
+  researchEl("evaluation-confusion").innerHTML = values
+    .map(([name, value]) => `<div><small>${name}</small><b>${fmt(value)}</b></div>`)
+    .join("");
+}
+
+function renderEvaluation(result) {
+  if (!result?.available) return;
+
+  const metrics = result.metrics || {};
+  const model = result.model || {};
+  const split = result.test_split || {};
+
+  researchEl("evaluation-status-badge").textContent = "EVALUATED";
+  researchEl("evaluation-status-badge").className = "badge success";
+  researchEl("evaluation-export").classList.remove("disabled");
+
+  researchEl("eval-balanced-accuracy").textContent =
+    metricValue(metrics.balanced_accuracy);
+  researchEl("eval-accuracy").textContent = metricValue(metrics.accuracy);
+  researchEl("eval-precision").textContent = metricValue(metrics.precision);
+  researchEl("eval-recall").textContent = metricValue(metrics.recall);
+  researchEl("eval-f1").textContent = metricValue(metrics.f1);
+  researchEl("eval-roc-auc").textContent = metricValue(metrics.roc_auc);
+
+  renderConfusion(metrics.confusion_matrix || {});
+
+  researchEl("evaluation-contract").innerHTML = `
+    <div><span>Model</span><b>${model.name || "—"}</b></div>
+    <div><span>Features</span><b>${(model.features || []).join(", ") || "—"}</b></div>
+    <div><span>Threshold</span><b>${Number(model.saved_threshold ?? 0.5).toFixed(3)}</b></div>
+    <div><span>Test rows</span><b>${fmt(split.rows)}</b></div>
+  `;
+
+  const conditions = result.condition_performance || [];
+  researchEl("evaluation-condition-table").innerHTML = conditions.length
+    ? conditions.map(row => `
+      <tr>
+        <td><b>${label(row.label)}</b></td>
+        <td>${fmt(row.rows)}</td>
+        <td>${metricValue(row.balanced_accuracy)}</td>
+        <td>${metricValue(row.precision)}</td>
+        <td>${metricValue(row.recall)}</td>
+        <td>${metricValue(row.f1)}</td>
+        <td>${fmt(row.confusion_matrix?.false_positive)}</td>
+        <td>${fmt(row.confusion_matrix?.false_negative)}</td>
+      </tr>
+    `).join("")
+    : `<tr><td colspan="8">The test split does not include a condition column.</td></tr>`;
+
+  const participants = (result.participant_performance || [])
+    .sort((a, b) => Number(b.rows || 0) - Number(a.rows || 0));
+  researchEl("evaluation-participant-bars").innerHTML = participants.length
+    ? participants.map(row => `
+      <div class="research-bar">
+        <div><span>${row.label}</span><b>${metricValue(row.balanced_accuracy)}</b></div>
+        <div class="meter"><i style="width:${Math.min(100, Number(row.balanced_accuracy || 0) * 100)}%"></i></div>
+        <small>${fmt(row.rows)} rows · F1 ${metricValue(row.f1)}</small>
+      </div>
+    `).join("")
+    : `<div class="empty-state">No participant column was found in the test split.</div>`;
+
+  const calibration = result.probability_calibration || [];
+  researchEl("evaluation-calibration-bars").innerHTML = calibration.length
+    ? calibration.map(row => `
+      <div class="calibration-row">
+        <span>${Number(row.lower).toFixed(1)}–${Number(row.upper).toFixed(1)}</span>
+        <div>
+          <i style="width:${Math.min(100, Number(row.mean_probability || 0) * 100)}%"></i>
+          <em style="left:${Math.min(100, Number(row.observed_positive_rate || 0) * 100)}%"></em>
+        </div>
+        <small>predicted ${pct(row.mean_probability)} · observed ${pct(row.observed_positive_rate)} · ${fmt(row.rows)} rows</small>
+      </div>
+    `).join("")
+    : `<div class="empty-state">No calibration bins are available.</div>`;
+}
+
+async function loadEvaluationStatus() {
+  try {
+    const response = await fetch("/api/research-lab/evaluation", {cache:"no-store"});
+    if (!response.ok) return;
+    const status = await response.json();
+    const candidates = status.candidate_paths || {};
+
+    const setCandidate = (id, values) => {
+      const input = researchEl(id);
+      if (!input || !values?.length) return;
+      const existing = input.value.trim();
+      if (!existing || existing.startsWith("data\\") || existing.startsWith("models\\")) {
+        input.value = values.find(value => value) || existing;
+      }
+    };
+
+    setCandidate("evaluation-model-path", candidates.model);
+    setCandidate("evaluation-test-path", candidates.test);
+    setCandidate("evaluation-calibration-path", candidates.calibration);
+
+    if (status.export_available) {
+      researchEl("evaluation-export").classList.remove("disabled");
+    }
+    if (status.last_evaluation) renderEvaluation(status.last_evaluation);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+researchEl("evaluation-form")?.addEventListener("submit", async event => {
+  event.preventDefault();
+  const button = event.currentTarget.querySelector('button[type="submit"]');
+  button.disabled = true;
+  researchEl("evaluation-status-badge").textContent = "RUNNING";
+  researchEl("evaluation-status-badge").className = "badge warning";
+
+  try {
+    const response = await fetch("/api/research-lab/evaluation", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        model_path: researchEl("evaluation-model-path").value.trim(),
+        test_path: researchEl("evaluation-test-path").value.trim(),
+        calibration_path:
+          researchEl("evaluation-calibration-path").value.trim() || null,
+      }),
+    });
+    const payload = await evaluationResponsePayload(response);
+    if (!response.ok) {
+      throw new Error(payload.detail || "Model evaluation failed.");
+    }
+    renderEvaluation(payload);
+    DG.toast("Held-out model evaluation completed", "success");
+  } catch (error) {
+    researchEl("evaluation-status-badge").textContent = "FAILED";
+    researchEl("evaluation-status-badge").className = "badge danger";
+    DG.toast(error.message || "Model evaluation failed", "error");
+    console.error(error);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+loadEvaluationStatus();
