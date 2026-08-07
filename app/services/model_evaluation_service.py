@@ -11,7 +11,7 @@ from typing import Any
 class ModelEvaluationService:
     """Reproducible held-out evaluation for Guardian's saved model bundle."""
 
-    TARGET_CANDIDATES = ("state", "binary_target", "target", "fatigue_level")
+    TARGET_CANDIDATES = ("fatigue_level", "binary_target", "target", "state")
     PARTICIPANT_CANDIDATES = ("participant_id", "participant")
     SESSION_CANDIDATES = ("session_id", "session")
     CONDITION_CANDIDATES = ("condition",)
@@ -53,7 +53,11 @@ class ModelEvaluationService:
                 parse_constant=lambda _value: None,
             )
             if isinstance(payload, dict):
-                self._last = self._json_safe(payload)
+                payload = self._json_safe(payload)
+                target_column = str(
+                    (payload.get("test_split") or {}).get("target_column") or ""
+                ).strip().casefold()
+                self._last = None if target_column == "state" else payload
         except (OSError, json.JSONDecodeError):
             self._last = None
 
@@ -83,7 +87,7 @@ class ModelEvaluationService:
             "available": True,
             "candidate_paths": self.candidate_paths(),
             "last_evaluation": self._last,
-            "export_available": self.output_path.exists(),
+            "export_available": self._last is not None and self.output_path.exists(),
         }
 
     def _resolve(self, value: str, label: str, suffix: str) -> Path:
@@ -105,34 +109,53 @@ class ModelEvaluationService:
         return None
 
     @staticmethod
-    def _normalise_target(series: Any) -> tuple[Any, dict[str, int]]:
+    def _normalise_target(
+        series: Any,
+        saved_mapping: dict[str, Any] | None = None,
+    ) -> tuple[Any, dict[str, int]]:
         import pandas as pd
+
+        if saved_mapping:
+            clean_mapping = {
+                str(label).strip().casefold(): int(value)
+                for label, value in saved_mapping.items()
+            }
+            text = series.fillna("").astype(str).str.strip().str.casefold()
+            unknown = sorted(set(text.unique()) - set(clean_mapping))
+            if not unknown:
+                return text.map(clean_mapping).astype(int), {
+                    str(label): int(value)
+                    for label, value in saved_mapping.items()
+                }
 
         numeric = pd.to_numeric(series, errors="coerce")
         if numeric.notna().all():
             unique = sorted(set(int(value) for value in numeric.unique()))
             if set(unique).issubset({0, 1}):
-                return numeric.astype(int), {str(value): int(value) for value in unique}
+                return numeric.astype(int), {
+                    str(value): int(value) for value in unique
+                }
 
         mapping = {
-            "normal": 0,
             "alert": 0,
+            "normal": 0,
             "awake": 0,
             "non-fatigue": 0,
             "non fatigue": 0,
             "0": 0,
-            "drowsy": 1,
-            "fatigue": 1,
             "mild fatigue": 1,
             "moderate fatigue": 1,
             "severe fatigue": 1,
+            "drowsy": 1,
+            "fatigue": 1,
             "1": 1,
         }
         text = series.fillna("").astype(str).str.strip().str.casefold()
         unknown = sorted(set(text.unique()) - set(mapping))
         if unknown:
             raise ValueError(
-                "Unsupported target labels: " + ", ".join(repr(value) for value in unknown[:12])
+                "Unsupported target labels: "
+                + ", ".join(repr(value) for value in unknown[:12])
             )
         return text.map(mapping).astype(int), mapping
 
@@ -285,6 +308,8 @@ class ModelEvaluationService:
             feature_columns = list(bundle.get("feature_columns", []))
             class_names = list(bundle.get("class_names", ["Alert", "Fatigue"]))
             saved_metrics = bundle.get("test_metrics", {}) or {}
+            saved_target_mapping = bundle.get("target_mapping", {}) or {}
+            saved_target_column = str(bundle.get("target_column", "") or "").strip()
             model_name = str(bundle.get("model_name", bundle.get("variant_name", model_file.stem)))
         else:
             pipeline = bundle
@@ -292,6 +317,8 @@ class ModelEvaluationService:
             feature_columns = []
             class_names = ["Alert", "Fatigue"]
             saved_metrics = {}
+            saved_target_mapping = {}
+            saved_target_column = ""
             model_name = model_file.stem
 
         if pipeline is None:
@@ -306,13 +333,36 @@ class ModelEvaluationService:
         if missing_features:
             raise ValueError("Test split is missing model features: " + ", ".join(missing_features))
 
-        target_column = self._column(test, self.TARGET_CANDIDATES)
+        target_column = None
+        if saved_target_column and saved_target_column in test.columns:
+            target_column = saved_target_column
+        elif saved_target_mapping:
+            expected_labels = {
+                str(label).strip().casefold()
+                for label in saved_target_mapping
+            }
+            for candidate in self.TARGET_CANDIDATES:
+                column = self._column(test, (candidate,))
+                if not column:
+                    continue
+                observed = set(
+                    test[column].dropna().astype(str).str.strip().str.casefold().unique()
+                )
+                if observed and observed.issubset(expected_labels):
+                    target_column = column
+                    break
+        if not target_column:
+            target_column = self._column(test, self.TARGET_CANDIDATES)
         if not target_column:
             raise ValueError(
-                "Test split needs one target column: " + ", ".join(self.TARGET_CANDIDATES)
+                "Test split needs one target column: "
+                + ", ".join(self.TARGET_CANDIDATES)
             )
 
-        y_test, target_mapping = self._normalise_target(test[target_column])
+        y_test, target_mapping = self._normalise_target(
+            test[target_column],
+            saved_target_mapping,
+        )
         test_probabilities = self._positive_probability(pipeline, test[feature_columns])
         test_metrics = self._metrics(y_test, test_probabilities, threshold)
 
@@ -330,10 +380,17 @@ class ModelEvaluationService:
                     "Calibration split is missing model features: "
                     + ", ".join(missing_calibration)
                 )
-            calibration_target = self._column(calibration, self.TARGET_CANDIDATES)
+            calibration_target = (
+                target_column
+                if target_column in calibration.columns
+                else self._column(calibration, self.TARGET_CANDIDATES)
+            )
             if not calibration_target:
                 raise ValueError("Calibration split does not contain a supported target column.")
-            y_calibration, _ = self._normalise_target(calibration[calibration_target])
+            y_calibration, _ = self._normalise_target(
+                calibration[calibration_target],
+                saved_target_mapping,
+            )
             calibration_probabilities = self._positive_probability(
                 pipeline,
                 calibration[feature_columns],
@@ -350,6 +407,7 @@ class ModelEvaluationService:
 
         result = {
             "available": True,
+            "evaluation_contract_version": "7.2.2-fatigue-level",
             "generated_at": self._now(),
             "model": {
                 "name": model_name,
@@ -359,6 +417,8 @@ class ModelEvaluationService:
                 "class_names": class_names,
                 "saved_threshold": threshold,
                 "saved_test_metrics": saved_metrics,
+                "target_column": target_column,
+                "target_mapping": target_mapping,
                 "bundle_type": type(bundle).__name__,
                 "pipeline_type": type(pipeline).__name__,
             },
@@ -429,6 +489,37 @@ class ModelEvaluationService:
                 "Participant-level rows with very few examples should not be over-interpreted.",
                 "Live calibrated decisions also include personal baseline and temporal logic not reproduced here.",
             ],
+        }
+
+
+        saved_balanced = saved_metrics.get("balanced_accuracy")
+        saved_accuracy = saved_metrics.get("accuracy")
+        tolerance = 0.000001
+        result["reconciliation"] = {
+            "target_contract_source": (
+                "model_bundle" if saved_target_mapping else "inferred"
+            ),
+            "historical_balanced_accuracy": saved_balanced,
+            "reproduced_balanced_accuracy": test_metrics["balanced_accuracy"],
+            "balanced_accuracy_delta": (
+                round(test_metrics["balanced_accuracy"] - float(saved_balanced), 6)
+                if saved_balanced is not None else None
+            ),
+            "historical_accuracy": saved_accuracy,
+            "reproduced_accuracy": test_metrics["accuracy"],
+            "accuracy_delta": (
+                round(test_metrics["accuracy"] - float(saved_accuracy), 6)
+                if saved_accuracy is not None else None
+            ),
+            "matches_saved_evidence": bool(
+                saved_balanced is not None
+                and abs(test_metrics["balanced_accuracy"] - float(saved_balanced)) <= tolerance
+                and saved_accuracy is not None
+                and abs(test_metrics["accuracy"] - float(saved_accuracy)) <= tolerance
+            ),
+            "explanation": (
+                "The evaluator used the target mapping stored in the model bundle."
+            ),
         }
 
         result = self._json_safe(result)

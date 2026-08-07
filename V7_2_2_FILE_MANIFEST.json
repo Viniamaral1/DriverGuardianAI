@@ -1,0 +1,33 @@
+{
+  "release": "Guardian OS V7.2.2 Evaluation Target Contract Fix",
+  "files": {
+    "app/services/model_evaluation_service.py": {
+      "bytes": 21243,
+      "sha256": "6d051d21c2eeb6a6048401f687c2c441f2d3c40897c899b8608db553e80d8933"
+    },
+    "app/static/js/research_lab.js": {
+      "bytes": 14077,
+      "sha256": "875630f768d272d9c41cb6797f893b6f7bb9a21388d5986457a2100fdd4793f3"
+    },
+    "GUARDIAN_OS_V7_2_2_TARGET_CONTRACT_FIX.md": {
+      "bytes": 1541,
+      "sha256": "9b6d3098b082815e1972faf0598e06022bdf8dc24c0974e3a5c639d7aefb6a32"
+    }
+  },
+  "verified_metrics": {
+    "rows": 6940,
+    "threshold": 0.64,
+    "accuracy": 0.9528818443804035,
+    "balanced_accuracy": 0.9595998214349195,
+    "precision": 0.9997316876844647,
+    "recall": 0.9195459032576505,
+    "f1": 0.9579637485537987,
+    "roc_auc": 0.9607146995567319,
+    "confusion_matrix": {
+      "tn": 2887,
+      "fp": 1,
+      "fn": 326,
+      "tp": 3726
+    }
+  }
+}

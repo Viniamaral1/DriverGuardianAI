@@ -160,7 +160,9 @@ function renderEvaluation(result) {
     <div><span>Model</span><b>${model.name || "—"}</b></div>
     <div><span>Features</span><b>${(model.features || []).join(", ") || "—"}</b></div>
     <div><span>Threshold</span><b>${Number(model.saved_threshold ?? 0.5).toFixed(3)}</b></div>
+    <div><span>Target</span><b>${model.target_column || split.target_column || "—"}</b></div>
     <div><span>Test rows</span><b>${fmt(split.rows)}</b></div>
+    <div><span>Saved evidence</span><b>${result.reconciliation?.matches_saved_evidence ? "Reproduced" : "Review required"}</b></div>
   `;
 
   const conditions = result.condition_performance || [];
