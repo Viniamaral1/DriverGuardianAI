@@ -118,6 +118,152 @@
   </div>
 </section>
 
+<section class="panel v81-visual-intelligence">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">LIVE VISUAL INTELLIGENCE</p>
+      <h2>Signals and reasoning over time</h2>
+    </div>
+    <span class="badge" id="v81-memory-status">MEMORY STANDBY</span>
+  </div>
+
+  <p class="muted">
+    These charts use the same read-only Intelligence polling stream. They show
+    trends rather than isolated values and do not change Monitoring or alerts.
+  </p>
+
+  <div class="v81-chart-grid">
+    <article class="v81-chart-card">
+      <div class="v81-chart-head">
+        <div><span>Risk & confidence</span><small>Last 2 minutes</small></div>
+        <b id="v81-risk-now">—</b>
+      </div>
+      <svg id="v81-risk-chart" class="v81-line-chart" viewBox="0 0 640 190" role="img"
+        aria-label="Live advisory risk and confidence trend"></svg>
+      <div class="v81-legend">
+        <span><i class="v81-dot series-1"></i>Advisory risk</span>
+        <span><i class="v81-dot series-2"></i>Confidence</span>
+      </div>
+    </article>
+
+    <article class="v81-chart-card">
+      <div class="v81-chart-head">
+        <div><span>Personal EAR</span><small>Current vs calibrated baseline</small></div>
+        <b id="v81-ear-now">—</b>
+      </div>
+      <svg id="v81-ear-chart" class="v81-line-chart" viewBox="0 0 640 190" role="img"
+        aria-label="Live EAR and personal baseline trend"></svg>
+      <div class="v81-legend">
+        <span><i class="v81-dot series-1"></i>EAR</span>
+        <span><i class="v81-dot baseline"></i>Baseline</span>
+      </div>
+    </article>
+
+    <article class="v81-chart-card">
+      <div class="v81-chart-head">
+        <div><span>Behaviour evidence</span><small>Yawn and head pose</small></div>
+        <b id="v81-behaviour-now">—</b>
+      </div>
+      <svg id="v81-behaviour-chart" class="v81-line-chart" viewBox="0 0 640 190" role="img"
+        aria-label="Live yawn and head-pose evidence trend"></svg>
+      <div class="v81-legend">
+        <span><i class="v81-dot series-1"></i>Yawn</span>
+        <span><i class="v81-dot series-2"></i>Head pose</span>
+      </div>
+    </article>
+
+    <article class="v81-chart-card">
+      <div class="v81-chart-head">
+        <div><span>Perception quality</span><small>Camera/image confidence</small></div>
+        <b id="v81-quality-now">—</b>
+      </div>
+      <svg id="v81-quality-chart" class="v81-line-chart" viewBox="0 0 640 190" role="img"
+        aria-label="Live perception quality trend"></svg>
+      <div class="v81-legend">
+        <span><i class="v81-dot series-1"></i>Signal quality</span>
+        <span><i class="v81-dot series-2"></i>Image quality</span>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="panel v81-memory-panel">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">GUARDIAN DECISION MEMORY</p>
+      <h2>Replay and compare advisory sessions</h2>
+    </div>
+    <button class="button secondary" id="v81-memory-refresh" type="button">
+      Refresh sessions
+    </button>
+  </div>
+
+  <p class="muted">
+    Decision Memory stores advisory snapshots while Guardian Intelligence is
+    open. It is an explainability/research trace, not complete camera telemetry.
+  </p>
+
+  <div class="v81-memory-layout">
+    <aside class="v81-memory-sessions">
+      <div id="v81-memory-list" class="v81-memory-list">
+        <div class="empty-state">No Decision Memory sessions yet.</div>
+      </div>
+    </aside>
+
+    <section class="v81-replay">
+      <div class="v81-replay-toolbar">
+        <div>
+          <span>Selected session</span>
+          <b id="v81-selected-session">None</b>
+        </div>
+        <div class="button-row">
+          <a class="button secondary disabled" id="v81-export-json" href="#">JSON</a>
+          <a class="button secondary disabled" id="v81-export-csv" href="#">CSV</a>
+        </div>
+      </div>
+
+      <input id="v81-replay-slider" type="range" min="0" max="0" value="0"
+        aria-label="Decision Memory replay position">
+
+      <div class="v81-replay-metrics">
+        <div><span>Time</span><b id="v81-replay-time">—</b></div>
+        <div><span>Risk</span><b id="v81-replay-risk">—</b></div>
+        <div><span>Confidence</span><b id="v81-replay-confidence">—</b></div>
+        <div><span>EAR</span><b id="v81-replay-ear">—</b></div>
+        <div><span>Dominant evidence</span><b id="v81-replay-evidence">—</b></div>
+        <div><span>Context</span><b id="v81-replay-context">—</b></div>
+      </div>
+
+      <svg id="v81-replay-chart" class="v81-line-chart v81-replay-chart"
+        viewBox="0 0 900 220" role="img"
+        aria-label="Decision Memory session replay trend"></svg>
+
+      <div class="v81-replay-action">
+        <b>Recorded recommendation</b>
+        <span id="v81-replay-action">Select a session to replay its decisions.</span>
+      </div>
+    </section>
+  </div>
+
+  <div class="v81-comparison">
+    <h3>Session comparison</h3>
+    <div class="v81-compare-controls">
+      <label>Session A
+        <select id="v81-compare-a"></select>
+      </label>
+      <label>Session B
+        <select id="v81-compare-b"></select>
+      </label>
+      <button class="button primary" id="v81-compare-button" type="button">
+        Compare
+      </button>
+    </div>
+    <div id="v81-comparison-result" class="v81-comparison-result">
+      <div class="empty-state">Choose two recorded sessions to compare.</div>
+    </div>
+  </div>
+</section>
+
 <section class="intelligence-main-grid">
     <article class="panel intelligence-explanation">
       <div class="panel-head">
@@ -283,5 +429,5 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="/static/js/intelligence.js?v=8.0.0"></script>
+<script src="/static/js/intelligence.js?v=8.1.0"></script>
 {% endblock %}

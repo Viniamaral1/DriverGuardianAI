@@ -1,0 +1,50 @@
+{
+  "release": "Guardian OS V8.1 Visual Intelligence & Decision Memory",
+  "source": "GuardianOS-V8-Decision-Memory-Source-20260808-180145.zip",
+  "files": {
+    "app/services/decision_memory_service.py": {
+      "bytes": 14359,
+      "sha256": "bf2fb71628c324e7afe59f70654d39f36f3e4c20871abb5e45ddde363e02d6ba"
+    },
+    "app/services/intelligence_service.py": {
+      "bytes": 16346,
+      "sha256": "77bba64849818fcf2f48b78ed7703746fc375bc9b097469b8301858efd4d24a1"
+    },
+    "app/routers/intelligence.py": {
+      "bytes": 2195,
+      "sha256": "04d74a2f2f76156f9e99a581ecadfac684c57e3e4afb4854f288246c2e5163b9"
+    },
+    "app/templates/intelligence.html": {
+      "bytes": 16543,
+      "sha256": "f593080fa93b7d35ce4437de4c63e2afe34fd613f1116493bb1966657716c4a9"
+    },
+    "app/static/js/intelligence.js": {
+      "bytes": 23699,
+      "sha256": "1cf7aa8c6eaaf3b045e33ffa76518109349b320ede041f07a1e6b21ae5b289df"
+    },
+    "app/static/css/app.css": {
+      "bytes": 94960,
+      "sha256": "ef395d2a81ba39cbb2167ec43faaf91a48d6437d74ce36fb69a1b57459f10325"
+    },
+    "app/main.py": {
+      "bytes": 1845,
+      "sha256": "2490235fafd0a1f9416573fc7d88d013b8c4911e380cc308a63d06fadee9ff99"
+    },
+    "GUARDIAN_OS_V8_1_VISUAL_DECISION_MEMORY.md": {
+      "bytes": 2244,
+      "sha256": "be18fbe3cd0ba53f06cb13c369949861b3b39894ff148d49eedaa47f189a95d3"
+    }
+  },
+  "protected_unchanged": [
+    "app/services/live_monitoring_service.py",
+    "app/services/persistent_calibration.py",
+    "app/templates/monitoring.html",
+    "app/static/js/monitoring.js"
+  ],
+  "validation": {
+    "python_syntax": "passed",
+    "javascript_syntax": "passed",
+    "decision_memory_record_replay_export_contract": "passed",
+    "protected_monitoring_files_in_patch": false
+  }
+}

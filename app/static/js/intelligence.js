@@ -169,6 +169,8 @@ function renderIntelligence(snapshot) {
     snapshot.safety_note || "Live monitoring remains the primary safety input.";
 
   renderV8DecisionEngine(snapshot.decision_engine || {});
+  v81AddLivePoint(snapshot);
+  v81RenderMemoryStatus(snapshot.decision_memory || {});
 }
 
 function renderV8DecisionEngine(engine) {
@@ -242,6 +244,383 @@ function renderV8DecisionEngine(engine) {
 }
 
 
+const v81LiveSeries = [];
+let v81MemorySessions = [];
+let v81SelectedMemory = null;
+
+function v81Clamp(value, min = 0, max = 1) {
+  return Math.max(min, Math.min(max, Number(value || 0)));
+}
+
+function v81Path(points, xFor, yFor) {
+  if (!points.length) return "";
+  return points.map((point, index) =>
+    `${index ? "L" : "M"} ${xFor(point, index).toFixed(1)} ${yFor(point, index).toFixed(1)}`
+  ).join(" ");
+}
+
+function v81RenderLineChart(svg, series, options = {}) {
+  if (!svg) return;
+  const width = options.width || 640;
+  const height = options.height || 190;
+  const left = 38, right = 12, top = 12, bottom = 25;
+  const plotWidth = width - left - right;
+  const plotHeight = height - top - bottom;
+  const rows = options.rows || [];
+  const yMin = Number(options.yMin ?? 0);
+  const yMax = Number(options.yMax ?? 1);
+  const count = Math.max(2, rows.length);
+
+  const xFor = (_, index) => left + (index / (count - 1)) * plotWidth;
+  const yForValue = value => {
+    const ratio = (Number(value || 0) - yMin) / Math.max(0.000001, yMax - yMin);
+    return top + (1 - v81Clamp(ratio)) * plotHeight;
+  };
+
+  let markup = "";
+  for (let i = 0; i <= 4; i++) {
+    const y = top + (i / 4) * plotHeight;
+    const value = yMax - ((yMax - yMin) * i / 4);
+    markup += `
+      <line x1="${left}" y1="${y}" x2="${width-right}" y2="${y}"
+        class="v81-grid-line"></line>
+      <text x="3" y="${y + 4}" class="v81-axis-label">
+        ${options.formatY ? options.formatY(value) : value.toFixed(1)}
+      </text>`;
+  }
+
+  series.forEach((item, seriesIndex) => {
+    const valid = rows.map((row, index) => ({
+      value: Number(item.value(row) || 0),
+      index,
+    }));
+    const path = v81Path(
+      valid,
+      point => xFor(point, point.index),
+      point => yForValue(point.value)
+    );
+    markup += `<path d="${path}" class="v81-series v81-series-${seriesIndex + 1}"></path>`;
+  });
+
+  if (options.markerIndex !== undefined && rows.length) {
+    const index = Math.max(0, Math.min(rows.length - 1, options.markerIndex));
+    const x = xFor(rows[index], index);
+    markup += `<line x1="${x}" y1="${top}" x2="${x}" y2="${height-bottom}"
+      class="v81-marker"></line>`;
+  }
+
+  svg.innerHTML = markup;
+}
+
+function v81AddLivePoint(snapshot) {
+  const engine = snapshot.decision_engine || {};
+  const evidence = Object.fromEntries(
+    (engine.evidence || []).map(item => [item.key, item.value])
+  );
+  const live = snapshot.live || {};
+  const environment = snapshot.environment || {};
+  const quality = snapshot.signal_quality || {};
+  const baseline = engine.personal_baseline || {};
+
+  v81LiveSeries.push({
+    time: Date.now(),
+    risk: Number(engine.risk_score || 0),
+    confidence: Number(engine.confidence?.score || 0),
+    ear: Number(baseline.current_ear || 0),
+    baseline: Number(baseline.baseline_ear || 0),
+    yawn: Number(evidence.yawn || 0),
+    tilt: Number(evidence.head_pose || 0),
+    signalQuality: Number(quality.score || 0),
+    imageQuality: Number(environment.quality_score || 0),
+  });
+
+  while (v81LiveSeries.length > 30) v81LiveSeries.shift();
+  v81RenderLiveCharts();
+}
+
+function v81RenderLiveCharts() {
+  if (!v81LiveSeries.length) return;
+  const last = v81LiveSeries[v81LiveSeries.length - 1];
+
+  intelligenceEl("v81-risk-now").textContent =
+    intelligencePercent(last.risk);
+  intelligenceEl("v81-ear-now").textContent =
+    last.ear ? last.ear.toFixed(3) : "—";
+  intelligenceEl("v81-behaviour-now").textContent =
+    `Yawn ${intelligencePercent(last.yawn)}`;
+  intelligenceEl("v81-quality-now").textContent =
+    intelligencePercent(last.signalQuality);
+
+  v81RenderLineChart(
+    intelligenceEl("v81-risk-chart"),
+    [
+      {value: row => row.risk},
+      {value: row => row.confidence},
+    ],
+    {
+      rows: v81LiveSeries,
+      yMin: 0,
+      yMax: 1,
+      formatY: value => `${Math.round(value * 100)}%`,
+    }
+  );
+
+  const earValues = v81LiveSeries
+    .flatMap(row => [row.ear, row.baseline])
+    .filter(value => value > 0);
+  const earMin = earValues.length ? Math.max(0, Math.min(...earValues) - 0.04) : 0;
+  const earMax = earValues.length ? Math.max(...earValues) + 0.04 : 0.4;
+
+  v81RenderLineChart(
+    intelligenceEl("v81-ear-chart"),
+    [
+      {value: row => row.ear},
+      {value: row => row.baseline},
+    ],
+    {
+      rows: v81LiveSeries,
+      yMin: earMin,
+      yMax: earMax,
+      formatY: value => value.toFixed(2),
+    }
+  );
+
+  v81RenderLineChart(
+    intelligenceEl("v81-behaviour-chart"),
+    [
+      {value: row => row.yawn},
+      {value: row => row.tilt},
+    ],
+    {
+      rows: v81LiveSeries,
+      yMin: 0,
+      yMax: 1,
+      formatY: value => `${Math.round(value * 100)}%`,
+    }
+  );
+
+  v81RenderLineChart(
+    intelligenceEl("v81-quality-chart"),
+    [
+      {value: row => row.signalQuality},
+      {value: row => row.imageQuality},
+    ],
+    {
+      rows: v81LiveSeries,
+      yMin: 0,
+      yMax: 1,
+      formatY: value => `${Math.round(value * 100)}%`,
+    }
+  );
+}
+
+function v81RenderMemoryStatus(memory) {
+  const badge = intelligenceEl("v81-memory-status");
+  if (!badge) return;
+  if (memory?.recording) {
+    badge.textContent = `RECORDING · ${memory.sample_count || 0}`;
+    badge.className = "badge success";
+  } else {
+    badge.textContent = "MEMORY STANDBY";
+    badge.className = "badge";
+  }
+}
+
+async function v81LoadMemoryList() {
+  try {
+    const response = await fetch("/api/intelligence/memory", {cache: "no-store"});
+    if (!response.ok) throw new Error(await response.text());
+    const payload = await response.json();
+    v81MemorySessions = payload.sessions || [];
+    v81RenderMemoryList();
+    v81RenderCompareOptions();
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+function v81RenderMemoryList() {
+  const container = intelligenceEl("v81-memory-list");
+  if (!container) return;
+
+  container.innerHTML = v81MemorySessions.length
+    ? v81MemorySessions.slice(0, 20).map(session => `
+      <button type="button" class="v81-memory-item"
+        data-memory-id="${session.id}">
+        <div>
+          <b>${new Date(session.started_at).toLocaleString("en-GB")}</b>
+          <span>${session.driver_profile || "Guest"}</span>
+        </div>
+        <div>
+          <strong>${intelligencePercent(session.maximum_advisory_risk)}</strong>
+          <small>${session.sample_count} samples · ${session.active ? "LIVE" : "saved"}</small>
+        </div>
+      </button>
+    `).join("")
+    : `<div class="empty-state">No Decision Memory sessions yet.</div>`;
+
+  container.querySelectorAll("[data-memory-id]").forEach(button => {
+    button.addEventListener("click", () => v81LoadMemorySession(button.dataset.memoryId));
+  });
+}
+
+async function v81LoadMemorySession(sessionId) {
+  try {
+    const response = await fetch(
+      `/api/intelligence/memory/${encodeURIComponent(sessionId)}`,
+      {cache: "no-store"}
+    );
+    if (!response.ok) throw new Error(await response.text());
+    v81SelectedMemory = await response.json();
+
+    intelligenceEl("v81-selected-session").textContent =
+      new Date(v81SelectedMemory.started_at).toLocaleString("en-GB");
+
+    const slider = intelligenceEl("v81-replay-slider");
+    const samples = v81SelectedMemory.samples || [];
+    slider.max = Math.max(0, samples.length - 1);
+    slider.value = Math.max(0, samples.length - 1);
+
+    const jsonLink = intelligenceEl("v81-export-json");
+    const csvLink = intelligenceEl("v81-export-csv");
+    jsonLink.href = `/api/intelligence/memory/${encodeURIComponent(sessionId)}/json`;
+    csvLink.href = `/api/intelligence/memory/${encodeURIComponent(sessionId)}/csv`;
+    jsonLink.classList.remove("disabled");
+    csvLink.classList.remove("disabled");
+
+    v81RenderReplay(Number(slider.value));
+  } catch (error) {
+    DG.toast("Decision Memory session could not be loaded", "error");
+    console.error(error);
+  }
+}
+
+function v81RenderReplay(index) {
+  const samples = v81SelectedMemory?.samples || [];
+  if (!samples.length) return;
+  index = Math.max(0, Math.min(samples.length - 1, Number(index || 0)));
+  const row = samples[index];
+
+  intelligenceEl("v81-replay-time").textContent =
+    new Date(row.timestamp).toLocaleTimeString("en-GB");
+  intelligenceEl("v81-replay-risk").textContent =
+    intelligencePercent(row.advisory_risk);
+  intelligenceEl("v81-replay-confidence").textContent =
+    intelligencePercent(row.decision_confidence);
+  intelligenceEl("v81-replay-ear").textContent =
+    Number(row.ear || 0).toFixed(3);
+  intelligenceEl("v81-replay-evidence").textContent =
+    row.dominant_evidence || "—";
+  intelligenceEl("v81-replay-context").textContent =
+    [row.weather, row.road_condition, row.external_light]
+      .filter(Boolean).join(" · ");
+  intelligenceEl("v81-replay-action").textContent =
+    row.recommended_action || "No recommendation stored.";
+
+  v81RenderLineChart(
+    intelligenceEl("v81-replay-chart"),
+    [
+      {value: item => item.advisory_risk},
+      {value: item => item.decision_confidence},
+      {value: item => item.raw_model_probability},
+    ],
+    {
+      rows: samples,
+      yMin: 0,
+      yMax: 1,
+      width: 900,
+      height: 220,
+      markerIndex: index,
+      formatY: value => `${Math.round(value * 100)}%`,
+    }
+  );
+}
+
+function v81RenderCompareOptions() {
+  const options = v81MemorySessions.map(session =>
+    `<option value="${session.id}">
+      ${new Date(session.started_at).toLocaleString("en-GB")} · ${session.driver_profile}
+    </option>`
+  ).join("");
+
+  const a = intelligenceEl("v81-compare-a");
+  const b = intelligenceEl("v81-compare-b");
+  if (!a || !b) return;
+  a.innerHTML = options;
+  b.innerHTML = options;
+
+  if (v81MemorySessions.length > 1) {
+    a.selectedIndex = 1;
+    b.selectedIndex = 0;
+  }
+}
+
+async function v81CompareSessions() {
+  const a = intelligenceEl("v81-compare-a")?.value;
+  const b = intelligenceEl("v81-compare-b")?.value;
+  if (!a || !b || a === b) {
+    DG.toast("Choose two different Decision Memory sessions", "warning");
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `/api/intelligence/memory/compare/${encodeURIComponent(a)}/${encodeURIComponent(b)}`,
+      {cache: "no-store"}
+    );
+    if (!response.ok) throw new Error(await response.text());
+    const comparison = await response.json();
+    const first = comparison.first || {};
+    const second = comparison.second || {};
+    const delta = comparison.delta_second_minus_first || {};
+
+    const signedPct = value => {
+      const number = Number(value || 0) * 100;
+      return `${number >= 0 ? "+" : ""}${number.toFixed(1)}%`;
+    };
+
+    intelligenceEl("v81-comparison-result").innerHTML = `
+      <div class="v81-compare-card">
+        <span>Average risk</span>
+        <b>${intelligencePercent(first.summary?.average_advisory_risk)}</b>
+        <strong>→ ${intelligencePercent(second.summary?.average_advisory_risk)}</strong>
+        <small>${signedPct(delta.average_advisory_risk)}</small>
+      </div>
+      <div class="v81-compare-card">
+        <span>Peak risk</span>
+        <b>${intelligencePercent(first.summary?.maximum_advisory_risk)}</b>
+        <strong>→ ${intelligencePercent(second.summary?.maximum_advisory_risk)}</strong>
+        <small>${signedPct(delta.maximum_advisory_risk)}</small>
+      </div>
+      <div class="v81-compare-card">
+        <span>Confidence</span>
+        <b>${intelligencePercent(first.summary?.average_confidence)}</b>
+        <strong>→ ${intelligencePercent(second.summary?.average_confidence)}</strong>
+        <small>${signedPct(delta.average_confidence)}</small>
+      </div>
+      <div class="v81-compare-card">
+        <span>Average EAR</span>
+        <b>${Number(first.summary?.average_ear || 0).toFixed(3)}</b>
+        <strong>→ ${Number(second.summary?.average_ear || 0).toFixed(3)}</strong>
+        <small>${Number(delta.average_ear || 0) >= 0 ? "+" : ""}${Number(delta.average_ear || 0).toFixed(3)}</small>
+      </div>`;
+  } catch (error) {
+    DG.toast("Decision Memory comparison failed", "error");
+    console.error(error);
+  }
+}
+
+intelligenceEl("v81-replay-slider")?.addEventListener("input", event => {
+  v81RenderReplay(Number(event.currentTarget.value));
+});
+
+intelligenceEl("v81-memory-refresh")?.addEventListener("click", async () => {
+  await v81LoadMemoryList();
+  DG.toast("Decision Memory refreshed", "success");
+});
+
+intelligenceEl("v81-compare-button")?.addEventListener("click", v81CompareSessions);
+
 async function loadIntelligence() {
   try {
     const response = await fetch("/api/intelligence", {cache: "no-store"});
@@ -265,4 +644,6 @@ DG.subscribe(() => {
 });
 
 loadIntelligence();
+v81LoadMemoryList();
 window.setInterval(loadIntelligence, 4000);
+window.setInterval(v81LoadMemoryList, 12000);

@@ -5,6 +5,7 @@ from statistics import mean
 from typing import Any, TYPE_CHECKING
 
 from app.services.decision_engine_service import DecisionEngineService
+from app.services.decision_memory_service import DecisionMemoryService
 
 if TYPE_CHECKING:
     from app.services.app_state import GuardianState
@@ -21,6 +22,7 @@ class IntelligenceService:
     def __init__(self, state: "GuardianState") -> None:
         self.state = state
         self.decision_engine = DecisionEngineService()
+        self.decision_memory = DecisionMemoryService(state.root)
 
     @staticmethod
     def _number(value: Any, default: float = 0.0) -> float:
@@ -316,7 +318,7 @@ class IntelligenceService:
             resolved_context,
         )
 
-        return {
+        payload = {
             "available": True,
             "decision_engine": decision_engine,
             "generated_at": now.isoformat(timespec="seconds"),
@@ -407,3 +409,9 @@ class IntelligenceService:
                 "safety input."
             ),
         }
+
+        payload["decision_memory"] = self.decision_memory.observe(
+            metrics,
+            payload,
+        )
+        return payload
