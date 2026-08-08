@@ -6,10 +6,11 @@ from app.services.app_state import guardian_state
 from app.services.intelligence_service import IntelligenceService
 
 router = APIRouter()
+_service = IntelligenceService(guardian_state)
 
 
 def service() -> IntelligenceService:
-    return IntelligenceService(guardian_state)
+    return _service
 
 
 @router.get("")

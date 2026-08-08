@@ -48,7 +48,77 @@
     </article>
   </section>
 
-  <section class="intelligence-main-grid">
+  <section class="panel v8-decision-engine">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">V8 AI DECISION ENGINE</p>
+      <h2>Explainable evidence fusion</h2>
+    </div>
+    <div class="button-row">
+      <span class="badge success">ADVISORY</span>
+      <span class="badge" id="v8-engine-confidence-badge">STANDBY</span>
+    </div>
+  </div>
+
+  <p class="muted">
+    The trained model remains primary. Personal EAR deviation, yawning and head
+    pose are bounded supporting evidence. Weather and road context change caution
+    guidance only; they do not change biological fatigue.
+  </p>
+
+  <div class="v8-engine-grid">
+    <div class="v8-risk-panel">
+      <span>Advisory risk index</span>
+      <strong id="v8-risk-score">0%</strong>
+      <b id="v8-risk-band">Standby</b>
+      <small>Not a calibrated medical probability</small>
+    </div>
+    <div class="v8-risk-panel">
+      <span>Decision confidence</span>
+      <strong id="v8-confidence-score">0%</strong>
+      <b id="v8-confidence-level">Standby</b>
+      <small id="v8-confidence-summary">Start Monitoring to activate.</small>
+    </div>
+    <div class="v8-risk-panel">
+      <span>Context caution</span>
+      <strong id="v8-context-level">Normal</strong>
+      <b id="v8-context-count">0 factors</b>
+      <small id="v8-context-summary">No additional context caution.</small>
+    </div>
+  </div>
+
+  <div class="v8-evidence-layout">
+    <section>
+      <h3>Evidence ledger</h3>
+      <div id="v8-evidence-ledger" class="v8-evidence-ledger">
+        <div class="empty-state">Start Monitoring to inspect evidence.</div>
+      </div>
+    </section>
+    <section>
+      <h3>Guardian reasoning</h3>
+      <p class="intelligence-summary" id="v8-explanation">
+        The advisory engine is waiting for live signals.
+      </p>
+      <div class="intelligence-method-note">
+        <b>Recommended action</b>
+        <span id="v8-action">Start Monitoring when ready.</span>
+      </div>
+      <div class="intelligence-method-note">
+        <b>Safety contract</b>
+        <span id="v8-safety-contract">V8 does not control the existing alert path.</span>
+      </div>
+    </section>
+  </div>
+
+  <div class="v8-timeline-section">
+    <h3>Decision timeline</h3>
+    <div id="v8-decision-timeline" class="v8-decision-timeline">
+      <div class="empty-state">Risk-band changes will appear here.</div>
+    </div>
+  </div>
+</section>
+
+<section class="intelligence-main-grid">
     <article class="panel intelligence-explanation">
       <div class="panel-head">
         <div>
@@ -213,5 +283,5 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="/static/js/intelligence.js?v=6.3.0"></script>
+<script src="/static/js/intelligence.js?v=8.0.0"></script>
 {% endblock %}

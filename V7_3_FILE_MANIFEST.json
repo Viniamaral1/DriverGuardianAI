@@ -1,0 +1,41 @@
+{
+  "release": "Guardian OS V7.3 Personal Calibration Validation",
+  "source_checkpoint": "GuardianOS-Calibration-Audit-20260807-160548.zip",
+  "files": {
+    "app/services/personal_calibration_validation_service.py": {
+      "bytes": 18615,
+      "sha256": "06bb781dfedc0c9e7f89cc23669a4b55426bc44cccdb09bc077f35571e67e319"
+    },
+    "app/routers/research_lab.py": {
+      "bytes": 6068,
+      "sha256": "38bcfa584858789904c4aeaea8c333495a5f529902b1b038723afff700edb7f3"
+    },
+    "app/routers/websocket.py": {
+      "bytes": 715,
+      "sha256": "990a9e7b4ab3d804387c3cb482d4c2879143bc027b298e28405616bcbfc2b60c"
+    },
+    "app/templates/research_lab.html": {
+      "bytes": 15381,
+      "sha256": "2f6d85d02706d126b7fef876f00baa33cb5ffaf8e9982814bc877e63353c08e4"
+    },
+    "app/static/js/research_lab.js": {
+      "bytes": 19076,
+      "sha256": "1420e0565dc021bbb4ddc6394738dc2d93b7828a158a5598ff7e8b047702853f"
+    },
+    "GUARDIAN_OS_V7_3_CALIBRATION_VALIDATION.md": {
+      "bytes": 2512,
+      "sha256": "d421605ef1347ad8b2e13c1535db635fc6013c2d54edf9bf18ab12db6a6f05fa"
+    }
+  },
+  "validation": {
+    "python_syntax": "passed",
+    "javascript_syntax": "passed",
+    "calibration_replay_execution_contract": "passed with synthetic compatible model/V3 fixture"
+  },
+  "protected_unchanged_files": [
+    "app/services/live_monitoring_service.py",
+    "app/services/persistent_calibration.py",
+    "app/services/driver_profile_service.py",
+    "models/v2/ablation/driver_guardian_core_behaviour.joblib"
+  ]
+}

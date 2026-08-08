@@ -207,6 +207,102 @@
   </p>
 </article>
 
+<article class="panel research-card research-wide">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">PERSONAL CALIBRATION VALIDATION</p>
+      <h2>Generic model versus personal risk fusion</h2>
+    </div>
+    <span class="badge" id="calibration-validation-status">NOT RUN</span>
+  </div>
+
+  <p class="muted">
+    Guardian replays a held-out normal session to establish the same V3 personal
+    baseline used by Monitoring, excludes those baseline rows from scoring, then
+    evaluates the remaining normal rows and paired drowsy session. The trained
+    model is not modified.
+  </p>
+
+  <form id="calibration-validation-form" class="evaluation-path-grid">
+    <label class="field">
+      <span>Saved core-behaviour model</span>
+      <input id="calibration-validation-model" required
+        value="models\v2\ablation\driver_guardian_core_behaviour.joblib">
+    </label>
+    <label class="field">
+      <span>Held-out test split</span>
+      <input id="calibration-validation-test" required
+        value="data\splits\v2\test.csv">
+    </label>
+    <div class="button-row evaluation-wide">
+      <button class="button primary" type="submit">Run calibration replay</button>
+      <a class="button secondary disabled" id="calibration-validation-export"
+        href="/api/research-lab/calibration-validation/export">
+        Export calibration JSON
+      </a>
+    </div>
+  </form>
+
+  <div class="evaluation-detail-grid">
+    <section>
+      <h3>Generic model</h3>
+      <div class="evaluation-metrics-grid">
+        <div><span>Balanced accuracy</span><b id="cal-generic-ba">—</b></div>
+        <div><span>Accuracy</span><b id="cal-generic-accuracy">—</b></div>
+        <div><span>Precision</span><b id="cal-generic-precision">—</b></div>
+        <div><span>Recall</span><b id="cal-generic-recall">—</b></div>
+        <div><span>F1</span><b id="cal-generic-f1">—</b></div>
+        <div><span>ROC-AUC</span><b id="cal-generic-auc">—</b></div>
+      </div>
+    </section>
+
+    <section>
+      <h3>Personalized fusion</h3>
+      <div class="evaluation-metrics-grid">
+        <div><span>Balanced accuracy</span><b id="cal-personal-ba">—</b></div>
+        <div><span>Accuracy</span><b id="cal-personal-accuracy">—</b></div>
+        <div><span>Precision</span><b id="cal-personal-precision">—</b></div>
+        <div><span>Recall</span><b id="cal-personal-recall">—</b></div>
+        <div><span>F1</span><b id="cal-personal-f1">—</b></div>
+        <div><span>ROC-AUC</span><b id="cal-personal-auc">—</b></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="model-card-grid">
+    <div><span>Balanced-accuracy change</span><b id="cal-delta-ba">—</b></div>
+    <div><span>False-positive change</span><b id="cal-delta-fp">—</b></div>
+    <div><span>False-negative change</span><b id="cal-delta-fn">—</b></div>
+    <div><span>Protocol</span><b>Normal baseline → paired drowsy session</b></div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Participant</th>
+          <th>Condition</th>
+          <th>Baseline EAR</th>
+          <th>Generic BA</th>
+          <th>Personal BA</th>
+          <th>Δ BA</th>
+          <th>Δ FP</th>
+          <th>Δ FN</th>
+        </tr>
+      </thead>
+      <tbody id="calibration-validation-table">
+        <tr><td colspan="8">Run the controlled replay to quantify calibration.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="research-boundary">
+    Research boundary: this uses the exact V3 personal-calibration fusion, but
+    it does not include TemporalStateEngine, alert-duration rules or cooldown.
+    It is therefore a calibration-effect study, not final live-alert accuracy.
+  </p>
+</article>
+
     <article class="panel research-card">
       <div class="panel-head"><div><p class="eyebrow">AI READINESS</p><h2>What can be built honestly?</h2></div></div>
       <div id="research-readiness" class="research-readiness"></div>
@@ -220,4 +316,4 @@
   </section>
 </div>
 {% endblock %}
-{% block scripts %}<script src="/static/js/research_lab.js?v=7.2.0"></script>{% endblock %}
+{% block scripts %}<script src="/static/js/research_lab.js?v=7.3.0"></script>{% endblock %}

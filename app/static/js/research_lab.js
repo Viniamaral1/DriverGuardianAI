@@ -272,3 +272,150 @@ researchEl("evaluation-form")?.addEventListener("submit", async event => {
 });
 
 loadEvaluationStatus();
+function signedPct(value) {
+  if (value === null || value === undefined) return "—";
+  const number = Number(value) * 100;
+  return `${number >= 0 ? "+" : ""}${number.toFixed(1)}%`;
+}
+
+function signedInt(value) {
+  if (value === null || value === undefined) return "—";
+  const number = Number(value);
+  return `${number >= 0 ? "+" : ""}${number}`;
+}
+
+function renderCalibrationValidation(result) {
+  if (!result?.available) return;
+
+  const generic = result.generic_model || {};
+  const personal = result.personalized_fusion || {};
+  const comparison = result.comparison || {};
+
+  const status = researchEl("calibration-validation-status");
+  if (status) {
+    status.textContent = "MEASURED";
+    status.className = "badge success";
+  }
+
+  researchEl("calibration-validation-export")?.classList.remove("disabled");
+
+  const setMetric = (id, value) => {
+    const element = researchEl(id);
+    if (element) element.textContent = metricValue(value);
+  };
+
+  setMetric("cal-generic-ba", generic.balanced_accuracy);
+  setMetric("cal-generic-accuracy", generic.accuracy);
+  setMetric("cal-generic-precision", generic.precision);
+  setMetric("cal-generic-recall", generic.recall);
+  setMetric("cal-generic-f1", generic.f1);
+  setMetric("cal-generic-auc", generic.roc_auc);
+
+  setMetric("cal-personal-ba", personal.balanced_accuracy);
+  setMetric("cal-personal-accuracy", personal.accuracy);
+  setMetric("cal-personal-precision", personal.precision);
+  setMetric("cal-personal-recall", personal.recall);
+  setMetric("cal-personal-f1", personal.f1);
+  setMetric("cal-personal-auc", personal.roc_auc);
+
+  researchEl("cal-delta-ba").textContent =
+    signedPct(comparison.balanced_accuracy_delta);
+  researchEl("cal-delta-fp").textContent =
+    signedInt(comparison.false_positive_delta);
+  researchEl("cal-delta-fn").textContent =
+    signedInt(comparison.false_negative_delta);
+
+  const pairs = (result.pairs || []).filter(row => row.status === "evaluated");
+  researchEl("calibration-validation-table").innerHTML = pairs.length
+    ? pairs.map(row => `
+      <tr>
+        <td><b>${row.participant}</b></td>
+        <td>${label(row.condition)}</td>
+        <td>${Number(row.baseline_ear).toFixed(3)}</td>
+        <td>${metricValue(row.generic?.balanced_accuracy)}</td>
+        <td>${metricValue(row.personalized_fusion?.balanced_accuracy)}</td>
+        <td>${signedPct(row.delta_balanced_accuracy)}</td>
+        <td>${signedInt(row.delta_false_positive)}</td>
+        <td>${signedInt(row.delta_false_negative)}</td>
+      </tr>
+    `).join("")
+    : `<tr><td colspan="8">No participant-condition pair completed calibration.</td></tr>`;
+}
+
+async function loadCalibrationValidationStatus() {
+  try {
+    const response = await fetch(
+      "/api/research-lab/calibration-validation",
+      {cache: "no-store"}
+    );
+    if (!response.ok) return;
+    const status = await response.json();
+
+    const setCandidate = (id, values) => {
+      const input = researchEl(id);
+      if (!input || !values?.length) return;
+      const existing = input.value.trim();
+      if (
+        !existing ||
+        existing.startsWith("data\\") ||
+        existing.startsWith("models\\")
+      ) {
+        input.value = values.find(Boolean) || existing;
+      }
+    };
+
+    setCandidate("calibration-validation-model", status.candidate_paths?.model);
+    setCandidate("calibration-validation-test", status.candidate_paths?.test);
+
+    if (status.export_available) {
+      researchEl("calibration-validation-export")?.classList.remove("disabled");
+    }
+    if (status.last_validation) {
+      renderCalibrationValidation(status.last_validation);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+researchEl("calibration-validation-form")?.addEventListener("submit", async event => {
+  event.preventDefault();
+  const button = event.currentTarget.querySelector('button[type="submit"]');
+  const badge = researchEl("calibration-validation-status");
+
+  button.disabled = true;
+  if (badge) {
+    badge.textContent = "RUNNING";
+    badge.className = "badge warning";
+  }
+
+  try {
+    const response = await fetch("/api/research-lab/calibration-validation", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        model_path: researchEl("calibration-validation-model").value.trim(),
+        test_path: researchEl("calibration-validation-test").value.trim(),
+      }),
+    });
+
+    const payload = await evaluationResponsePayload(response);
+    if (!response.ok) {
+      throw new Error(payload.detail || "Calibration validation failed.");
+    }
+
+    renderCalibrationValidation(payload);
+    DG.toast("Personal calibration replay completed", "success");
+  } catch (error) {
+    if (badge) {
+      badge.textContent = "FAILED";
+      badge.className = "badge danger";
+    }
+    DG.toast(error.message || "Calibration validation failed", "error");
+    console.error(error);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+loadCalibrationValidationStatus();

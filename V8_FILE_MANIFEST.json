@@ -1,0 +1,51 @@
+{
+  "release": "Guardian OS V8.0 Advisory AI Decision Engine",
+  "source": "GuardianOS-V8-Source-20260808-163254.zip",
+  "files": {
+    "app/services/decision_engine_service.py": {
+      "bytes": 14332,
+      "sha256": "4f8176c9c771c06172998a7989abad95bb5c6b430f080e82ec8f749c6e739d8b"
+    },
+    "app/services/intelligence_service.py": {
+      "bytes": 16064,
+      "sha256": "a59ca4ad84325a840df7e5684bb71704522cb06f6cbcf7f3d7c2df90ad4d21bc"
+    },
+    "app/routers/intelligence.py": {
+      "bytes": 378,
+      "sha256": "313a9b001d9c8535bd31742c5ad56250f96ff27cc91c80c53e5753d34ace9a90"
+    },
+    "app/templates/intelligence.html": {
+      "bytes": 11110,
+      "sha256": "1d8053013b8eac1f418feaf8b5f6ecb3b7d0ea5daee48d0254041775e41c3dd0"
+    },
+    "app/static/js/intelligence.js": {
+      "bytes": 11150,
+      "sha256": "18620135f737eba92cca547c19eb9c893fc7c9516315f1f39130dcf8b2aef015"
+    },
+    "app/static/css/app.css": {
+      "bytes": 90421,
+      "sha256": "86e9c1660d2f7c9db0b9a99a1fc00fd8bdd52e388628e43702944d280217b471"
+    },
+    "app/main.py": {
+      "bytes": 1845,
+      "sha256": "08624c2a78df7ea1c07b55d661ffb62942fe8595ddfdf2409ee0b29843a9bc89"
+    },
+    "GUARDIAN_OS_V8_DECISION_ENGINE.md": {
+      "bytes": 1070,
+      "sha256": "3823eab353b431e846a29c4504015a51e5e72af18696536a46ba97c8b4b0e35b"
+    }
+  },
+  "protected_unchanged": [
+    "app/services/live_monitoring_service.py",
+    "app/services/persistent_calibration.py",
+    "app/services/driver_profile_service.py",
+    "app/templates/monitoring.html",
+    "app/static/js/monitoring.js"
+  ],
+  "validation": {
+    "python_syntax": "passed",
+    "javascript_syntax": "passed",
+    "decision_engine_contract": "passed",
+    "protected_monitoring_files_in_patch": false
+  }
+}

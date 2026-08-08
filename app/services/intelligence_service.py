@@ -4,6 +4,8 @@ from datetime import datetime
 from statistics import mean
 from typing import Any, TYPE_CHECKING
 
+from app.services.decision_engine_service import DecisionEngineService
+
 if TYPE_CHECKING:
     from app.services.app_state import GuardianState
 
@@ -18,6 +20,7 @@ class IntelligenceService:
 
     def __init__(self, state: "GuardianState") -> None:
         self.state = state
+        self.decision_engine = DecisionEngineService()
 
     @staticmethod
     def _number(value: Any, default: float = 0.0) -> float:
@@ -308,8 +311,14 @@ class IntelligenceService:
                 str(effective_context.get("occlusion")).replace("_", " ")
             )
 
+        decision_engine = self.decision_engine.snapshot(
+            metrics,
+            resolved_context,
+        )
+
         return {
             "available": True,
+            "decision_engine": decision_engine,
             "generated_at": now.isoformat(timespec="seconds"),
             "live": {
                 "monitoring": bool(metrics.get("monitoring")),

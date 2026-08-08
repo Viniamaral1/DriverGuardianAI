@@ -167,7 +167,80 @@ function renderIntelligence(snapshot) {
 
   intelligenceEl("intelligence-safety-note").textContent =
     snapshot.safety_note || "Live monitoring remains the primary safety input.";
+
+  renderV8DecisionEngine(snapshot.decision_engine || {});
 }
+
+function renderV8DecisionEngine(engine) {
+  engine = engine || {};
+  const confidence = engine.confidence || {};
+  const caution = engine.context_caution || {};
+  const evidence = engine.evidence || [];
+  const timeline = engine.timeline || [];
+  const contract = engine.safety_contract || {};
+
+  intelligenceEl("v8-risk-score").textContent =
+    intelligencePercent(engine.risk_score || 0);
+  intelligenceEl("v8-risk-band").textContent =
+    intelligenceLabel(engine.risk_band || "standby");
+
+  intelligenceEl("v8-confidence-score").textContent =
+    intelligencePercent(confidence.score || 0);
+  intelligenceEl("v8-confidence-level").textContent =
+    intelligenceLabel(confidence.level || "standby");
+  intelligenceEl("v8-confidence-summary").textContent =
+    confidence.summary || "No live confidence estimate.";
+
+  const badge = intelligenceEl("v8-engine-confidence-badge");
+  badge.textContent = intelligenceLabel(confidence.level || "standby");
+  badge.className = `badge ${
+    confidence.level === "high" ? "success" :
+    confidence.level === "limited" ? "warning" : ""
+  }`;
+
+  const reasons = caution.reasons || [];
+  intelligenceEl("v8-context-level").textContent =
+    intelligenceLabel(caution.level || "normal");
+  intelligenceEl("v8-context-count").textContent =
+    `${reasons.length} factor${reasons.length === 1 ? "" : "s"}`;
+  intelligenceEl("v8-context-summary").textContent =
+    caution.summary || "No additional context caution.";
+
+  intelligenceEl("v8-evidence-ledger").innerHTML = evidence.length
+    ? evidence.map(item => `
+      <div class="v8-evidence-row">
+        <div>
+          <span>${item.label}</span>
+          <b>${intelligencePercent(item.value || 0)}</b>
+          <small>${intelligenceLabel(item.role || "supporting")}</small>
+        </div>
+        <div class="v8-evidence-meter">
+          <i style="width:${Math.max(0, Math.min(100, Number(item.contribution || 0) * 100))}%"></i>
+        </div>
+        <p>${item.explanation || ""}</p>
+      </div>
+    `).join("")
+    : `<div class="empty-state">No live evidence is currently active.</div>`;
+
+  intelligenceEl("v8-explanation").textContent =
+    engine.explanation || "The advisory engine is waiting for live signals.";
+  intelligenceEl("v8-action").textContent =
+    engine.action || "Start Monitoring when ready.";
+  intelligenceEl("v8-safety-contract").textContent =
+    contract.description || "V8 remains advisory.";
+
+  intelligenceEl("v8-decision-timeline").innerHTML = timeline.length
+    ? timeline.slice(0, 8).map(item => `
+      <div class="v8-timeline-item">
+        <time>${item.time || "—"}</time>
+        <b>${intelligenceLabel(item.risk_band || "unknown")}</b>
+        <span>${intelligencePercent(item.score || 0)}</span>
+        <small>${item.reason || ""} · ${intelligenceLabel(item.confidence || "unknown")} confidence</small>
+      </div>
+    `).join("")
+    : `<div class="empty-state">Risk-band changes will appear here.</div>`;
+}
+
 
 async function loadIntelligence() {
   try {
