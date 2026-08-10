@@ -19,10 +19,14 @@ class IntelligenceService:
     and produces a transparent near-term outlook.
     """
 
-    def __init__(self, state: "GuardianState") -> None:
+    def __init__(
+        self,
+        state: "GuardianState",
+        decision_memory: DecisionMemoryService | None = None,
+    ) -> None:
         self.state = state
         self.decision_engine = DecisionEngineService()
-        self.decision_memory = DecisionMemoryService(state.root)
+        self.decision_memory = decision_memory or DecisionMemoryService(state.root)
 
     @staticmethod
     def _number(value: Any, default: float = 0.0) -> float:
@@ -49,7 +53,7 @@ class IntelligenceService:
             return "dusk"
         return "night"
 
-    def _edge_snapshot(self) -> dict[str, Any]:
+    def _edge_snapshot(self, *, refresh_reports: bool = True) -> dict[str, Any]:
         service = self.state.edge_memory_service
         if service is None:
             return {
@@ -58,7 +62,8 @@ class IntelligenceService:
                 "context": {},
                 "recent_sessions": [],
             }
-        service.refresh_from_reports()
+        if refresh_reports:
+            service.refresh_from_reports()
         return service.snapshot()
 
     def _contributions(self, metrics: dict[str, Any]) -> list[dict[str, Any]]:
@@ -258,9 +263,12 @@ class IntelligenceService:
             ),
         }
 
-    def snapshot(self) -> dict[str, Any]:
+    def snapshot(self, *, record_memory: bool = False) -> dict[str, Any]:
         metrics = self.state.metrics()
-        edge = self._edge_snapshot()
+        # Browser views can refresh report-derived history. The automatic
+        # Decision Memory sampler reuses the current Edge snapshot to avoid a
+        # filesystem/report scan every sampling interval.
+        edge = self._edge_snapshot(refresh_reports=not record_memory)
         insights = edge.get("insights", {}) or {}
         resolved_context = edge.get("context", {}) or {}
         manual_context = edge.get("manual_context", {}) or {}
@@ -410,8 +418,11 @@ class IntelligenceService:
             ),
         }
 
-        payload["decision_memory"] = self.decision_memory.observe(
-            metrics,
-            payload,
-        )
+        if record_memory:
+            payload["decision_memory"] = self.decision_memory.record(
+                metrics,
+                payload,
+            )
+        else:
+            payload["decision_memory"] = self.decision_memory.status()
         return payload

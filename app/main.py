@@ -18,8 +18,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Guardian OS V8.2",
-    version="8.2.0",
+    title="Guardian OS V8.2.3",
+    version="8.2.3",
     description="Automotive driver-monitoring dashboard and Commander interface.",
     lifespan=lifespan,
 )
@@ -44,6 +44,6 @@ app.include_router(websocket.router, tags=["websocket"])
 def health() -> dict:
     return {
         "status": "ok",
-        "application": "Guardian OS V8.2",
-        "version": "8.2.0",
+        "application": "Guardian OS V8.2.3",
+        "version": "8.2.3",
     }

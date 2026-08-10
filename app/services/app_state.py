@@ -37,6 +37,9 @@ class GuardianState:
         self.report_service: AutomaticReportService | None = None
         self.edge_memory_service: EdgeMemoryService | None = None
         self.driver_profile_service: DriverProfileService | None = None
+        self.intelligence_service = None
+        self._decision_memory_thread: threading.Thread | None = None
+        self._decision_memory_stop = threading.Event()
 
     def initialise(self, root: Path) -> None:
         self.root = root
@@ -61,6 +64,12 @@ class GuardianState:
             event_callback=self.add_event,
         )
         self.edge_memory_service = EdgeMemoryService(root)
+
+        # Local import avoids an import cycle while allowing GuardianState to
+        # own the Intelligence/Decision Memory lifecycle.
+        from app.services.intelligence_service import IntelligenceService
+        self.intelligence_service = IntelligenceService(self)
+
         self.add_event("SYSTEM", "Guardian OS V6.1 persistent profiles ready", "info")
         name = str(self.settings.get("driver_name", "")).strip()
         greeting = f"Welcome back, {name}." if name else "Commander online."
@@ -70,6 +79,9 @@ class GuardianState:
         )
 
     def shutdown(self) -> None:
+        self._stop_decision_memory_worker()
+        if self.intelligence_service is not None:
+            self.intelligence_service.decision_memory.finalise()
         if self.voice_service is not None:
             self.voice_service.stop()
         if self.monitoring_service is not None:
@@ -117,11 +129,70 @@ class GuardianState:
                 }
             )
 
+    def _decision_memory_loop(self) -> None:
+        """Capture advisory evidence independently of any browser page."""
+        while True:
+            service = self.intelligence_service
+            interval = (
+                service.decision_memory.SAMPLE_INTERVAL_SECONDS
+                if service is not None
+                else 2.0
+            )
+            if self._decision_memory_stop.wait(interval):
+                break
+            if service is None:
+                continue
+
+            metrics = self.metrics()
+            if not bool(metrics.get("monitoring")):
+                if not (
+                    metrics.get("starting")
+                    or metrics.get("stopping")
+                ):
+                    break
+                continue
+
+            try:
+                service.snapshot(record_memory=True)
+            except Exception as error:
+                # Decision Memory is research/explainability telemetry only.
+                # It must never interrupt the safety-critical live path.
+                self.add_event(
+                    "MEMORY",
+                    f"Decision Memory sample skipped: {type(error).__name__}",
+                    "warning",
+                )
+
+    def _start_decision_memory_worker(self) -> None:
+        self._stop_decision_memory_worker()
+        self._decision_memory_stop.clear()
+        self._decision_memory_thread = threading.Thread(
+            target=self._decision_memory_loop,
+            name="guardian-decision-memory",
+            daemon=True,
+        )
+        self._decision_memory_thread.start()
+
+    def _stop_decision_memory_worker(self) -> None:
+        self._decision_memory_stop.set()
+        thread = self._decision_memory_thread
+        if (
+            thread is not None
+            and thread.is_alive()
+            and thread is not threading.current_thread()
+        ):
+            thread.join(timeout=3.0)
+        self._decision_memory_thread = None
+
     def start_monitoring(self) -> tuple[bool, str]:
         if self.monitoring_service is None:
             return False, "Monitoring service has not been initialised."
         success, message = self.monitoring_service.start()
         if success:
+            if self.intelligence_service is not None:
+                self.intelligence_service.decision_memory.begin(self.metrics())
+                self._start_decision_memory_worker()
+
             profile = (
                 self.driver_profile_service.active_profile()
                 if self.driver_profile_service is not None
@@ -138,6 +209,18 @@ class GuardianState:
 
         session_log = self.monitoring_service.snapshot().get("log_path")
         success, message = self.monitoring_service.stop()
+
+        self._stop_decision_memory_worker()
+        if self.intelligence_service is not None:
+            memory_status = self.intelligence_service.decision_memory.finalise()
+            completed_id = memory_status.get("completed_session_id")
+            if completed_id:
+                self.add_event(
+                    "MEMORY",
+                    f"Decision Memory saved: {completed_id}",
+                    "success",
+                )
+
         self.add_event("MONITOR", message, "info")
 
         if (

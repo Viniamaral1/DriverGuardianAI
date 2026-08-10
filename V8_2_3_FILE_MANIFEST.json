@@ -1,0 +1,48 @@
+{
+  "release": "Guardian OS V8.2.3 Automatic Decision Memory Lifecycle Fix",
+  "source_checkpoint": "GuardianOS-V8.2-Decision-Memory-Fix-20260810-155859.zip",
+  "root_cause": "Decision Memory session creation depended on Intelligence/Decision Memory browser polling instead of the Monitoring application lifecycle.",
+  "files": {
+    "app/services/decision_memory_service.py": {
+      "bytes": 19967,
+      "sha256": "61c258e62b1619f8d44164d78033fa793c0185cef96847760a0f05efd2fc050b"
+    },
+    "app/services/intelligence_service.py": {
+      "bytes": 16916,
+      "sha256": "e13d30559bda62fa22a8d649781964d3128f059d673b0a0d32d18b62c90403e7"
+    },
+    "app/services/app_state.py": {
+      "bytes": 11487,
+      "sha256": "3ae7dcfd3516a9c80b6bd50a05e05948aff9e214661d663d9ab523a2239244c5"
+    },
+    "app/routers/intelligence.py": {
+      "bytes": 3128,
+      "sha256": "4875bcbed9c1e412424f36d70206211a87f104aae041b292d4ad1d5885428c11"
+    },
+    "app/main.py": {
+      "bytes": 1849,
+      "sha256": "b78f5b7d8a6fbff3eb08e9495dc4ddb94c6407aebd55220fe9255ecad37a3fac"
+    },
+    "GUARDIAN_OS_V8_2_3_DECISION_MEMORY_FIX.md": {
+      "bytes": 1734,
+      "sha256": "9f5463c84a0556a96ab732ad1baaef9008b0413523f345b8f0014597ff567ff4"
+    }
+  },
+  "protected_unchanged": [
+    "app/services/live_monitoring_service.py",
+    "app/services/persistent_calibration.py",
+    "app/templates/monitoring.html",
+    "app/static/js/monitoring.js",
+    "realtime_driver_guardian_v3_alerts.py"
+  ],
+  "validation": {
+    "python_syntax": "passed",
+    "decision_memory_header_creation": "passed",
+    "page_independent_background_sampling": "passed",
+    "automatic_finalisation": "passed",
+    "historical_replay_export_compatibility": "passed",
+    "guardian_state_start_stop_integration": "passed",
+    "full_fastapi_import_and_routes": "APP_IMPORT_PASS 8.2.3 63",
+    "live_monitoring_file_in_patch": false
+  }
+}

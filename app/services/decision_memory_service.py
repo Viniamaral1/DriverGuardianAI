@@ -15,9 +15,10 @@ from typing import Any
 class DecisionMemoryService:
     """Persistent research trace for Guardian's advisory Intelligence layer.
 
-    V8.2 deliberately remains attached to the read-only Intelligence path, so
-    Monitoring/camera/alerts stay untouched. Sampling is throttled and disk
-    writes are batched to reduce overhead on lower-memory machines.
+    V8.2.3 is owned by the application session lifecycle rather than a browser
+    page. Monitoring starts/finalises Decision Memory automatically, while a
+    lightweight background advisory sampler records evidence. Camera ownership,
+    V3 calibration, TemporalStateEngine and AlertManager remain untouched.
     """
 
     SAMPLE_INTERVAL_SECONDS = 2.0
@@ -68,10 +69,10 @@ class DecisionMemoryService:
             "label": "",
             "condition": "",
             "notes": "",
-            "source": "Guardian Intelligence polling",
+            "source": "Guardian automatic advisory sampler",
             "coverage_note": (
-                "Samples are captured while a Guardian Intelligence/Decision Memory "
-                "view is polling. This is an advisory research trace, not every camera frame."
+                "Samples are captured automatically during Monitoring at the advisory "
+                "sampling interval. This is an explainability trace, not every camera frame."
             ),
             "sample_interval_seconds_nominal": self.SAMPLE_INTERVAL_SECONDS,
             "samples": [],
@@ -184,29 +185,118 @@ class DecisionMemoryService:
             elif conf >= .68: low_conf=False
         return events
 
-    def observe(self, metrics: dict[str, Any], intelligence: dict[str, Any]) -> dict[str, Any]:
-        monitoring=bool(metrics.get("monitoring")); now_clock=monotonic()
+    def begin(self, metrics: dict[str, Any]) -> dict[str, Any]:
+        """Start a Decision Memory session from the Monitoring lifecycle."""
         with self._lock:
-            if monitoring and not self._last_monitoring:
-                self._active=self._new_session(metrics); self._active_id=self._active["id"]
-                self._last_sample_clock=0.0; self._last_flush_clock=0.0
-            if monitoring:
-                if self._active is None:
-                    self._active=self._new_session(metrics); self._active_id=self._active["id"]
-                should_sample=(now_clock-self._last_sample_clock)>=self.SAMPLE_INTERVAL_SECONDS
-                if should_sample:
-                    self._active["samples"].append(self._sample(metrics,intelligence))
-                    self._active["summary"]=self._summary(self._active["samples"])
-                    self._last_sample_clock=now_clock
-                should_flush=should_sample and ((now_clock-self._last_flush_clock)>=self.FLUSH_INTERVAL_SECONDS or len(self._active["samples"])<=1)
-                if should_flush:
-                    self._save(self._active); self._last_flush_clock=now_clock
-            if not monitoring and self._last_monitoring and self._active:
-                self._active["ended_at"]=self._now().isoformat(timespec="seconds")
-                self._active["summary"]=self._summary(self._active["samples"])
-                self._save(self._active); self._active=None; self._active_id=None
-            self._last_monitoring=monitoring
-            return {"recording":monitoring and self._active is not None,"active_session_id":self._active_id,"sample_count":len(self._active.get("samples",[])) if self._active else 0,"coverage_note":"Decision Memory records while Guardian Intelligence or Decision Memory is open.","sample_interval_seconds":self.SAMPLE_INTERVAL_SECONDS}
+            if self._active is not None:
+                return self.status()
+
+            self._active = self._new_session(metrics)
+            self._active_id = self._active["id"]
+            self._last_monitoring = True
+            self._last_sample_clock = 0.0
+            self._last_flush_clock = 0.0
+
+            # Persist the header immediately so the new timestamp appears even
+            # before the first advisory sample.
+            self._active["summary"] = self._summary([])
+            self._save(self._active)
+            self._last_flush_clock = monotonic()
+            return self.status()
+
+    def record(
+        self,
+        metrics: dict[str, Any],
+        intelligence: dict[str, Any],
+        *,
+        force: bool = False,
+    ) -> dict[str, Any]:
+        """Append an advisory snapshot when a Monitoring session is active."""
+        now_clock = monotonic()
+        with self._lock:
+            if self._active is None:
+                if not bool(metrics.get("monitoring")):
+                    return self.status()
+                self.begin(metrics)
+
+            if not bool(metrics.get("monitoring")) and not force:
+                return self.status()
+
+            should_sample = (
+                force
+                or (now_clock - self._last_sample_clock) >= self.SAMPLE_INTERVAL_SECONDS
+            )
+            if not should_sample:
+                return self.status()
+
+            self._active["samples"].append(self._sample(metrics, intelligence))
+            self._active["summary"] = self._summary(self._active["samples"])
+            self._last_sample_clock = now_clock
+
+            should_flush = (
+                force
+                or (now_clock - self._last_flush_clock) >= self.FLUSH_INTERVAL_SECONDS
+                or len(self._active["samples"]) <= 1
+            )
+            if should_flush:
+                self._save(self._active)
+                self._last_flush_clock = now_clock
+
+            return self.status()
+
+    def finalise(self) -> dict[str, Any]:
+        """Finalise the active session even if no browser page is open."""
+        with self._lock:
+            if self._active is None:
+                self._last_monitoring = False
+                return self.status()
+
+            self._active["ended_at"] = self._now().isoformat(timespec="seconds")
+            self._active["summary"] = self._summary(self._active["samples"])
+            self._save(self._active)
+
+            completed_id = self._active_id
+            self._active = None
+            self._active_id = None
+            self._last_monitoring = False
+            self._last_sample_clock = 0.0
+            self._last_flush_clock = 0.0
+
+            return {
+                **self.status(),
+                "completed_session_id": completed_id,
+            }
+
+    def status(self) -> dict[str, Any]:
+        with self._lock:
+            return {
+                "recording": self._active is not None,
+                "active_session_id": self._active_id,
+                "sample_count": (
+                    len(self._active.get("samples", []))
+                    if self._active is not None
+                    else 0
+                ),
+                "coverage_note": (
+                    "Decision Memory starts and stops automatically with Monitoring."
+                ),
+                "sample_interval_seconds": self.SAMPLE_INTERVAL_SECONDS,
+            }
+
+    def observe(
+        self,
+        metrics: dict[str, Any],
+        intelligence: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Backward-compatible wrapper for older callers."""
+        monitoring = bool(metrics.get("monitoring"))
+        if monitoring and self._active is None:
+            self.begin(metrics)
+        if monitoring:
+            return self.record(metrics, intelligence)
+        if self._active is not None:
+            return self.finalise()
+        return self.status()
 
     def _save(self,payload:dict[str,Any])->None:
         path=self.memory_dir/f"{payload['id']}.json"; temporary=path.with_suffix('.json.tmp')

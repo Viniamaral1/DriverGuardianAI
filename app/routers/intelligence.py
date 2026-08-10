@@ -10,11 +10,12 @@ from app.services.app_state import guardian_state
 from app.services.intelligence_service import IntelligenceService
 
 router = APIRouter()
-_service = IntelligenceService(guardian_state)
 
 
 def service() -> IntelligenceService:
-    return _service
+    if guardian_state.intelligence_service is None:
+        guardian_state.intelligence_service = IntelligenceService(guardian_state)
+    return guardian_state.intelligence_service
 
 
 class DecisionMemoryMetadataRequest(BaseModel):
