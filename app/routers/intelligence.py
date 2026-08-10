@@ -4,6 +4,7 @@ import json
 
 from fastapi import APIRouter, HTTPException, Response
 from fastapi.responses import FileResponse
+from pydantic import BaseModel, Field
 
 from app.services.app_state import guardian_state
 from app.services.intelligence_service import IntelligenceService
@@ -14,6 +15,12 @@ _service = IntelligenceService(guardian_state)
 
 def service() -> IntelligenceService:
     return _service
+
+
+class DecisionMemoryMetadataRequest(BaseModel):
+    label: str = Field(default="", max_length=120)
+    condition: str = Field(default="", max_length=80)
+    notes: str = Field(default="", max_length=1000)
 
 
 @router.get("")
@@ -67,5 +74,20 @@ def decision_memory_csv(session_id: str):
 def decision_memory_compare(first_id: str, second_id: str):
     try:
         return service().decision_memory.comparison(first_id, second_id)
+    except (ValueError, FileNotFoundError, json.JSONDecodeError):
+        raise HTTPException(status_code=404, detail="Decision Memory session not found")
+
+
+@router.get("/memory-summary")
+def decision_memory_summary():
+    return service().decision_memory.aggregate()
+
+
+@router.post("/memory/{session_id}/metadata")
+def decision_memory_metadata(session_id: str, payload: DecisionMemoryMetadataRequest):
+    try:
+        return service().decision_memory.update_metadata(
+            session_id, label=payload.label, condition=payload.condition, notes=payload.notes
+        )
     except (ValueError, FileNotFoundError, json.JSONDecodeError):
         raise HTTPException(status_code=404, detail="Decision Memory session not found")

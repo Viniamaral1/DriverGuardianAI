@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="memory-hero-grid">
+  <article class="panel memory-hero-card"><span>Recorded sessions</span><strong id="dm-session-count">—</strong><small>Advisory research traces</small></article>
+  <article class="panel memory-hero-card"><span>Observed time</span><strong id="dm-observed-time">—</strong><small>While Intelligence/Memory was open</small></article>
+  <article class="panel memory-hero-card"><span>Peak advisory risk</span><strong id="dm-peak-risk">—</strong><small>Across stored traces</small></article>
+  <article class="panel memory-hero-card"><span>Average confidence</span><strong id="dm-average-confidence">—</strong><small>Decision confidence</small></article>
+</section>
+
+<section class="memory-workspace">
+  <aside class="panel memory-browser">
+    <div class="panel-head"><div><p class="eyebrow">SESSION LIBRARY</p><h2>Decision Memory</h2></div><button class="icon-button" id="dm-refresh" title="Refresh">↻</button></div>
+    <p class="muted">Choose a journey trace to replay, annotate or export.</p>
+    <div class="memory-filter-row"><input id="dm-search" type="search" placeholder="Search driver, label or condition"><select id="dm-sort"><option value="newest">Newest</option><option value="risk">Highest risk</option><option value="confidence">Lowest confidence</option></select></div>
+    <div id="dm-session-list" class="memory-session-list"><div class="empty-state">Loading Decision Memory…</div></div>
+  </aside>
+
+  <main class="panel memory-replay-panel">
+    <div class="panel-head"><div><p class="eyebrow">EXPLAINABLE REPLAY</p><h2 id="dm-replay-title">Select a recorded session</h2></div><div class="button-row"><button class="button secondary" id="dm-play" type="button" disabled>▶ Replay</button><a class="button secondary disabled" id="dm-json" href="#">JSON</a><a class="button secondary disabled" id="dm-csv" href="#">CSV</a></div></div>
+
+    <div id="dm-empty-replay" class="memory-empty-hero"><strong>Guardian's AI flight recorder</strong><p>Select a session to inspect how risk, confidence, the model and personal evidence changed through time.</p></div>
+
+    <div id="dm-replay-content" class="memory-replay-content hidden">
+      <div class="memory-session-summary" id="dm-session-summary"></div>
+      <svg id="dm-replay-chart" class="memory-main-chart" viewBox="0 0 1100 300" role="img" aria-label="Decision replay chart"></svg>
+      <div class="memory-chart-legend"><span><i class="dm-cyan"></i>Advisory risk</span><span><i class="dm-amber"></i>Confidence</span><span><i class="dm-muted"></i>Raw model</span><span><i class="dm-event"></i>Event</span></div>
+      <input id="dm-slider" class="memory-slider" type="range" min="0" max="0" value="0">
+
+      <div class="memory-inspector-grid">
+        <section class="memory-inspector-card">
+          <div class="memory-inspector-time"><span id="dm-point-time">—</span><b id="dm-point-band">—</b></div>
+          <div class="memory-kpis"><div><span>Advisory risk</span><b id="dm-point-risk">—</b></div><div><span>Confidence</span><b id="dm-point-confidence">—</b></div><div><span>EAR / baseline</span><b id="dm-point-ear">—</b></div><div><span>State</span><b id="dm-point-state">—</b></div></div>
+          <div class="memory-action"><span>Recorded recommendation</span><p id="dm-point-action">—</p></div>
+        </section>
+        <section class="memory-inspector-card">
+          <div class="panel-head compact"><div><p class="eyebrow">WHY?</p><h3>Evidence at this moment</h3></div></div>
+          <div id="dm-evidence" class="memory-evidence-list"></div>
+          <div class="memory-context" id="dm-context"></div>
+        </section>
+      </div>
+
+      <section class="memory-events-section"><div class="panel-head compact"><div><p class="eyebrow">EVENT MARKERS</p><h3>Meaningful changes</h3></div><span class="badge" id="dm-event-count">0 EVENTS</span></div><div id="dm-events" class="memory-event-list"></div></section>
+
+      <section class="memory-metadata-section"><div class="panel-head compact"><div><p class="eyebrow">RESEARCH ANNOTATION</p><h3>Label this session</h3></div></div><div class="memory-metadata-grid"><label>Session label<input id="dm-label" placeholder="Example: Sunglasses test"></label><label>Condition<input id="dm-condition" placeholder="Example: bright light + sunglasses"></label><label class="wide">Notes<textarea id="dm-notes" rows="2" placeholder="Optional observations"></textarea></label><button class="button primary" id="dm-save-metadata" type="button">Save annotation</button></div></section>
+    </div>
+  </main>
+</section>
+
+<section class="panel memory-studio">
+  <div class="panel-head"><div><p class="eyebrow">GUARDIAN STUDIO</p><h2>Compare two sessions</h2></div><span class="badge">SIDE BY SIDE</span></div>
+  <p class="muted">Compare recorded advisory behaviour without changing the model or live safety path.</p>
+  <div class="memory-compare-controls"><label>Session A<select id="dm-compare-a"></select></label><label>Session B<select id="dm-compare-b"></select></label><button class="button primary" id="dm-compare" type="button">Compare sessions</button></div>
+  <div id="dm-compare-result" class="memory-compare-result"><div class="empty-state">Select two different sessions to open Guardian Studio.</div></div>
+  <svg id="dm-compare-chart" class="memory-main-chart hidden" viewBox="0 0 1100 270" role="img" aria-label="Session comparison chart"></svg>
+</section>
+
+<section class="panel memory-boundary"><p class="eyebrow">RESEARCH BOUNDARY</p><p>Decision Memory is an explainability trace sampled from Guardian's read-only Intelligence layer. It is not every camera frame and it does not control Monitoring, the trained model, calibration, TemporalStateEngine or alerts.</p></section>
+{% endblock %}
+{% block scripts %}<script src="/static/js/decision_memory.js?v=8.2.0"></script>{% endblock %}

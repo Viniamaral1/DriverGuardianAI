@@ -639,11 +639,12 @@ intelligenceEl("intelligence-refresh")?.addEventListener("click", async event =>
   DG.toast("Guardian Intelligence refreshed", "success");
 });
 
-DG.subscribe(() => {
-  if (document.visibilityState === "visible") loadIntelligence();
-});
+// Core WebSocket already maintains the global READY/MONITORING state.
+// V8.2 intentionally avoids re-fetching the full Intelligence payload on every
+// WebSocket frame; the 4-second timer below is enough for advisory charts and
+// materially reduces CPU, JSON serialization and Decision Memory disk traffic.
 
 loadIntelligence();
 v81LoadMemoryList();
 window.setInterval(loadIntelligence, 4000);
-window.setInterval(v81LoadMemoryList, 12000);
+window.setInterval(v81LoadMemoryList, 20000);

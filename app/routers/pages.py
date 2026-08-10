@@ -61,6 +61,16 @@ def intelligence_page(request: Request):
     )
 
 
+@router.get("/decision-memory")
+def decision_memory_page(request: Request):
+    return render(
+        request,
+        "decision_memory.html",
+        "decision_memory",
+        "Decision Memory",
+    )
+
+
 
 @router.get("/profiles")
 def profiles_page(request: Request):

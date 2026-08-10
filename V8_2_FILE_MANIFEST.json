@@ -1,0 +1,59 @@
+{
+  "release": "Guardian OS V8.2 Decision Memory & Guardian Studio",
+  "source": "GuardianOS-V8.1-Next-Phase-20260808-225326.zip",
+  "files": {
+    "app/services/decision_memory_service.py": {
+      "bytes": 17692,
+      "sha256": "4b85eb5bcc67d3e81c41bcf5521a61ef28cafb5a685463681bd527a7d89ec888"
+    },
+    "app/routers/intelligence.py": {
+      "bytes": 3014,
+      "sha256": "0feae1cf829db2403f3776772fd906ae8848b5e475932b0e18e2a96285908022"
+    },
+    "app/routers/pages.py": {
+      "bytes": 2439,
+      "sha256": "cf1393fb4baf375404e1e5b9a7b9179d47dfad4b6b753e84a28c03e44473a81c"
+    },
+    "app/templates/base.html": {
+      "bytes": 4122,
+      "sha256": "ee15853836f46ed7756bd525fb9c2fb011e59f6765481f40c0e873a83e75f176"
+    },
+    "app/templates/decision_memory.html": {
+      "bytes": 5922,
+      "sha256": "bdbf67c4c0619de793e69cb3e9d70f6183cc10f4a5e5825149c395cce83ebd4b"
+    },
+    "app/static/js/decision_memory.js": {
+      "bytes": 11264,
+      "sha256": "803183cbc0ae532ec44bc7525e6f9a99f3749ec688d1331fabb38d7148a55314"
+    },
+    "app/static/js/intelligence.js": {
+      "bytes": 23918,
+      "sha256": "da76930750b715e73bf9ece5f9ddd7b2116aea505e63a527055f03bca938517d"
+    },
+    "app/static/css/app.css": {
+      "bytes": 102396,
+      "sha256": "6808837d44a2ba0bc4171026f091063f8ae3aee8239c4eede55d520650868d9d"
+    },
+    "app/main.py": {
+      "bytes": 1845,
+      "sha256": "77047d48fa16a4b488dfc8ffdcdc0bdc97abb2084049faa6761c551689e25410"
+    },
+    "GUARDIAN_OS_V8_2_DECISION_MEMORY_STUDIO.md": {
+      "bytes": 1412,
+      "sha256": "38bda6ba2cf39a30476619d77df5a2aedcb7d9771f31f553514065d00a58db65"
+    }
+  },
+  "protected_unchanged": [
+    "app/services/live_monitoring_service.py",
+    "app/services/persistent_calibration.py",
+    "app/templates/monitoring.html",
+    "app/static/js/monitoring.js"
+  ],
+  "validation": {
+    "python_syntax": "passed",
+    "javascript_syntax": "passed",
+    "decision_memory_events_metadata_exports": "passed",
+    "performance_throttle": "passed",
+    "protected_monitoring_files_in_patch": false
+  }
+}
