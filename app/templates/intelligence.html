@@ -356,7 +356,11 @@
         <div><span>Current weather</span><b id="context-weather">Unknown</b><small id="context-weather-source">Unknown source</small></div>
         <div><span>Road condition</span><b id="context-road">Unknown</b><small id="context-road-source">Unknown source</small></div>
         <div><span>Cabin light</span><b id="context-cabin">Unknown</b></div>
-        <div><span>Occlusion</span><b id="context-occlusion">None</b></div>
+        <div>
+          <span>Resolved occlusion</span>
+          <b id="context-occlusion">None</b>
+          <small id="context-occlusion-detail">Automatic detector standby</small>
+        </div>
       </div>
       <p class="intelligence-context-summary" id="context-summary">
         No additional journey-context caution is currently recorded.
@@ -429,5 +433,5 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="/static/js/intelligence.js?v=8.1.0"></script>
+<script src="/static/js/intelligence.js?v=8.3.1"></script>
 {% endblock %}

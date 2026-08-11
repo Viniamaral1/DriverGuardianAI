@@ -334,6 +334,9 @@ class IntelligenceService:
             "external_light": resolved_value("external_light", automatic_light),
             "cabin_light": resolved_value("cabin_light"),
             "occlusion": effective_occlusion,
+            "manual_occlusion": manual_occlusion,
+            "resolved_occlusion": effective_occlusion,
+            "occlusion_source": str(occlusion_source.get("source") or "unknown"),
             "automatic_time_period": period,
             "automatic_external_light": resolved_value("external_light", automatic_light),
             "local_time": now.isoformat(timespec="seconds"),
@@ -349,6 +352,11 @@ class IntelligenceService:
                 "confidence": round(automatic_occlusion_confidence, 4),
                 "summary": metrics.get("automatic_occlusion_summary", ""),
                 "eye_visibility_score": self._number(metrics.get("eye_visibility_score")),
+                "eye_region_brightness_ratio": self._number(
+                    metrics.get("eye_region_brightness_ratio")
+                ),
+                "eye_dark_ratio": self._number(metrics.get("eye_dark_ratio")),
+                "eye_edge_density": self._number(metrics.get("eye_edge_density")),
             },
             "automatic_weather": resolved_context.get("automatic_weather", {}),
             "location": resolved_context.get("location", ""),

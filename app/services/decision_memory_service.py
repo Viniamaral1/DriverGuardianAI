@@ -31,6 +31,10 @@ class DecisionMemoryService:
         "existing_smoothed_probability", "advisory_risk", "risk_band",
         "decision_confidence", "confidence_level", "signal_quality", "image_quality",
         "weather", "road_condition", "external_light", "occlusion",
+        "automatic_occlusion", "automatic_occlusion_confidence",
+        "eye_visibility_score", "eye_region_brightness_ratio",
+        "eye_dark_ratio", "eye_edge_density",
+        "manual_occlusion", "resolved_occlusion", "occlusion_source",
         "context_caution", "dominant_evidence", "recommended_action",
     ]
 
@@ -61,7 +65,7 @@ class DecisionMemoryService:
         now = self._now()
         session_id = f"decision_{now.strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
         return {
-            "schema_version": "8.2-decision-memory-v2",
+            "schema_version": "8.3.1-decision-memory-v3",
             "id": session_id,
             "started_at": now.isoformat(timespec="seconds"),
             "ended_at": None,
@@ -113,6 +117,48 @@ class DecisionMemoryService:
             "road_condition": str(context.get("road_condition") or "unknown"),
             "external_light": str(context.get("external_light") or "unknown"),
             "occlusion": str(context.get("occlusion") or "none"),
+            "automatic_occlusion": str(
+                (context.get("automatic_occlusion") or {}).get("value")
+                or metrics.get("automatic_occlusion")
+                or "unknown"
+            ),
+            "automatic_occlusion_confidence": round(
+                self._number(
+                    (context.get("automatic_occlusion") or {}).get("confidence")
+                    or metrics.get("automatic_occlusion_confidence")
+                ),
+                6,
+            ),
+            "eye_visibility_score": round(
+                self._number(
+                    (context.get("automatic_occlusion") or {}).get("eye_visibility_score")
+                    or metrics.get("eye_visibility_score")
+                ),
+                6,
+            ),
+            "eye_region_brightness_ratio": round(
+                self._number(metrics.get("eye_region_brightness_ratio")),
+                6,
+            ),
+            "eye_dark_ratio": round(
+                self._number(metrics.get("eye_dark_ratio")),
+                6,
+            ),
+            "eye_edge_density": round(
+                self._number(metrics.get("eye_edge_density")),
+                6,
+            ),
+            "manual_occlusion": str(context.get("manual_occlusion") or "none"),
+            "resolved_occlusion": str(
+                context.get("resolved_occlusion")
+                or context.get("occlusion")
+                or "none"
+            ),
+            "occlusion_source": str(
+                context.get("occlusion_source")
+                or ((context.get("sources") or {}).get("occlusion") or {}).get("source")
+                or "unknown"
+            ),
             "context_caution": str(caution.get("level") or "normal"),
             "dominant_evidence": str(strongest.get("label") or "none"),
             "recommended_action": str(engine.get("action") or ""),

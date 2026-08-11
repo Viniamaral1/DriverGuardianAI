@@ -1,0 +1,56 @@
+{
+  "release": "Guardian OS V8.3.1 Occlusion Pipeline Diagnostics",
+  "source": "GuardianOS-V8.3.1-Occlusion-Pipeline-Fix-20260811-134800.zip",
+  "changed_files": {
+    "app/services/decision_memory_service.py": {
+      "bytes": 21883,
+      "sha256": "d42080f57767a335affbdca50bc7d8dda76d4032fd2fa5abd8d435018de21ec0"
+    },
+    "app/services/intelligence_service.py": {
+      "bytes": 19924,
+      "sha256": "3574b642a610bf6b2aa39fd31da6f7bbb043cc8c3e6439417dfdf9388135fe1d"
+    },
+    "app/routers/edge.py": {
+      "bytes": 4539,
+      "sha256": "1f91d7b1b6d92ccfbdba334ecf10b760da999c3d65759c58bb2c556020b6d5e6"
+    },
+    "app/templates/edge.html": {
+      "bytes": 9521,
+      "sha256": "e6cb87c4f25de37c7c8feec41dd06f3eeadac37c2a4042e6a802f6298981c7d6"
+    },
+    "app/static/js/edge.js": {
+      "bytes": 11761,
+      "sha256": "da8f797fe8716457c6c156b96ead7366d1b84a0aadd08646a4125af33ae5d4db"
+    },
+    "app/templates/intelligence.html": {
+      "bytes": 16755,
+      "sha256": "32bdd836fed42aa9eb4243de7b4d1b433bc35b1428e7d4e48e276fa09103b30d"
+    },
+    "app/static/js/intelligence.js": {
+      "bytes": 24376,
+      "sha256": "aad43dd5986620b2029e92edf677c70e7fb24b295598d678c7fb8cc99c1f1eb2"
+    },
+    "app/main.py": {
+      "bytes": 1849,
+      "sha256": "0e3706a706172480c68f7bfbac494f8ba551ceb3bb5713fa2adf373ea58f48f5"
+    },
+    "GUARDIAN_OS_V8_3_1_OCCLUSION_PIPELINE_DIAGNOSTICS.md": {
+      "bytes": 987,
+      "sha256": "81963e5508759cf8574b3ced8e863a1b60bb86166fc7ab8dfd717bc98f2259c9"
+    }
+  },
+  "protected_unchanged": [
+    "app/services/live_monitoring_service.py",
+    "app/services/environmental_perception_service.py",
+    "app/services/persistent_calibration.py",
+    "app/templates/monitoring.html",
+    "app/static/js/monitoring.js",
+    "realtime_driver_guardian_v3_alerts.py"
+  ],
+  "validation": {
+    "python_syntax": "passed",
+    "javascript_syntax": "passed",
+    "detector_thresholds_changed": false,
+    "live_monitoring_pipeline_changed": false
+  }
+}

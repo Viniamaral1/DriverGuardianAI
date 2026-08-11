@@ -95,6 +95,23 @@ function renderEdge(snapshot) {
   edgeSnapshot = snapshot;
   const insights = snapshot.insights || {};
   const sessions = snapshot.recent_sessions || [];
+  const perception = snapshot.live_perception || {};
+
+  edgeEl("auto-occlusion-value").textContent =
+    String(perception.automatic_occlusion || "unknown").replaceAll("_", " ");
+  edgeEl("auto-occlusion-confidence").textContent =
+    edgePercent(perception.automatic_occlusion_confidence);
+  edgeEl("auto-occlusion-summary").textContent =
+    perception.automatic_occlusion_summary ||
+    "Start Monitoring to analyse eye visibility.";
+  edgeEl("auto-eye-visibility").textContent =
+    edgePercent(perception.eye_visibility_score);
+  edgeEl("auto-eye-ratio").textContent =
+    `Brightness ratio ${Number(perception.eye_region_brightness_ratio || 0).toFixed(2)}`;
+  edgeEl("auto-eye-darkness").textContent =
+    edgePercent(perception.eye_dark_ratio);
+  edgeEl("auto-eye-edges").textContent =
+    `Edge density ${Number(perception.eye_edge_density || 0).toFixed(3)}`;
 
   edgeEl("edge-updated").textContent =
     `Updated ${edgeDate(snapshot.updated_at)}`;

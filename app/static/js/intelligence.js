@@ -118,6 +118,19 @@ function renderIntelligence(snapshot) {
     intelligenceLabel(context.cabin_light);
   intelligenceEl("context-occlusion").textContent =
     intelligenceLabel(context.occlusion);
+
+  const autoOcclusion = context.automatic_occlusion || {};
+  const resolvedSource =
+    context.occlusion_source ||
+    context.sources?.occlusion?.source ||
+    "unknown";
+  const detail = intelligenceEl("context-occlusion-detail");
+  if (detail) {
+    detail.textContent =
+      `Auto: ${intelligenceLabel(autoOcclusion.value || "unknown")} · ` +
+      `${intelligencePercent(autoOcclusion.confidence || 0)} · ` +
+      `Source: ${resolvedSource}`;
+  }
   intelligenceEl("context-summary").textContent =
     caution.summary || "No additional journey caution is recorded.";
   intelligenceEl("context-caution-badge").textContent =

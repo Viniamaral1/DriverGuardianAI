@@ -34,7 +34,31 @@ def service():
 @router.get("")
 def snapshot():
     service().refresh_from_reports()
-    return service().snapshot()
+    payload = service().snapshot()
+    metrics = guardian_state.metrics()
+    payload["live_perception"] = {
+        "monitoring": bool(metrics.get("monitoring")),
+        "automatic_occlusion": str(metrics.get("automatic_occlusion") or "unknown"),
+        "automatic_occlusion_confidence": float(
+            metrics.get("automatic_occlusion_confidence") or 0.0
+        ),
+        "automatic_occlusion_summary": str(
+            metrics.get("automatic_occlusion_summary") or ""
+        ),
+        "eye_visibility_score": float(metrics.get("eye_visibility_score") or 0.0),
+        "eye_region_brightness_ratio": float(
+            metrics.get("eye_region_brightness_ratio") or 0.0
+        ),
+        "eye_dark_ratio": float(metrics.get("eye_dark_ratio") or 0.0),
+        "eye_edge_density": float(metrics.get("eye_edge_density") or 0.0),
+        "perception_quality": str(
+            metrics.get("automatic_perception_quality") or "standby"
+        ),
+        "perception_score": float(
+            metrics.get("automatic_perception_score") or 0.0
+        ),
+    }
+    return payload
 
 
 @router.post("/refresh")

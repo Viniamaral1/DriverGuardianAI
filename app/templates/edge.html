@@ -103,6 +103,13 @@
   <button class="button secondary" id="edge-refresh-weather" type="button">Refresh weather now</button>
 </div>
 
+<div class="automatic-context-status occlusion-diagnostic-card" id="automatic-occlusion-status">
+  <div><span>Automatic occlusion</span><b id="auto-occlusion-value">Unknown</b><small id="auto-occlusion-summary">Start Monitoring to analyse eye visibility</small></div>
+  <div><span>Detector confidence</span><b id="auto-occlusion-confidence">0%</b><small>Live camera perception</small></div>
+  <div><span>Eye visibility</span><b id="auto-eye-visibility">0%</b><small id="auto-eye-ratio">Brightness ratio —</small></div>
+  <div><span>Eye darkness</span><b id="auto-eye-darkness">0%</b><small id="auto-eye-edges">Edge density —</small></div>
+</div>
+
 <form id="edge-context-form" class="edge-context-form">
   <label class="switch-row edge-context-wide">
     <span><b>Automatic online weather</b><small>Use current modelled conditions for the configured location</small></span>
@@ -174,4 +181,4 @@
   </section>
 </div>
 {% endblock %}
-{% block scripts %}<script src="/static/js/edge.js?v=6.3.3"></script>{% endblock %}
+{% block scripts %}<script src="/static/js/edge.js?v=8.3.1"></script>{% endblock %}
