@@ -138,12 +138,22 @@ class DecisionEngineService:
         })
 
         occlusion = str(((context.get("occlusion") or {}).get("value", "none"))).lower()
-        if occlusion in {"sunglasses", "glasses_and_hat"}:
-            score -= 0.12
+        occlusion_penalties = {
+            "glasses": 0.03,
+            "sunglasses": 0.12,
+            "glasses_and_hat": 0.10,
+            "eye_occlusion": 0.12,
+            "partial_face": 0.16,
+            "hand_or_object": 0.18,
+            "uncertain": 0.06,
+        }
+        penalty = occlusion_penalties.get(occlusion, 0.0)
+        if penalty > 0:
+            score -= penalty
             factors.append({
                 "label": "Occlusion context",
                 "status": occlusion.replace("_", " "),
-                "effect": -0.12,
+                "effect": -round(penalty, 3),
             })
 
         score = cls._clamp(score)
@@ -183,7 +193,10 @@ class DecisionEngineService:
             reasons.append(road.replace("_", " "))
         if light in {"night", "dark", "dusk"}:
             reasons.append(light)
-        if occlusion in {"sunglasses", "glasses_and_hat"}:
+        if occlusion in {
+            "sunglasses", "glasses_and_hat", "eye_occlusion",
+            "partial_face", "hand_or_object",
+        }:
             reasons.append(occlusion.replace("_", " "))
 
         level = "high" if len(reasons) >= 3 else "elevated" if reasons else "normal"

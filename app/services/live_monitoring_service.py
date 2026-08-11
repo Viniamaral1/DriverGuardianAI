@@ -107,6 +107,15 @@ class LiveMonitoringService:
             "automatic_perception_summary": (
                 "Start Monitoring to analyse camera image quality."
             ),
+            "automatic_occlusion": "unknown",
+            "automatic_occlusion_confidence": 0.0,
+            "automatic_occlusion_summary": (
+                "Start Monitoring to analyse eye visibility."
+            ),
+            "eye_visibility_score": 0.0,
+            "eye_region_brightness_ratio": 0.0,
+            "eye_dark_ratio": 0.0,
+            "eye_edge_density": 0.0,
             "error": None,
             "log_path": None,
         }
@@ -603,14 +612,15 @@ class LiveMonitoringService:
                 )
 
                 frame = cv2.flip(frame, 1)
+                features, face_landmarks = v3.extract_features(frame, face_mesh)
+
                 if now - last_environment_analysis >= 0.5:
                     environment_metrics = environmental_perception.analyse(
                         frame,
                         cv2,
+                        face_landmarks=face_landmarks,
                     )
                     last_environment_analysis = now
-
-                features, face_landmarks = v3.extract_features(frame, face_mesh)
 
                 if face_landmarks is not None:
                     mp.solutions.drawing_utils.draw_landmarks(

@@ -289,18 +289,66 @@ class IntelligenceService:
             item = resolved_context.get(name, {}) or {}
             return str(item.get("value", fallback) or fallback)
 
+        automatic_occlusion = str(metrics.get("automatic_occlusion", "unknown") or "unknown")
+        automatic_occlusion_confidence = self._number(
+            metrics.get("automatic_occlusion_confidence")
+        )
+        manual_occlusion = resolved_value("occlusion", "none")
+        use_manual_occlusion = bool(resolved_context.get("manual_override"))
+
+        if use_manual_occlusion:
+            effective_occlusion = manual_occlusion
+            occlusion_source = resolved_context.get("occlusion", {}) or {}
+        elif automatic_occlusion not in {"", "unknown", "uncertain"} and automatic_occlusion_confidence >= 0.58:
+            effective_occlusion = automatic_occlusion
+            occlusion_source = {
+                "value": automatic_occlusion,
+                "source": "Automatic eye-region analysis",
+                "confidence": round(automatic_occlusion_confidence, 4),
+                "updated_at": now.isoformat(timespec="seconds"),
+                "fresh": True,
+                "summary": metrics.get("automatic_occlusion_summary", ""),
+            }
+        else:
+            effective_occlusion = "none" if automatic_occlusion == "none" else manual_occlusion
+            occlusion_source = {
+                "value": effective_occlusion,
+                "source": (
+                    "Automatic eye-region analysis"
+                    if automatic_occlusion == "none" and automatic_occlusion_confidence >= 0.58
+                    else "Manual/default context"
+                ),
+                "confidence": (
+                    round(automatic_occlusion_confidence, 4)
+                    if automatic_occlusion == "none"
+                    else 0.0
+                ),
+                "updated_at": now.isoformat(timespec="seconds"),
+                "fresh": bool(metrics.get("monitoring")),
+                "summary": metrics.get("automatic_occlusion_summary", ""),
+            }
+
         effective_context = {
             "weather": resolved_value("weather"),
             "road_condition": resolved_value("road_condition"),
             "external_light": resolved_value("external_light", automatic_light),
             "cabin_light": resolved_value("cabin_light"),
-            "occlusion": resolved_value("occlusion", "none"),
+            "occlusion": effective_occlusion,
             "automatic_time_period": period,
             "automatic_external_light": resolved_value("external_light", automatic_light),
             "local_time": now.isoformat(timespec="seconds"),
             "sources": {
-                key: resolved_context.get(key, {})
-                for key in ("weather", "road_condition", "external_light", "cabin_light", "occlusion", "local_period")
+                **{
+                    key: resolved_context.get(key, {})
+                    for key in ("weather", "road_condition", "external_light", "cabin_light", "local_period")
+                },
+                "occlusion": occlusion_source,
+            },
+            "automatic_occlusion": {
+                "value": automatic_occlusion,
+                "confidence": round(automatic_occlusion_confidence, 4),
+                "summary": metrics.get("automatic_occlusion_summary", ""),
+                "eye_visibility_score": self._number(metrics.get("eye_visibility_score")),
             },
             "automatic_weather": resolved_context.get("automatic_weather", {}),
             "location": resolved_context.get("location", ""),
@@ -321,9 +369,11 @@ class IntelligenceService:
                 str(effective_context.get("occlusion")).replace("_", " ")
             )
 
+        decision_context = dict(resolved_context)
+        decision_context["occlusion"] = occlusion_source
         decision_engine = self.decision_engine.snapshot(
             metrics,
-            resolved_context,
+            decision_context,
         )
 
         payload = {
@@ -385,7 +435,7 @@ class IntelligenceService:
                 ),
                 "scope_note": (
                     "This layer measures image conditions only. It does not "
-                    "identify glasses, hats or driver identity."
+                    "identify driver identity. Automatic eye-region occlusion is conservative; clear glasses and hats may still require manual context."
                 ),
             },
             "journey_caution": {

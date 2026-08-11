@@ -1,0 +1,49 @@
+{
+  "release": "Guardian OS V8.3 Conservative Automatic Occlusion Perception",
+  "source": "GuardianOS-V8.2.3-Occlusion-Review-20260810-210854.zip",
+  "files": {
+    "app/services/environmental_perception_service.py": {
+      "bytes": 15168,
+      "sha256": "734bf141f62b7b20ff2f7fde04680ae181bb878f6962143c3b0029a087e89b10"
+    },
+    "app/services/live_monitoring_service.py": {
+      "bytes": 34168,
+      "sha256": "945dad138aa3c1c4c981d3c1b92bc17b5e2831753f9632eed9d918c1a5675201"
+    },
+    "app/services/intelligence_service.py": {
+      "bytes": 19432,
+      "sha256": "b0e9c137d96e8c934417e300e93fb83d852f4cecc8e3b777eb8649eccf9deef4"
+    },
+    "app/services/decision_engine_service.py": {
+      "bytes": 14733,
+      "sha256": "513f2fb0f181b0f774d4f0f4469e9e963dc50cbc0539029f137628cc6142bfaa"
+    },
+    "app/templates/edge.html": {
+      "bytes": 8870,
+      "sha256": "8cbf86a0dd7134c9bc030d7961dff546137ba5004c3df797946744b8a28735ad"
+    },
+    "app/templates/intelligence.html": {
+      "bytes": 16633,
+      "sha256": "794474f89c3458339510bcda5fd8926c6255024cc8cc8a21ee30f3bd5173238d"
+    },
+    "app/main.py": {
+      "bytes": 1845,
+      "sha256": "c4d1ebcc6515c2a60d6c2dac5823e0730e0602845e3a333b9a33436b0849b07e"
+    },
+    "GUARDIAN_OS_V8_3_OCCLUSION_PERCEPTION.md": {
+      "bytes": 2426,
+      "sha256": "8aed695d10c633ab37f269c33135be1f9b2992f859f201bf255428edab15698e"
+    }
+  },
+  "protected_unchanged": [
+    "realtime_driver_guardian_v3_alerts.py",
+    "app/services/persistent_calibration.py",
+    "app/static/js/monitoring.js"
+  ],
+  "validation": {
+    "python_syntax": "passed",
+    "fatigue_model_modified": false,
+    "calibration_modified": false,
+    "alert_logic_modified": false
+  }
+}
