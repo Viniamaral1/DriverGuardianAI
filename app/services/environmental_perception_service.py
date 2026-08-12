@@ -18,7 +18,14 @@ class EnvironmentalPerceptionService:
     RIGHT_EYE = (362, 263, 386, 374, 385, 380)
 
     def __init__(self) -> None:
-        self._occlusion_history: deque[tuple[str, float]] = deque(maxlen=5)
+        # Raw frame-level evidence is retained separately from the temporally
+        # stabilised label. Environmental analysis runs roughly every 0.5 s,
+        # so 8 samples represent about four seconds of recent evidence.
+        self._occlusion_history: deque[dict[str, Any]] = deque(maxlen=8)
+        self._stable_occlusion = "none"
+        self._stable_occlusion_confidence = 0.72
+        self._candidate_occlusion: str | None = None
+        self._candidate_count = 0
 
     @staticmethod
     def _clip(value: float) -> float:
@@ -62,6 +69,141 @@ class EnvironmentalPerceptionService:
             return None
         return gray[yy1:yy2, xx1:xx2]
 
+    def _stabilise_occlusion(
+        self,
+        raw_label: str,
+        raw_confidence: float,
+        lighting: str,
+        metrics: dict[str, float],
+    ) -> tuple[str, float, str]:
+        """Apply persistence and hysteresis without hiding raw evidence."""
+
+        raw_label = str(raw_label or "unknown")
+        raw_confidence = self._clip(raw_confidence)
+        item = {
+            "label": raw_label,
+            "confidence": raw_confidence,
+            "lighting": lighting,
+            "brightness_ratio": float(metrics.get("eye_region_brightness_ratio", 0.0) or 0.0),
+            "dark_ratio": float(metrics.get("eye_dark_ratio", 0.0) or 0.0),
+            "visibility": float(metrics.get("eye_visibility_score", 0.0) or 0.0),
+        }
+        self._occlusion_history.append(item)
+
+        # "uncertain" is meaningful information about the current frame. It
+        # must not instantly erase an already-established physical occlusion.
+        if raw_label in {"unknown", "uncertain"}:
+            if self._stable_occlusion not in {"none", "unknown", "uncertain"}:
+                held_confidence = max(0.50, self._stable_occlusion_confidence * 0.92)
+                self._stable_occlusion_confidence = held_confidence
+                return (
+                    self._stable_occlusion,
+                    held_confidence,
+                    "Temporal state held while the current frame is visually uncertain.",
+                )
+            return (
+                "uncertain",
+                max(0.35, raw_confidence),
+                "Current lighting or visibility is insufficient for a stable physical-occlusion label.",
+            )
+
+        # Recent weighted support. Eye-occlusion evidence contributes partial
+        # support to sunglasses because both indicate reduced eye visibility,
+        # but only raw sunglasses frames can promote the specific sunglasses label.
+        recent = list(self._occlusion_history)
+        sunglasses_votes = sum(
+            x["confidence"] for x in recent if x["label"] == "sunglasses"
+        )
+        eye_votes = sum(
+            x["confidence"] for x in recent if x["label"] == "eye_occlusion"
+        )
+        none_votes = sum(
+            x["confidence"] for x in recent if x["label"] == "none"
+        )
+        partial_votes = sum(
+            x["confidence"] for x in recent if x["label"] == "partial_face"
+        )
+
+        # Candidate streak is deliberately separate from weighted history.
+        if raw_label == self._candidate_occlusion:
+            self._candidate_count += 1
+        else:
+            self._candidate_occlusion = raw_label
+            self._candidate_count = 1
+
+        previous = self._stable_occlusion
+
+        # Partial face is visually distinct but still requires persistence.
+        if raw_label == "partial_face":
+            if self._candidate_count >= 2 or partial_votes >= 1.35:
+                self._stable_occlusion = "partial_face"
+                self._stable_occlusion_confidence = min(0.90, max(0.65, partial_votes / 2.0))
+        elif raw_label == "sunglasses":
+            # Specific sunglasses promotion requires persistent direct evidence,
+            # not one lucky dark/glare frame.
+            if (
+                self._candidate_count >= 2
+                and sunglasses_votes >= 1.35
+            ) or sunglasses_votes >= 2.05:
+                self._stable_occlusion = "sunglasses"
+                support = sunglasses_votes + eye_votes * 0.20
+                self._stable_occlusion_confidence = min(0.94, max(0.68, support / 3.0))
+            elif previous in {"none", "uncertain", "unknown"}:
+                # While waiting for sunglasses persistence, use the safer
+                # generic eye-occlusion state if recent evidence supports it.
+                if sunglasses_votes + eye_votes >= 1.40:
+                    self._stable_occlusion = "eye_occlusion"
+                    self._stable_occlusion_confidence = min(
+                        0.84, max(0.58, (sunglasses_votes + eye_votes) / 3.0)
+                    )
+        elif raw_label == "eye_occlusion":
+            # Do not immediately downgrade an established sunglasses state.
+            if previous == "sunglasses":
+                if eye_votes >= 2.20 and sunglasses_votes < 0.80:
+                    self._stable_occlusion = "eye_occlusion"
+                    self._stable_occlusion_confidence = min(0.82, max(0.58, eye_votes / 3.0))
+            elif self._candidate_count >= 2 or eye_votes + sunglasses_votes >= 1.35:
+                self._stable_occlusion = "eye_occlusion"
+                self._stable_occlusion_confidence = min(
+                    0.84, max(0.58, (eye_votes + sunglasses_votes * 0.65) / 3.0)
+                )
+        elif raw_label == "none":
+            # Clearing an established physical occlusion requires stronger
+            # persistence than entering it. This is the hysteresis that stops
+            # one bright/reflection frame from snapping back to "none".
+            required_none_streak = (
+                4
+                if previous in {"sunglasses", "partial_face"}
+                else 3
+            )
+            required_none_votes = (
+                2.60
+                if previous in {"sunglasses", "partial_face"}
+                else 1.85
+            )
+            if self._candidate_count >= required_none_streak and none_votes >= required_none_votes:
+                self._stable_occlusion = "none"
+                self._stable_occlusion_confidence = min(0.90, max(0.65, none_votes / 4.0))
+            elif previous in {"none", "unknown", "uncertain"}:
+                self._stable_occlusion = "none"
+                self._stable_occlusion_confidence = max(0.62, raw_confidence)
+
+        stable = self._stable_occlusion
+        confidence = self._clip(self._stable_occlusion_confidence)
+
+        if stable == "sunglasses":
+            summary = "Persistent recent eye-region evidence is consistent with sunglasses or dark bilateral eye covering."
+        elif stable == "eye_occlusion":
+            summary = "Persistent recent evidence indicates reduced eye visibility without enough specificity for a sunglasses label."
+        elif stable == "partial_face":
+            summary = "Persistent recent landmarks indicate that part of the face is close to or outside the camera boundary."
+        elif stable == "none":
+            summary = "Recent frames do not support a persistent eye-region occlusion."
+        else:
+            summary = "Temporal occlusion evidence remains uncertain."
+
+        return stable, confidence, summary
+
     def _analyse_occlusion(
         self,
         gray: Any,
@@ -71,12 +213,21 @@ class EnvironmentalPerceptionService:
     ) -> dict[str, Any]:
         if face_landmarks is None:
             return {
-                "automatic_occlusion": "unknown",
-                "automatic_occlusion_confidence": 0.0,
-                "automatic_occlusion_summary": "No face landmarks are available for occlusion analysis.",
+                "raw_automatic_occlusion": "unknown",
+                "raw_automatic_occlusion_confidence": 0.0,
+                "raw_automatic_occlusion_summary": "No face landmarks are available for occlusion analysis.",
+                "automatic_occlusion": self._stable_occlusion,
+                "automatic_occlusion_confidence": round(
+                    self._stable_occlusion_confidence * 0.90, 4
+                ),
+                "automatic_occlusion_summary": (
+                    "No face landmarks are available; the last stable occlusion state is being held temporarily."
+                ),
+                "occlusion_temporal_window": len(self._occlusion_history),
                 "eye_visibility_score": 0.0,
                 "eye_region_brightness_ratio": 0.0,
                 "eye_dark_ratio": 0.0,
+                "eye_edge_density": 0.0,
             }
 
         height, width = gray.shape[:2]
@@ -167,38 +318,48 @@ class EnvironmentalPerceptionService:
                 "eye_edge_density": round(edge_density, 4),
             }
 
-            self._occlusion_history.append((label, confidence))
-            # Stabilise labels across a short 2–3 second window. Strong
-            # sunglasses/partial-face detections can still promote immediately.
-            if label not in {"sunglasses", "partial_face"} and len(self._occlusion_history) >= 3:
-                weighted: dict[str, float] = {}
-                for history_label, history_confidence in self._occlusion_history:
-                    weighted[history_label] = weighted.get(history_label, 0.0) + history_confidence
-                stable = max(weighted, key=weighted.get)
-                if stable != label and weighted[stable] >= weighted.get(label, 0.0) * 1.25:
-                    label = stable
-                    confidence = min(confidence, 0.78)
-                    if stable == "none":
-                        summary = "Recent frames do not support a persistent eye-region occlusion."
-                    elif stable == "eye_occlusion":
-                        summary = "Recent frames indicate persistent reduced eye visibility."
+            raw_label = label
+            raw_confidence = confidence
+            raw_summary = summary
+            stable_label, stable_confidence, stable_summary = self._stabilise_occlusion(
+                raw_label,
+                raw_confidence,
+                lighting,
+                result_metrics,
+            )
 
             return {
-                "automatic_occlusion": label,
-                "automatic_occlusion_confidence": round(confidence, 4),
-                "automatic_occlusion_summary": summary,
+                "raw_automatic_occlusion": raw_label,
+                "raw_automatic_occlusion_confidence": round(raw_confidence, 4),
+                "raw_automatic_occlusion_summary": raw_summary,
+                "automatic_occlusion": stable_label,
+                "automatic_occlusion_confidence": round(stable_confidence, 4),
+                "automatic_occlusion_summary": stable_summary,
+                "occlusion_temporal_window": len(self._occlusion_history),
                 **result_metrics,
             }
 
-        self._occlusion_history.append((label, confidence))
-        return {
-            "automatic_occlusion": label,
-            "automatic_occlusion_confidence": round(confidence, 4),
-            "automatic_occlusion_summary": summary,
+        result_metrics = {
             "eye_visibility_score": 0.0,
             "eye_region_brightness_ratio": 0.0,
             "eye_dark_ratio": 0.0,
             "eye_edge_density": 0.0,
+        }
+        stable_label, stable_confidence, stable_summary = self._stabilise_occlusion(
+            label,
+            confidence,
+            lighting,
+            result_metrics,
+        )
+        return {
+            "raw_automatic_occlusion": label,
+            "raw_automatic_occlusion_confidence": round(confidence, 4),
+            "raw_automatic_occlusion_summary": summary,
+            "automatic_occlusion": stable_label,
+            "automatic_occlusion_confidence": round(stable_confidence, 4),
+            "automatic_occlusion_summary": stable_summary,
+            "occlusion_temporal_window": len(self._occlusion_history),
+            **result_metrics,
         }
 
     def analyse(self, frame: Any, cv2: Any, face_landmarks: Any | None = None) -> dict[str, Any]:
@@ -324,9 +485,13 @@ class EnvironmentalPerceptionService:
             "automatic_perception_quality": "standby",
             "automatic_perception_score": 0.0,
             "automatic_perception_summary": "Start Monitoring to analyse camera image quality.",
+            "raw_automatic_occlusion": "unknown",
+            "raw_automatic_occlusion_confidence": 0.0,
+            "raw_automatic_occlusion_summary": "Start Monitoring to analyse eye visibility.",
             "automatic_occlusion": "unknown",
             "automatic_occlusion_confidence": 0.0,
             "automatic_occlusion_summary": "Start Monitoring to analyse eye visibility.",
+            "occlusion_temporal_window": 0,
             "eye_visibility_score": 0.0,
             "eye_region_brightness_ratio": 0.0,
             "eye_dark_ratio": 0.0,

@@ -289,6 +289,12 @@ class IntelligenceService:
             item = resolved_context.get(name, {}) or {}
             return str(item.get("value", fallback) or fallback)
 
+        raw_automatic_occlusion = str(
+            metrics.get("raw_automatic_occlusion", "unknown") or "unknown"
+        )
+        raw_automatic_occlusion_confidence = self._number(
+            metrics.get("raw_automatic_occlusion_confidence")
+        )
         automatic_occlusion = str(metrics.get("automatic_occlusion", "unknown") or "unknown")
         automatic_occlusion_confidence = self._number(
             metrics.get("automatic_occlusion_confidence")
@@ -351,6 +357,12 @@ class IntelligenceService:
                 "value": automatic_occlusion,
                 "confidence": round(automatic_occlusion_confidence, 4),
                 "summary": metrics.get("automatic_occlusion_summary", ""),
+                "raw_value": raw_automatic_occlusion,
+                "raw_confidence": round(raw_automatic_occlusion_confidence, 4),
+                "raw_summary": metrics.get("raw_automatic_occlusion_summary", ""),
+                "temporal_window": int(
+                    self._number(metrics.get("occlusion_temporal_window"))
+                ),
                 "eye_visibility_score": self._number(metrics.get("eye_visibility_score")),
                 "eye_region_brightness_ratio": self._number(
                     metrics.get("eye_region_brightness_ratio")

@@ -31,7 +31,9 @@ class DecisionMemoryService:
         "existing_smoothed_probability", "advisory_risk", "risk_band",
         "decision_confidence", "confidence_level", "signal_quality", "image_quality",
         "weather", "road_condition", "external_light", "occlusion",
+        "raw_automatic_occlusion", "raw_automatic_occlusion_confidence",
         "automatic_occlusion", "automatic_occlusion_confidence",
+        "occlusion_temporal_window",
         "eye_visibility_score", "eye_region_brightness_ratio",
         "eye_dark_ratio", "eye_edge_density",
         "manual_occlusion", "resolved_occlusion", "occlusion_source",
@@ -65,7 +67,7 @@ class DecisionMemoryService:
         now = self._now()
         session_id = f"decision_{now.strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
         return {
-            "schema_version": "8.3.1-decision-memory-v3",
+            "schema_version": "8.3.3-decision-memory-v4",
             "id": session_id,
             "started_at": now.isoformat(timespec="seconds"),
             "ended_at": None,
@@ -117,6 +119,18 @@ class DecisionMemoryService:
             "road_condition": str(context.get("road_condition") or "unknown"),
             "external_light": str(context.get("external_light") or "unknown"),
             "occlusion": str(context.get("occlusion") or "none"),
+            "raw_automatic_occlusion": str(
+                (context.get("automatic_occlusion") or {}).get("raw_value")
+                or metrics.get("raw_automatic_occlusion")
+                or "unknown"
+            ),
+            "raw_automatic_occlusion_confidence": round(
+                self._number(
+                    (context.get("automatic_occlusion") or {}).get("raw_confidence")
+                    or metrics.get("raw_automatic_occlusion_confidence")
+                ),
+                6,
+            ),
             "automatic_occlusion": str(
                 (context.get("automatic_occlusion") or {}).get("value")
                 or metrics.get("automatic_occlusion")
@@ -128,6 +142,12 @@ class DecisionMemoryService:
                     or metrics.get("automatic_occlusion_confidence")
                 ),
                 6,
+            ),
+            "occlusion_temporal_window": int(
+                self._number(
+                    (context.get("automatic_occlusion") or {}).get("temporal_window")
+                    or metrics.get("occlusion_temporal_window")
+                )
             ),
             "eye_visibility_score": round(
                 self._number(

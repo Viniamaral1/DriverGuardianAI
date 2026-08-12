@@ -127,8 +127,9 @@ function renderIntelligence(snapshot) {
   const detail = intelligenceEl("context-occlusion-detail");
   if (detail) {
     detail.textContent =
-      `Auto: ${intelligenceLabel(autoOcclusion.value || "unknown")} · ` +
+      `Stable: ${intelligenceLabel(autoOcclusion.value || "unknown")} · ` +
       `${intelligencePercent(autoOcclusion.confidence || 0)} · ` +
+      `Raw: ${intelligenceLabel(autoOcclusion.raw_value || "unknown")} · ` +
       `Source: ${resolvedSource}`;
   }
   intelligenceEl("context-summary").textContent =

@@ -101,6 +101,13 @@ function renderEdge(snapshot) {
     String(perception.automatic_occlusion || "unknown").replaceAll("_", " ");
   edgeEl("auto-occlusion-confidence").textContent =
     edgePercent(perception.automatic_occlusion_confidence);
+  const rawOcclusion = edgeEl("auto-occlusion-raw");
+  if (rawOcclusion) {
+    rawOcclusion.textContent =
+      `Raw: ${String(perception.raw_automatic_occlusion || "unknown").replaceAll("_", " ")} · ` +
+      `${edgePercent(perception.raw_automatic_occlusion_confidence)} · ` +
+      `window ${Number(perception.occlusion_temporal_window || 0)}`;
+  }
   edgeEl("auto-occlusion-summary").textContent =
     perception.automatic_occlusion_summary ||
     "Start Monitoring to analyse eye visibility.";

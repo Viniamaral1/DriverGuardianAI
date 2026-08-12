@@ -1,0 +1,76 @@
+{
+  "release": "Guardian OS V8.3.3 Temporal Occlusion Stabilisation",
+  "source_checkpoint": "GuardianOS-V8.3.3-Temporal-Occlusion-20260812-103756.zip",
+  "purpose": "Stabilise the already-working automatic occlusion detector using persistence and hysteresis while retaining raw frame-level evidence.",
+  "changed_files": {
+    "app/services/environmental_perception_service.py": {
+      "bytes": 22960,
+      "sha256": "db604fdcc8b78104fec24866cc3f48a0557de8463ec23b33c4d36d4782cd571c"
+    },
+    "app/services/live_monitoring_service.py": {
+      "bytes": 34443,
+      "sha256": "66b2a178a4fdce2bc9e42c405608adc9ecdc367bb7a0d74d25d7eda3a8542832"
+    },
+    "app/services/intelligence_service.py": {
+      "bytes": 20530,
+      "sha256": "8b3637b62787cf1bb9e2112da97aa43182a792bceba3147a5d0b85a99f9e26c3"
+    },
+    "app/services/decision_memory_service.py": {
+      "bytes": 22772,
+      "sha256": "9861c6dfc7bc379d3ca8ad78a8aa509f74cfd0dd873c8ccdae5d64e57b869c93"
+    },
+    "app/routers/edge.py": {
+      "bytes": 4898,
+      "sha256": "25dacbfb3d0fc378befe62c52a11f673ade4b326175897c3fb972bfac49047f7"
+    },
+    "app/templates/edge.html": {
+      "bytes": 9530,
+      "sha256": "dbea0800222152b50e7f09aed0c978dcc117f920e6c2b88d5cb8b920957c7eef"
+    },
+    "app/static/js/edge.js": {
+      "bytes": 12115,
+      "sha256": "6c7db09f7ff3fec39e16f819794be4b9139f1642d7a1ca4ed7bc3b4f2c00abcd"
+    },
+    "app/templates/intelligence.html": {
+      "bytes": 16755,
+      "sha256": "b0a5a774df150901be7c06bce0716222b704b42e1b8060c5bfe1ff0a026613ed"
+    },
+    "app/static/js/intelligence.js": {
+      "bytes": 24456,
+      "sha256": "a5afadcd63453617d52dbfa6aaf9ea715cb5bcd337c65e832fe3ee1d49f255c1"
+    },
+    "app/main.py": {
+      "bytes": 1849,
+      "sha256": "62ad3519956f982ccb337ba91a8c3b0038910db4715684add06de479728d0853"
+    },
+    "GUARDIAN_OS_V8_3_3_TEMPORAL_OCCLUSION.md": {
+      "bytes": 1021,
+      "sha256": "a45660b65a25216716662295c8341e40d34d735bc22807c3787427eb43b6d02a"
+    }
+  },
+  "protected_unchanged": [
+    "realtime_driver_guardian_v3_alerts.py",
+    "app/services/persistent_calibration.py",
+    "trained model artifacts",
+    "TemporalStateEngine",
+    "AlertManager"
+  ],
+  "behaviour": {
+    "raw_automatic_occlusion": "current analysed frame",
+    "automatic_occlusion": "temporally stabilised label",
+    "sunglasses_promotion": "requires persistent direct evidence",
+    "return_to_none": "requires stronger persistence than entry",
+    "uncertain_frames": "do not immediately erase established physical occlusion",
+    "thresholds_changed": false
+  },
+  "validation": {
+    "python_syntax": "passed",
+    "javascript_syntax": "passed",
+    "single_frame_sunglasses_spike_rejected": "passed",
+    "persistent_sunglasses_promotion": "passed",
+    "uncertain_frame_hold": "passed",
+    "hysteresis_return_to_none": "passed",
+    "persistent_eye_occlusion": "passed",
+    "fastapi_smoke_import": "8.3.3 63"
+  }
+}

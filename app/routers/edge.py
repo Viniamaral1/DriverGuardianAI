@@ -38,12 +38,21 @@ def snapshot():
     metrics = guardian_state.metrics()
     payload["live_perception"] = {
         "monitoring": bool(metrics.get("monitoring")),
+        "raw_automatic_occlusion": str(
+            metrics.get("raw_automatic_occlusion") or "unknown"
+        ),
+        "raw_automatic_occlusion_confidence": float(
+            metrics.get("raw_automatic_occlusion_confidence") or 0.0
+        ),
         "automatic_occlusion": str(metrics.get("automatic_occlusion") or "unknown"),
         "automatic_occlusion_confidence": float(
             metrics.get("automatic_occlusion_confidence") or 0.0
         ),
         "automatic_occlusion_summary": str(
             metrics.get("automatic_occlusion_summary") or ""
+        ),
+        "occlusion_temporal_window": int(
+            metrics.get("occlusion_temporal_window") or 0
         ),
         "eye_visibility_score": float(metrics.get("eye_visibility_score") or 0.0),
         "eye_region_brightness_ratio": float(

@@ -107,11 +107,17 @@ class LiveMonitoringService:
             "automatic_perception_summary": (
                 "Start Monitoring to analyse camera image quality."
             ),
+            "raw_automatic_occlusion": "unknown",
+            "raw_automatic_occlusion_confidence": 0.0,
+            "raw_automatic_occlusion_summary": (
+                "Start Monitoring to analyse eye visibility."
+            ),
             "automatic_occlusion": "unknown",
             "automatic_occlusion_confidence": 0.0,
             "automatic_occlusion_summary": (
                 "Start Monitoring to analyse eye visibility."
             ),
+            "occlusion_temporal_window": 0,
             "eye_visibility_score": 0.0,
             "eye_region_brightness_ratio": 0.0,
             "eye_dark_ratio": 0.0,
