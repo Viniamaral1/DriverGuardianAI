@@ -79,21 +79,6 @@ class EnvironmentalPerceptionService:
                 "eye_dark_ratio": 0.0,
             }
 
-        if lighting in {"too_dark", "too_bright", "glare"}:
-            # Do not confuse exposure problems with physical occlusion.
-            label = "uncertain"
-            confidence = 0.45
-            summary = "Eye occlusion cannot be classified reliably under the current exposure conditions."
-            self._occlusion_history.append((label, confidence))
-            return {
-                "automatic_occlusion": label,
-                "automatic_occlusion_confidence": confidence,
-                "automatic_occlusion_summary": summary,
-                "eye_visibility_score": 0.45,
-                "eye_region_brightness_ratio": 0.0,
-                "eye_dark_ratio": 0.0,
-            }
-
         height, width = gray.shape[:2]
         points = [
             self._landmark_xy(face_landmarks, i, width, height)
@@ -116,7 +101,10 @@ class EnvironmentalPerceptionService:
 
         if left is None or right is None or cheek_l is None or cheek_r is None:
             label, confidence = "uncertain", 0.35
-            summary = "The eye/face regions are too small for reliable occlusion analysis."
+            summary = (
+                "Eye-region extraction produced an invalid or undersized ROI; "
+                "occlusion cannot be classified from this frame."
+            )
         else:
             import numpy as np
             eye_pixels = np.concatenate([left.reshape(-1), right.reshape(-1)])
@@ -142,10 +130,22 @@ class EnvironmentalPerceptionService:
                 + symmetry * 0.16
             )
 
+            exposure_unreliable = lighting in {"too_dark", "too_bright", "glare"}
+
             if clipped:
                 label = "partial_face"
                 confidence = 0.72
                 summary = "Part of the landmarked face is close to the camera boundary."
+            elif exposure_unreliable:
+                # V8.3.2: still calculate and retain real eye-region measurements
+                # under difficult exposure, but do not promote a physical
+                # occlusion label from those measurements alone.
+                label = "uncertain"
+                confidence = 0.45
+                summary = (
+                    "Eye-region measurements were captured, but physical "
+                    f"occlusion cannot be classified reliably while lighting is {lighting.replace('_', ' ')}."
+                )
             elif ratio < 0.58 and dark_ratio > 0.48 and symmetry > 0.55 and cheek_median > 55:
                 label = "sunglasses"
                 confidence = max(0.72, min(0.95, 0.70 + sunglasses_strength * 0.25))

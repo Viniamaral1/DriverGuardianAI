@@ -1,0 +1,95 @@
+{
+  "release": "Guardian OS V8.3.2 Eye-Region Measurement Fix",
+  "source": "GuardianOS-V8.3.2-Eye-Region-Fix-20260811-172609.zip",
+  "root_cause": "EnvironmentalPerceptionService returned early on glare/too-dark/too-bright frames before eye-region measurements were calculated.",
+  "changed_files": {
+    "app/services/environmental_perception_service.py": {
+      "bytes": 15202,
+      "sha256": "91a9c037ef8cf4da2c6196be325b1dd9f66ef1854c15ddb077b759b621e81f0f"
+    },
+    "app/main.py": {
+      "bytes": 1849,
+      "sha256": "89160c0b9239994d280438bacf8d1eb4a077074c01fc1fe9bad09ad301c1f09b"
+    },
+    "GUARDIAN_OS_V8_3_2_EYE_REGION_MEASUREMENT_FIX.md": {
+      "bytes": 1598,
+      "sha256": "4c98f227fc81951e1ae302b0b51d99c03e57bd1b30c0e9d366536a70af524a61"
+    }
+  },
+  "protected_unchanged": [
+    "app/services/live_monitoring_service.py",
+    "app/services/persistent_calibration.py",
+    "app/services/decision_memory_service.py",
+    "app/static/js/monitoring.js",
+    "app/templates/monitoring.html",
+    "realtime_driver_guardian_v3_alerts.py"
+  ],
+  "validation": {
+    "python_syntax": "passed",
+    "normal_eye_measurement": {
+      "environment_available": true,
+      "frame_brightness": 145.0,
+      "frame_contrast": 0.0,
+      "frame_blur_variance": 0.0,
+      "underexposed_ratio": 0.0,
+      "overexposed_ratio": 0.0,
+      "glare_ratio": 0.0,
+      "automatic_cabin_light": "normal",
+      "automatic_sharpness": "blurred",
+      "automatic_perception_quality": "limited",
+      "automatic_perception_score": 0.57,
+      "automatic_perception_summary": "Image is blurred; image contrast is low.",
+      "automatic_occlusion": "none",
+      "automatic_occlusion_confidence": 0.804,
+      "automatic_occlusion_summary": "No strong automatic eye-region occlusion pattern is detected.",
+      "eye_visibility_score": 1.0,
+      "eye_region_brightness_ratio": 1.0,
+      "eye_dark_ratio": 0.0,
+      "eye_edge_density": 0.0
+    },
+    "exposure_guard_regression": {
+      "environment_available": true,
+      "frame_brightness": 214.98,
+      "frame_contrast": 14.11,
+      "frame_blur_variance": 10.12,
+      "underexposed_ratio": 0.0,
+      "overexposed_ratio": 0.1106,
+      "glare_ratio": 0.3462,
+      "automatic_cabin_light": "too_bright",
+      "automatic_sharpness": "blurred",
+      "automatic_perception_quality": "limited",
+      "automatic_perception_score": 0.3147,
+      "automatic_perception_summary": "Cabin image is overexposed; image is blurred; image contrast is low.",
+      "automatic_occlusion": "uncertain",
+      "automatic_occlusion_confidence": 0.45,
+      "automatic_occlusion_summary": "Eye-region measurements were captured, but physical occlusion cannot be classified reliably while lighting is too bright.",
+      "eye_visibility_score": 1.0,
+      "eye_region_brightness_ratio": 1.2143,
+      "eye_dark_ratio": 0.0,
+      "eye_edge_density": 0.0
+    },
+    "dark_eye_measurement": {
+      "environment_available": true,
+      "frame_brightness": 146.41,
+      "frame_contrast": 20.89,
+      "frame_blur_variance": 58.59,
+      "underexposed_ratio": 0.0288,
+      "overexposed_ratio": 0.0,
+      "glare_ratio": 0.0,
+      "automatic_cabin_light": "normal",
+      "automatic_sharpness": "moderate",
+      "automatic_perception_quality": "limited",
+      "automatic_perception_score": 0.5792,
+      "automatic_perception_summary": "Image contrast is low; both eye regions are substantially darker than the visible face, consistent with sunglasses or dark eye covering.",
+      "automatic_occlusion": "sunglasses",
+      "automatic_occlusion_confidence": 0.95,
+      "automatic_occlusion_summary": "Both eye regions are substantially darker than the visible face, consistent with sunglasses or dark eye covering.",
+      "eye_visibility_score": 0.25,
+      "eye_region_brightness_ratio": 0.1667,
+      "eye_dark_ratio": 1.0,
+      "eye_edge_density": 0.0
+    },
+    "sunglasses_thresholds_changed": false,
+    "live_monitoring_service_changed": false
+  }
+}
