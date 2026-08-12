@@ -1,0 +1,62 @@
+{
+  "release": "Guardian OS V8.4.1 Interactive Evidence Replay",
+  "source_checkpoint": "GuardianOS-V8.4.1-Interactive-Evidence-Replay-20260812-171833.zip",
+  "scope": "Replay UX only; no model/camera/alert changes.",
+  "features": {
+    "click_graph_to_jump": true,
+    "graph_event_markers": true,
+    "event_jump_lane": true,
+    "evidence_previous": true,
+    "evidence_play": true,
+    "evidence_pause": true,
+    "evidence_next": true,
+    "clickable_thumbnails": true,
+    "existing_slider_preserved": true,
+    "continuous_video": false
+  },
+  "validation": {
+    "python_syntax": "passed",
+    "javascript_syntax": "passed",
+    "html_js_control_contract": "passed",
+    "fastapi_smoke": "Guardian OS 8.4.1 / 65 routes",
+    "actual_decision_memory_samples": 25,
+    "actual_computed_events": 14,
+    "actual_visual_evidence_groups": 14,
+    "actual_visual_evidence_files": 70,
+    "actual_replay_index_bounds": "passed"
+  },
+  "protected_unchanged": [
+    "trained fatigue model",
+    "PersonalCalibration",
+    "TemporalStateEngine",
+    "AlertManager",
+    "camera ownership",
+    "visual evidence capture backend",
+    "event capture thresholds",
+    "model thresholds",
+    "alert/beep/voice behaviour",
+    "Decision Memory numerical sampling"
+  ],
+  "changed_files": {
+    "app/templates/intelligence.html": {
+      "bytes": 18831,
+      "sha256": "cdc32f4e41866669ad5085673c5017a1b62204764a14b46afb62e965b0e29720"
+    },
+    "app/static/js/intelligence.js": {
+      "bytes": 35142,
+      "sha256": "a12f70dbe434746505eb05fac2764758e6d9ca2ae937d8f031bf52a3ea505e16"
+    },
+    "app/static/css/app.css": {
+      "bytes": 106216,
+      "sha256": "a7a17b18f80428644a12a0d074e6b7d4952bcbd66e2e48f05d6b71f4fac6d638"
+    },
+    "app/main.py": {
+      "bytes": 1849,
+      "sha256": "09c1371d4e1af6b2a5e5081e7e1cc9155fb1945d5767768be777697a9baed5e1"
+    },
+    "GUARDIAN_OS_V8_4_1_INTERACTIVE_EVIDENCE_REPLAY.md": {
+      "bytes": 1435,
+      "sha256": "be6d98ac3bb5dde134a060a305e3f5b5553bc0b0bd6b061e53098096b465a256"
+    }
+  }
+}

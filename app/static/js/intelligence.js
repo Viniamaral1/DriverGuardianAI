@@ -261,6 +261,9 @@ function renderV8DecisionEngine(engine) {
 const v81LiveSeries = [];
 let v81MemorySessions = [];
 let v81SelectedMemory = null;
+let v841EvidenceGroup = null;
+let v841EvidenceFrameIndex = 0;
+let v841EvidencePlaybackTimer = null;
 
 function v81Clamp(value, min = 0, max = 1) {
   return Math.max(min, Math.min(max, Number(value || 0)));
@@ -314,6 +317,29 @@ function v81RenderLineChart(svg, series, options = {}) {
       point => yForValue(point.value)
     );
     markup += `<path d="${path}" class="v81-series v81-series-${seriesIndex + 1}"></path>`;
+  });
+
+  const eventMarkers = Array.isArray(options.eventMarkers)
+    ? options.eventMarkers
+    : [];
+  eventMarkers.forEach(event => {
+    const index = Math.max(
+      0,
+      Math.min(rows.length - 1, Number(event.index || 0))
+    );
+    if (!rows.length) return;
+    const x = xFor(rows[index], index);
+    const type = String(event.type || "event")
+      .replace(/[^a-z0-9_-]/gi, "")
+      .toLowerCase();
+    markup += `
+      <g class="v841-chart-event v841-chart-event-${type}"
+        data-replay-index="${index}" tabindex="0"
+        role="button" aria-label="Jump to ${type} event">
+        <circle cx="${x}" cy="${top + 8}" r="6"></circle>
+        <line x1="${x}" y1="${top + 15}" x2="${x}" y2="${height-bottom}"
+          class="v841-chart-event-line"></line>
+      </g>`;
   });
 
   if (options.markerIndex !== undefined && rows.length) {
@@ -502,11 +528,139 @@ async function v81LoadMemorySession(sessionId) {
     jsonLink.classList.remove("disabled");
     csvLink.classList.remove("disabled");
 
+    v841StopEvidencePlayback();
+    v841EvidenceGroup = null;
+    v841EvidenceFrameIndex = 0;
+    v841RenderEventJumps(Number(slider.value));
     v81RenderReplay(Number(slider.value));
   } catch (error) {
     DG.toast("Decision Memory session could not be loaded", "error");
     console.error(error);
   }
+}
+
+function v841StopEvidencePlayback() {
+  if (v841EvidencePlaybackTimer) {
+    window.clearInterval(v841EvidencePlaybackTimer);
+    v841EvidencePlaybackTimer = null;
+  }
+}
+
+function v841JumpToReplayIndex(index) {
+  const samples = v81SelectedMemory?.samples || [];
+  if (!samples.length) return;
+  const safeIndex = Math.max(
+    0,
+    Math.min(samples.length - 1, Number(index || 0))
+  );
+  const slider = intelligenceEl("v81-replay-slider");
+  if (slider) slider.value = safeIndex;
+  v81RenderReplay(safeIndex);
+}
+
+function v841RenderEventJumps(activeIndex = null) {
+  const container = intelligenceEl("v841-event-jump-list");
+  if (!container) return;
+
+  const events = v81SelectedMemory?.events || [];
+  if (!events.length) {
+    container.innerHTML =
+      `<span class="muted">No replay events were recorded in this session.</span>`;
+    return;
+  }
+
+  container.innerHTML = events.map(event => {
+    const index = Number(event.index || 0);
+    const type = String(event.type || "event")
+      .replace(/[^a-z0-9_-]/gi, "")
+      .toLowerCase();
+    const isActive = activeIndex !== null && Number(activeIndex) === index;
+    const time = event.timestamp
+      ? new Date(event.timestamp).toLocaleTimeString("en-GB")
+      : `Sample ${index + 1}`;
+    return `
+      <button type="button"
+        class="v841-event-chip v841-event-${type}${isActive ? " is-active" : ""}"
+        data-replay-index="${index}">
+        <span>${String(event.title || event.type || "Event")}</span>
+        <small>${time}</small>
+      </button>`;
+  }).join("");
+}
+
+function v841EvidenceUrl(filename) {
+  if (!v81SelectedMemory?.id || !filename) return "";
+  return `/api/intelligence/memory/${encodeURIComponent(v81SelectedMemory.id)}/evidence/${encodeURIComponent(filename)}`;
+}
+
+function v841RenderEvidencePlayer() {
+  const player = intelligenceEl("v841-evidence-player");
+  const image = intelligenceEl("v841-player-image");
+  const empty = intelligenceEl("v841-player-empty");
+  const position = intelligenceEl("v841-player-position");
+  const prev = intelligenceEl("v841-player-prev");
+  const play = intelligenceEl("v841-player-play");
+  const pause = intelligenceEl("v841-player-pause");
+  const next = intelligenceEl("v841-player-next");
+  if (!player || !image || !empty || !position) return;
+
+  const files = v841EvidenceGroup?.files || [];
+  if (!files.length) {
+    v841StopEvidencePlayback();
+    v841EvidenceGroup = null;
+    v841EvidenceFrameIndex = 0;
+    player.classList.add("is-empty");
+    image.removeAttribute("src");
+    image.hidden = true;
+    empty.hidden = false;
+    position.textContent = "0 / 0";
+    [prev, play, pause, next].forEach(button => {
+      if (button) button.disabled = true;
+    });
+    return;
+  }
+
+  v841EvidenceFrameIndex = Math.max(
+    0,
+    Math.min(files.length - 1, v841EvidenceFrameIndex)
+  );
+  player.classList.remove("is-empty");
+  image.hidden = false;
+  empty.hidden = true;
+  image.src = v841EvidenceUrl(files[v841EvidenceFrameIndex]);
+  position.textContent =
+    `${v841EvidenceFrameIndex + 1} / ${files.length}`;
+
+  if (prev) prev.disabled = files.length < 2;
+  if (play) play.disabled = files.length < 2;
+  if (pause) pause.disabled = files.length < 2;
+  if (next) next.disabled = files.length < 2;
+
+  document.querySelectorAll(".v84-evidence-frame").forEach((frame, index) => {
+    frame.classList.toggle("is-current", index === v841EvidenceFrameIndex);
+  });
+}
+
+function v841SetEvidenceFrame(index) {
+  const files = v841EvidenceGroup?.files || [];
+  if (!files.length) return;
+  v841EvidenceFrameIndex = (
+    (Number(index) % files.length) + files.length
+  ) % files.length;
+  v841RenderEvidencePlayer();
+}
+
+function v841PlayEvidence() {
+  const files = v841EvidenceGroup?.files || [];
+  if (files.length < 2) return;
+  v841StopEvidencePlayback();
+  v841EvidencePlaybackTimer = window.setInterval(() => {
+    if (v841EvidenceFrameIndex >= files.length - 1) {
+      v841StopEvidencePlayback();
+      return;
+    }
+    v841SetEvidenceFrame(v841EvidenceFrameIndex + 1);
+  }, 800);
 }
 
 function v84EvidenceForReplayIndex(index) {
@@ -542,20 +696,37 @@ function v84RenderVisualEvidence(index) {
         ? "Move the replay slider near a captured event."
         : "Enable Visual Evidence in Settings before Monitoring."
     }</div>`;
+    v841EvidenceGroup = null;
+    v841RenderEvidencePlayer();
     return;
   }
+
+  const sameGroup =
+    v841EvidenceGroup
+    && Number(v841EvidenceGroup.index) === Number(group.index)
+    && String(v841EvidenceGroup.type) === String(group.type);
+
+  if (!sameGroup) {
+    v841StopEvidencePlayback();
+    v841EvidenceFrameIndex = 0;
+  }
+  v841EvidenceGroup = group;
 
   status.textContent =
     `${group.title || group.type || "Event"} · ${group.files.length} image${group.files.length === 1 ? "" : "s"}`;
 
   const sessionId = encodeURIComponent(v81SelectedMemory.id);
   strip.innerHTML = group.files.map((filename, order) => `
-    <figure class="v84-evidence-frame">
+    <figure class="v84-evidence-frame${order === v841EvidenceFrameIndex ? " is-current" : ""}"
+      data-evidence-frame="${order}" tabindex="0" role="button"
+      aria-label="Show evidence frame ${order + 1}">
       <img src="/api/intelligence/memory/${sessionId}/evidence/${encodeURIComponent(filename)}"
         alt="Guardian event evidence frame ${order + 1}" loading="lazy">
       <figcaption>${order === group.files.length - 1 ? "Event frame" : "Pre-event"}</figcaption>
     </figure>
   `).join("");
+
+  v841RenderEvidencePlayer();
 }
 
 function v81RenderReplay(index) {
@@ -580,6 +751,7 @@ function v81RenderReplay(index) {
   intelligenceEl("v81-replay-action").textContent =
     row.recommended_action || "No recommendation stored.";
   v84RenderVisualEvidence(index);
+  v841RenderEventJumps(index);
 
   v81RenderLineChart(
     intelligenceEl("v81-replay-chart"),
@@ -595,6 +767,7 @@ function v81RenderReplay(index) {
       width: 900,
       height: 220,
       markerIndex: index,
+      eventMarkers: v81SelectedMemory?.events || [],
       formatY: value => `${Math.round(value * 100)}%`,
     }
   );
@@ -675,7 +848,71 @@ async function v81CompareSessions() {
 }
 
 intelligenceEl("v81-replay-slider")?.addEventListener("input", event => {
-  v81RenderReplay(Number(event.currentTarget.value));
+  v841JumpToReplayIndex(Number(event.currentTarget.value));
+});
+
+intelligenceEl("v841-event-jump-list")?.addEventListener("click", event => {
+  const button = event.target.closest("[data-replay-index]");
+  if (!button) return;
+  v841JumpToReplayIndex(Number(button.dataset.replayIndex));
+});
+
+intelligenceEl("v81-replay-chart")?.addEventListener("click", event => {
+  const svg = event.currentTarget;
+  const marker = event.target.closest("[data-replay-index]");
+  if (marker) {
+    v841JumpToReplayIndex(Number(marker.dataset.replayIndex));
+    return;
+  }
+
+  const samples = v81SelectedMemory?.samples || [];
+  if (!samples.length) return;
+
+  const rect = svg.getBoundingClientRect();
+  const viewWidth = svg.viewBox?.baseVal?.width || 900;
+  const pointerX = ((event.clientX - rect.left) / Math.max(1, rect.width)) * viewWidth;
+  const plotLeft = 38;
+  const plotRight = 12;
+  const plotWidth = viewWidth - plotLeft - plotRight;
+  const ratio = Math.max(
+    0,
+    Math.min(1, (pointerX - plotLeft) / Math.max(1, plotWidth))
+  );
+  const index = Math.round(ratio * Math.max(0, samples.length - 1));
+  v841JumpToReplayIndex(index);
+});
+
+intelligenceEl("v81-replay-chart")?.addEventListener("keydown", event => {
+  const marker = event.target.closest("[data-replay-index]");
+  if (!marker || !["Enter", " "].includes(event.key)) return;
+  event.preventDefault();
+  v841JumpToReplayIndex(Number(marker.dataset.replayIndex));
+});
+
+intelligenceEl("v84-evidence-strip")?.addEventListener("click", event => {
+  const frame = event.target.closest("[data-evidence-frame]");
+  if (!frame) return;
+  v841StopEvidencePlayback();
+  v841SetEvidenceFrame(Number(frame.dataset.evidenceFrame));
+});
+
+intelligenceEl("v84-evidence-strip")?.addEventListener("keydown", event => {
+  const frame = event.target.closest("[data-evidence-frame]");
+  if (!frame || !["Enter", " "].includes(event.key)) return;
+  event.preventDefault();
+  v841StopEvidencePlayback();
+  v841SetEvidenceFrame(Number(frame.dataset.evidenceFrame));
+});
+
+intelligenceEl("v841-player-prev")?.addEventListener("click", () => {
+  v841StopEvidencePlayback();
+  v841SetEvidenceFrame(v841EvidenceFrameIndex - 1);
+});
+intelligenceEl("v841-player-play")?.addEventListener("click", v841PlayEvidence);
+intelligenceEl("v841-player-pause")?.addEventListener("click", v841StopEvidencePlayback);
+intelligenceEl("v841-player-next")?.addEventListener("click", () => {
+  v841StopEvidencePlayback();
+  v841SetEvidenceFrame(v841EvidenceFrameIndex + 1);
 });
 
 intelligenceEl("v84-delete-evidence")?.addEventListener("click", async () => {

@@ -225,6 +225,16 @@
       <input id="v81-replay-slider" type="range" min="0" max="0" value="0"
         aria-label="Decision Memory replay position">
 
+      <div class="v841-event-jumps" aria-label="Decision Memory event markers">
+        <div class="v841-event-jumps-head">
+          <span>Jump to event</span>
+          <small>Click an event or click directly on the graph</small>
+        </div>
+        <div id="v841-event-jump-list" class="v841-event-jump-list">
+          <span class="muted">Select a Decision Memory session.</span>
+        </div>
+      </div>
+
       <div class="v81-replay-metrics">
         <div><span>Time</span><b id="v81-replay-time">—</b></div>
         <div><span>Risk</span><b id="v81-replay-risk">—</b></div>
@@ -246,6 +256,21 @@
         <div class="v84-evidence-head">
           <div><span>Visual evidence</span><b id="v84-evidence-status">No evidence for this replay point</b></div>
           <button type="button" class="button secondary" id="v84-delete-evidence" disabled>Delete session evidence</button>
+        </div>
+        <div id="v841-evidence-player" class="v841-evidence-player is-empty">
+          <div class="v841-player-stage">
+            <img id="v841-player-image" alt="Guardian visual evidence replay frame">
+            <div id="v841-player-empty" class="empty-state">
+              Move the replay cursor to an event with visual evidence.
+            </div>
+          </div>
+          <div class="v841-player-controls" aria-label="Visual evidence playback controls">
+            <button type="button" class="button secondary" id="v841-player-prev" disabled>Previous</button>
+            <button type="button" class="button secondary" id="v841-player-play" disabled>Play</button>
+            <button type="button" class="button secondary" id="v841-player-pause" disabled>Pause</button>
+            <button type="button" class="button secondary" id="v841-player-next" disabled>Next</button>
+            <span id="v841-player-position" class="v841-player-position">0 / 0</span>
+          </div>
         </div>
         <div id="v84-evidence-strip" class="v84-evidence-strip">
           <div class="empty-state">Visual evidence is optional and disabled by default in Settings.</div>
@@ -443,5 +468,5 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="/static/js/intelligence.js?v=8.4.0"></script>
+<script src="/static/js/intelligence.js?v=8.4.1"></script>
 {% endblock %}
