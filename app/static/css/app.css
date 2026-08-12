@@ -3854,3 +3854,32 @@ html.sidebar-collapsed .sidebar-toggle {
   .v841-event-jumps-head{flex-direction:column}
   .v841-player-position{width:100%;margin-left:0}
 }
+
+
+/* Guardian OS V8.4.2 — Replay UI polish */
+.v841-event-jumps{display:none!important}
+.v842-replay-chart-wrap{position:relative;margin-top:12px}
+.v842-replay-chart-wrap .v81-replay-chart{margin-top:0}
+.v842-replay-tooltip{position:absolute;z-index:12;width:210px;padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:var(--surface);box-shadow:0 10px 28px rgba(0,0,0,.18);pointer-events:none;font-size:10px}
+.v842-replay-tooltip>strong{display:block;margin-bottom:7px;font-size:12px}
+.v842-replay-tooltip>div:not(.v842-tooltip-events){display:flex;justify-content:space-between;gap:10px;margin-top:4px}
+.v842-replay-tooltip span{color:var(--muted)}
+.v842-tooltip-events{display:grid;gap:4px;margin-top:8px;padding-top:7px;border-top:1px solid var(--line)}
+.v842-tooltip-events b{color:var(--warning);font-size:10px}
+
+.v84-evidence-replay{max-width:760px}
+.v841-evidence-player{max-width:430px;margin:0 auto 10px}
+.v841-player-stage{min-height:0;aspect-ratio:16/9}
+.v841-player-stage img{width:100%;max-height:242px;object-fit:contain}
+.v841-player-stage .empty-state{padding:20px;font-size:10px}
+.v841-player-controls{justify-content:center;gap:6px}
+.v841-player-controls .button{min-height:32px;padding:6px 10px}
+.v841-player-position{margin-left:6px}
+.v84-evidence-strip{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.v84-evidence-frame figcaption{padding:4px 6px;font-size:8px}
+
+@media(max-width:760px){
+  .v84-evidence-replay{max-width:100%}
+  .v841-evidence-player{max-width:100%}
+  .v84-evidence-strip{grid-template-columns:repeat(3,minmax(0,1fr))}
+}

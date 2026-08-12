@@ -225,16 +225,6 @@
       <input id="v81-replay-slider" type="range" min="0" max="0" value="0"
         aria-label="Decision Memory replay position">
 
-      <div class="v841-event-jumps" aria-label="Decision Memory event markers">
-        <div class="v841-event-jumps-head">
-          <span>Jump to event</span>
-          <small>Click an event or click directly on the graph</small>
-        </div>
-        <div id="v841-event-jump-list" class="v841-event-jump-list">
-          <span class="muted">Select a Decision Memory session.</span>
-        </div>
-      </div>
-
       <div class="v81-replay-metrics">
         <div><span>Time</span><b id="v81-replay-time">—</b></div>
         <div><span>Risk</span><b id="v81-replay-risk">—</b></div>
@@ -244,9 +234,12 @@
         <div><span>Context</span><b id="v81-replay-context">—</b></div>
       </div>
 
-      <svg id="v81-replay-chart" class="v81-line-chart v81-replay-chart"
-        viewBox="0 0 900 220" role="img"
-        aria-label="Decision Memory session replay trend"></svg>
+      <div class="v842-replay-chart-wrap">
+        <svg id="v81-replay-chart" class="v81-line-chart v81-replay-chart"
+          viewBox="0 0 900 220" role="img"
+          aria-label="Decision Memory session replay trend"></svg>
+        <div id="v842-replay-tooltip" class="v842-replay-tooltip" hidden></div>
+      </div>
 
       <div class="v81-replay-action">
         <b>Recorded recommendation</b>
@@ -468,5 +461,5 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="/static/js/intelligence.js?v=8.4.1"></script>
+<script src="/static/js/intelligence.js?v=8.4.2"></script>
 {% endblock %}

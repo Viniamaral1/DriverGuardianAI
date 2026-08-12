@@ -1,0 +1,63 @@
+{
+  "release": "Guardian OS V8.4.2 Replay UI Polish",
+  "source_checkpoint": "GuardianOS-V8.4.2-Replay-UI-Polish-20260812-212449.zip",
+  "features": {
+    "event_button_lane_removed": true,
+    "graph_hover_tooltip": true,
+    "graph_click_to_jump": true,
+    "graph_event_markers_preserved": true,
+    "tooltip_fields": [
+      "time",
+      "risk",
+      "confidence",
+      "ear",
+      "baseline_ear",
+      "event_title"
+    ],
+    "compact_evidence_player": true,
+    "smaller_thumbnails": true,
+    "evidence_preload": true,
+    "playback_interval_ms": 600,
+    "continuous_video": false
+  },
+  "validation": {
+    "python_syntax": "passed",
+    "javascript_syntax": "passed",
+    "ui_contract": "passed",
+    "fastapi_smoke": "8.4.2 / 69 routes"
+  },
+  "protected_unchanged": [
+    "trained fatigue model",
+    "PersonalCalibration",
+    "TemporalStateEngine",
+    "AlertManager",
+    "camera ownership",
+    "visual evidence capture backend",
+    "event capture thresholds",
+    "model thresholds",
+    "alert/beep/voice behaviour",
+    "Decision Memory numerical sampling"
+  ],
+  "changed_files": {
+    "app/templates/intelligence.html": {
+      "bytes": 18557,
+      "sha256": "23f75f082c330d01ae2c52796984deacc76baabc31dd6df34e9566382ba7668f"
+    },
+    "app/static/js/intelligence.js": {
+      "bytes": 36072,
+      "sha256": "426705d9196434c2a0618b74d8b2bb4ed31a0e0a9b1f83aff7620f0029737bcc"
+    },
+    "app/static/css/app.css": {
+      "bytes": 107808,
+      "sha256": "c0f830b40fc8975b7007e3b96d50fe13abea0344711c5b13a3321a3f60a6cc7d"
+    },
+    "app/main.py": {
+      "bytes": 1849,
+      "sha256": "d03fc118f413a21513771c155b00b11d22d3c5cd4770cc8137064f6db8d66a10"
+    },
+    "GUARDIAN_OS_V8_4_2_REPLAY_UI_POLISH.md": {
+      "bytes": 670,
+      "sha256": "35359a17486978de4938f84b1fc40e69b5284eb0cd039abc14c90dec33a8f40e"
+    }
+  }
+}

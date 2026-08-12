@@ -531,7 +531,6 @@ async function v81LoadMemorySession(sessionId) {
     v841StopEvidencePlayback();
     v841EvidenceGroup = null;
     v841EvidenceFrameIndex = 0;
-    v841RenderEventJumps(Number(slider.value));
     v81RenderReplay(Number(slider.value));
   } catch (error) {
     DG.toast("Decision Memory session could not be loaded", "error");
@@ -558,34 +557,76 @@ function v841JumpToReplayIndex(index) {
   v81RenderReplay(safeIndex);
 }
 
-function v841RenderEventJumps(activeIndex = null) {
-  const container = intelligenceEl("v841-event-jump-list");
-  if (!container) return;
+function v842ReplayEventAtIndex(index) {
+  return (v81SelectedMemory?.events || []).filter(
+    event => Number(event.index || 0) === Number(index)
+  );
+}
 
-  const events = v81SelectedMemory?.events || [];
-  if (!events.length) {
-    container.innerHTML =
-      `<span class="muted">No replay events were recorded in this session.</span>`;
-    return;
-  }
+function v842ReplayIndexFromPointer(event) {
+  const svg = intelligenceEl("v81-replay-chart");
+  const samples = v81SelectedMemory?.samples || [];
+  if (!svg || !samples.length) return null;
 
-  container.innerHTML = events.map(event => {
-    const index = Number(event.index || 0);
-    const type = String(event.type || "event")
-      .replace(/[^a-z0-9_-]/gi, "")
-      .toLowerCase();
-    const isActive = activeIndex !== null && Number(activeIndex) === index;
-    const time = event.timestamp
-      ? new Date(event.timestamp).toLocaleTimeString("en-GB")
-      : `Sample ${index + 1}`;
-    return `
-      <button type="button"
-        class="v841-event-chip v841-event-${type}${isActive ? " is-active" : ""}"
-        data-replay-index="${index}">
-        <span>${String(event.title || event.type || "Event")}</span>
-        <small>${time}</small>
-      </button>`;
-  }).join("");
+  const rect = svg.getBoundingClientRect();
+  const viewWidth = svg.viewBox?.baseVal?.width || 900;
+  const pointerX =
+    ((event.clientX - rect.left) / Math.max(1, rect.width)) * viewWidth;
+  const plotLeft = 38;
+  const plotRight = 12;
+  const plotWidth = viewWidth - plotLeft - plotRight;
+  const ratio = Math.max(
+    0,
+    Math.min(1, (pointerX - plotLeft) / Math.max(1, plotWidth))
+  );
+  return Math.round(ratio * Math.max(0, samples.length - 1));
+}
+
+function v842RenderReplayTooltip(event) {
+  const tooltip = intelligenceEl("v842-replay-tooltip");
+  const wrap = tooltip?.parentElement;
+  const samples = v81SelectedMemory?.samples || [];
+  if (!tooltip || !wrap || !samples.length) return;
+
+  const index = v842ReplayIndexFromPointer(event);
+  if (index === null) return;
+  const row = samples[index];
+  const events = v842ReplayEventAtIndex(index);
+  const eventMarkup = events.length
+    ? `<div class="v842-tooltip-events">${events.map(item =>
+        `<b>${String(item.title || item.type || "Event")}</b>`
+      ).join("")}</div>`
+    : "";
+
+  tooltip.innerHTML = `
+    <strong>${new Date(row.timestamp).toLocaleTimeString("en-GB")}</strong>
+    <div><span>Risk</span><b>${intelligencePercent(row.advisory_risk)}</b></div>
+    <div><span>Confidence</span><b>${intelligencePercent(row.decision_confidence)}</b></div>
+    <div><span>EAR</span><b>${Number(row.ear || 0).toFixed(3)}</b></div>
+    <div><span>Baseline</span><b>${Number(row.baseline_ear || 0).toFixed(3)}</b></div>
+    ${eventMarkup}
+  `;
+
+  const wrapRect = wrap.getBoundingClientRect();
+  const x = event.clientX - wrapRect.left;
+  const y = event.clientY - wrapRect.top;
+  const maxLeft = Math.max(8, wrapRect.width - 230);
+  tooltip.style.left = `${Math.max(8, Math.min(maxLeft, x + 12))}px`;
+  tooltip.style.top = `${Math.max(8, y - 18)}px`;
+  tooltip.hidden = false;
+}
+
+function v842HideReplayTooltip() {
+  const tooltip = intelligenceEl("v842-replay-tooltip");
+  if (tooltip) tooltip.hidden = true;
+}
+
+function v842PreloadEvidence(files) {
+  (files || []).forEach(filename => {
+    const image = new Image();
+    image.decoding = "async";
+    image.src = v841EvidenceUrl(filename);
+  });
 }
 
 function v841EvidenceUrl(filename) {
@@ -660,7 +701,7 @@ function v841PlayEvidence() {
       return;
     }
     v841SetEvidenceFrame(v841EvidenceFrameIndex + 1);
-  }, 800);
+  }, 600);
 }
 
 function v84EvidenceForReplayIndex(index) {
@@ -711,6 +752,9 @@ function v84RenderVisualEvidence(index) {
     v841EvidenceFrameIndex = 0;
   }
   v841EvidenceGroup = group;
+  if (!sameGroup) {
+    v842PreloadEvidence(group.files || []);
+  }
 
   status.textContent =
     `${group.title || group.type || "Event"} · ${group.files.length} image${group.files.length === 1 ? "" : "s"}`;
@@ -751,7 +795,6 @@ function v81RenderReplay(index) {
   intelligenceEl("v81-replay-action").textContent =
     row.recommended_action || "No recommendation stored.";
   v84RenderVisualEvidence(index);
-  v841RenderEventJumps(index);
 
   v81RenderLineChart(
     intelligenceEl("v81-replay-chart"),
@@ -851,36 +894,19 @@ intelligenceEl("v81-replay-slider")?.addEventListener("input", event => {
   v841JumpToReplayIndex(Number(event.currentTarget.value));
 });
 
-intelligenceEl("v841-event-jump-list")?.addEventListener("click", event => {
-  const button = event.target.closest("[data-replay-index]");
-  if (!button) return;
-  v841JumpToReplayIndex(Number(button.dataset.replayIndex));
-});
 
 intelligenceEl("v81-replay-chart")?.addEventListener("click", event => {
-  const svg = event.currentTarget;
   const marker = event.target.closest("[data-replay-index]");
   if (marker) {
     v841JumpToReplayIndex(Number(marker.dataset.replayIndex));
     return;
   }
-
-  const samples = v81SelectedMemory?.samples || [];
-  if (!samples.length) return;
-
-  const rect = svg.getBoundingClientRect();
-  const viewWidth = svg.viewBox?.baseVal?.width || 900;
-  const pointerX = ((event.clientX - rect.left) / Math.max(1, rect.width)) * viewWidth;
-  const plotLeft = 38;
-  const plotRight = 12;
-  const plotWidth = viewWidth - plotLeft - plotRight;
-  const ratio = Math.max(
-    0,
-    Math.min(1, (pointerX - plotLeft) / Math.max(1, plotWidth))
-  );
-  const index = Math.round(ratio * Math.max(0, samples.length - 1));
-  v841JumpToReplayIndex(index);
+  const index = v842ReplayIndexFromPointer(event);
+  if (index !== null) v841JumpToReplayIndex(index);
 });
+
+intelligenceEl("v81-replay-chart")?.addEventListener("pointermove", v842RenderReplayTooltip);
+intelligenceEl("v81-replay-chart")?.addEventListener("pointerleave", v842HideReplayTooltip);
 
 intelligenceEl("v81-replay-chart")?.addEventListener("keydown", event => {
   const marker = event.target.closest("[data-replay-index]");
