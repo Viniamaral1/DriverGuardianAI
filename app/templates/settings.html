@@ -65,6 +65,16 @@
     <p class="muted">Report generation runs in the background after the camera is released.</p>
   </section>
 
+  <section class="panel settings-section">
+    <div class="settings-icon">◫</div>
+    <div class="panel-head"><div><p class="eyebrow">VISUAL EVIDENCE</p><h2>Event-linked camera evidence</h2></div></div>
+    <label class="switch-row">
+      <span><b>Capture visual evidence</b><small>Save a tiny local JPEG burst around significant Decision Memory events</small></span>
+      <input name="visual_evidence_enabled" type="checkbox"><i></i>
+    </label>
+    <p class="muted">Off by default. Guardian does not record full-session video. Evidence can be deleted without deleting Decision Memory metrics.</p>
+  </section>
+
   <section class="panel settings-section settings-information">
     <div class="settings-icon">ⓘ</div>
     <div><p class="eyebrow">CONFIGURATION</p><h2>Local preferences</h2><p class="muted">Preferences are saved in <code>config/web_settings.json</code>. Your active theme is also remembered by the browser.</p></div>
@@ -80,4 +90,4 @@
   </section>
 </form>
 {% endblock %}
-{% block scripts %}<script src="/static/js/settings.js?v=6.1.0"></script>{% endblock %}
+{% block scripts %}<script src="/static/js/settings.js?v=8.4.0"></script>{% endblock %}

@@ -1,0 +1,86 @@
+{
+  "release": "Guardian OS V8.4 Visual Evidence Replay",
+  "source_checkpoint": "GuardianOS-V8.4-Visual-Evidence-Replay-20260812-142014.zip",
+  "design": {
+    "visual_evidence_default": "disabled",
+    "continuous_video": false,
+    "second_camera_pipeline": false,
+    "buffer": "6 compressed JPEG frames at approximately 1 Hz",
+    "event_capture": [
+      "risk transition",
+      "alert",
+      "strong yawn",
+      "EAR/personal-baseline event"
+    ],
+    "storage": "guardian_data/visual_evidence/<decision_session_id>/",
+    "deletion": "visual evidence can be deleted without deleting Decision Memory metrics"
+  },
+  "validation": {
+    "python_syntax": "passed",
+    "javascript_syntax": "passed",
+    "bounded_evidence_persistence": "passed",
+    "manifest_discovery": "passed",
+    "safe_file_resolution": "passed",
+    "independent_deletion": "passed",
+    "fastapi_import": "8.4.0 / 65 routes"
+  },
+  "protected_unchanged": [
+    "trained fatigue model",
+    "PersonalCalibration",
+    "TemporalStateEngine",
+    "AlertManager",
+    "camera ownership",
+    "model thresholds",
+    "alert/beep/voice behaviour"
+  ],
+  "changed_files": {
+    "app/services/live_monitoring_service.py": {
+      "bytes": 37999,
+      "sha256": "a8da2377954333a477286cab09c8a044d36f2e37d9bdaf5246f1670900245b8b"
+    },
+    "app/services/decision_memory_service.py": {
+      "bytes": 25773,
+      "sha256": "eff5ef30343c70405e92d84175bf1ba690b634a12bdff08b04857f109db27b5b"
+    },
+    "app/services/app_state.py": {
+      "bytes": 12465,
+      "sha256": "aa7c8fa37abdf6206a93f00d82b0f7f9cb86f4f825fab21f8820da8d2a049ca3"
+    },
+    "app/routers/settings.py": {
+      "bytes": 1193,
+      "sha256": "d9757118738172774877fb354c6123410dc8c46d8984ba1f5d4e2a074bd541b8"
+    },
+    "app/routers/intelligence.py": {
+      "bytes": 3889,
+      "sha256": "a736449a32e27ed23e04867885eec9ec8e7e26b24ed64be80329eaa2b3590ff8"
+    },
+    "app/templates/settings.html": {
+      "bytes": 4845,
+      "sha256": "7f82d3128a7e5e7c3474a14e30fbd09821a0c1de279090c585c68f7e0af71340"
+    },
+    "app/static/js/settings.js": {
+      "bytes": 2800,
+      "sha256": "e06c7b15372c4676dcf6e3f333cb5aeaeb8b135d6839cc835809e48416f8f12a"
+    },
+    "app/templates/intelligence.html": {
+      "bytes": 17410,
+      "sha256": "ec9f36adbf48797a34bb08224979966e507c3c1e569b7f314987778c915798be"
+    },
+    "app/static/js/intelligence.js": {
+      "bytes": 27006,
+      "sha256": "92b1a9d55a97c7d8736564b9dc2968a18cc8d4d3f1c6c6958ac07b92bd84fdae"
+    },
+    "app/static/css/app.css": {
+      "bytes": 103433,
+      "sha256": "b283f41eb1a7ebd8a0f7f9882940a2303a77a480334ea4b399fc5be718b43fe5"
+    },
+    "app/main.py": {
+      "bytes": 1845,
+      "sha256": "07070b5cc5e22d54d5cb3f7bf13a4ab6376cbb3e6330a886ec7305f59e8f2a85"
+    },
+    "GUARDIAN_OS_V8_4_VISUAL_EVIDENCE_REPLAY.md": {
+      "bytes": 929,
+      "sha256": "abc32b37628940e9cdcd3d70e83d3d66d6ec465a7653898bc0d3ff50ad568c1a"
+    }
+  }
+}

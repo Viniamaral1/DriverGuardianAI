@@ -50,6 +50,7 @@ class DecisionMemoryService:
         self._last_monitoring = False
         self._last_sample_clock = 0.0
         self._last_flush_clock = 0.0
+        self._pending_visual_events: list[dict[str, Any]] = []
 
     @staticmethod
     def _now() -> datetime:
@@ -67,7 +68,7 @@ class DecisionMemoryService:
         now = self._now()
         session_id = f"decision_{now.strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
         return {
-            "schema_version": "8.3.3-decision-memory-v4",
+            "schema_version": "8.4-decision-memory-v5",
             "id": session_id,
             "started_at": now.isoformat(timespec="seconds"),
             "ended_at": None,
@@ -262,6 +263,7 @@ class DecisionMemoryService:
             self._last_monitoring = True
             self._last_sample_clock = 0.0
             self._last_flush_clock = 0.0
+            self._pending_visual_events.clear()
 
             # Persist the header immediately so the new timestamp appears even
             # before the first advisory sample.
@@ -295,9 +297,14 @@ class DecisionMemoryService:
             if not should_sample:
                 return self.status()
 
+            previous_event_count = len(self.events(self._active["samples"]))
             self._active["samples"].append(self._sample(metrics, intelligence))
             self._active["summary"] = self._summary(self._active["samples"])
             self._last_sample_clock = now_clock
+
+            for event in self.events(self._active["samples"])[previous_event_count:]:
+                if event.get("type") in {"alert", "yawn", "eye", "risk_change"}:
+                    self._pending_visual_events.append(dict(event))
 
             should_flush = (
                 force
@@ -327,11 +334,18 @@ class DecisionMemoryService:
             self._last_monitoring = False
             self._last_sample_clock = 0.0
             self._last_flush_clock = 0.0
+            self._pending_visual_events.clear()
 
             return {
                 **self.status(),
                 "completed_session_id": completed_id,
             }
+
+    def pop_visual_events(self) -> list[dict[str, Any]]:
+        with self._lock:
+            events = list(self._pending_visual_events)
+            self._pending_visual_events.clear()
+            return events
 
     def status(self) -> dict[str, Any]:
         with self._lock:
@@ -386,13 +400,60 @@ class DecisionMemoryService:
                 'maximum_advisory_risk':float(summary.get('maximum_advisory_risk',0) or 0),'average_advisory_risk':float(summary.get('average_advisory_risk',0) or 0),
                 'average_confidence':float(summary.get('average_confidence',0) or 0),'minimum_confidence':float(summary.get('minimum_confidence',0) or 0),
                 'average_ear':float(summary.get('average_ear',0) or 0),'alert_count':int(summary.get('alert_count',0) or 0),
-                'dominant_evidence':summary.get('dominant_evidence','none'),'event_count':len(self.events(payload.get('samples',[]) or [])),
+                'dominant_evidence':summary.get('dominant_evidence','none'),'event_count':len(self.events(payload.get('samples',[]) or [])),'visual_evidence_count':self.visual_evidence(str(payload.get('id',path.stem))).get('file_count',0),
                 'active':payload.get('id')==self._active_id,
             })
         return rows
 
+    @property
+    def visual_evidence_root(self) -> Path:
+        return self.root / "guardian_data" / "visual_evidence"
+
+    def visual_evidence(self, session_id: str) -> dict[str, Any]:
+        if not session_id.startswith("decision_"):
+            raise ValueError("Invalid Decision Memory ID.")
+        manifest_path = self.visual_evidence_root / session_id / "manifest.json"
+        if not manifest_path.exists():
+            return {"available": False, "session_id": session_id, "events": [], "file_count": 0}
+        try:
+            payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            payload = {}
+        events = payload.get("events", []) if isinstance(payload, dict) else []
+        count = sum(len(item.get("files", []) or []) for item in events)
+        return {
+            "available": bool(count),
+            "session_id": session_id,
+            "events": events,
+            "file_count": count,
+            "privacy_note": payload.get("privacy_note", "") if isinstance(payload, dict) else "",
+        }
+
+    def resolve_visual_evidence(self, session_id: str, filename: str) -> Path:
+        if not session_id.startswith("decision_"):
+            raise ValueError("Invalid Decision Memory ID.")
+        if Path(filename).name != filename or not filename.lower().endswith(".jpg"):
+            raise ValueError("Invalid visual evidence filename.")
+        directory = (self.visual_evidence_root / session_id).resolve()
+        candidate = (directory / filename).resolve()
+        if directory not in candidate.parents or not candidate.exists():
+            raise FileNotFoundError(filename)
+        return candidate
+
+    def delete_visual_evidence(self, session_id: str) -> dict[str, Any]:
+        if not session_id.startswith("decision_"):
+            raise ValueError("Invalid Decision Memory ID.")
+        directory = self.visual_evidence_root / session_id
+        if directory.exists():
+            import shutil
+            shutil.rmtree(directory)
+        return {"deleted": True, "session_id": session_id, "decision_memory_preserved": True}
+
     def get_session(self,session_id:str)->dict[str,Any]:
-        payload=self._read(session_id); payload['events']=self.events(payload.get('samples',[]) or []); return payload
+        payload=self._read(session_id)
+        payload['events']=self.events(payload.get('samples',[]) or [])
+        payload['visual_evidence']=self.visual_evidence(session_id)
+        return payload
 
     def update_metadata(self,session_id:str,*,label:str='',condition:str='',notes:str='')->dict[str,Any]:
         with self._lock:

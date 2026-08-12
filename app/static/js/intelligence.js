@@ -509,6 +509,55 @@ async function v81LoadMemorySession(sessionId) {
   }
 }
 
+function v84EvidenceForReplayIndex(index) {
+  const groups = v81SelectedMemory?.visual_evidence?.events || [];
+  let best = null;
+  let bestDistance = Infinity;
+  for (const group of groups) {
+    const distance = Math.abs(Number(group.index || 0) - Number(index || 0));
+    if (distance < bestDistance) {
+      best = group;
+      bestDistance = distance;
+    }
+  }
+  return bestDistance <= 2 ? best : null;
+}
+
+function v84RenderVisualEvidence(index) {
+  const strip = intelligenceEl("v84-evidence-strip");
+  const status = intelligenceEl("v84-evidence-status");
+  const deleteButton = intelligenceEl("v84-delete-evidence");
+  if (!strip || !status) return;
+
+  const visual = v81SelectedMemory?.visual_evidence || {};
+  if (deleteButton) deleteButton.disabled = !visual.available;
+
+  const group = v84EvidenceForReplayIndex(index);
+  if (!group || !(group.files || []).length) {
+    status.textContent = visual.available
+      ? "No captured evidence near this replay point"
+      : "No visual evidence captured for this session";
+    strip.innerHTML = `<div class="empty-state">${
+      visual.available
+        ? "Move the replay slider near a captured event."
+        : "Enable Visual Evidence in Settings before Monitoring."
+    }</div>`;
+    return;
+  }
+
+  status.textContent =
+    `${group.title || group.type || "Event"} · ${group.files.length} image${group.files.length === 1 ? "" : "s"}`;
+
+  const sessionId = encodeURIComponent(v81SelectedMemory.id);
+  strip.innerHTML = group.files.map((filename, order) => `
+    <figure class="v84-evidence-frame">
+      <img src="/api/intelligence/memory/${sessionId}/evidence/${encodeURIComponent(filename)}"
+        alt="Guardian event evidence frame ${order + 1}" loading="lazy">
+      <figcaption>${order === group.files.length - 1 ? "Event frame" : "Pre-event"}</figcaption>
+    </figure>
+  `).join("");
+}
+
 function v81RenderReplay(index) {
   const samples = v81SelectedMemory?.samples || [];
   if (!samples.length) return;
@@ -530,6 +579,7 @@ function v81RenderReplay(index) {
       .filter(Boolean).join(" · ");
   intelligenceEl("v81-replay-action").textContent =
     row.recommended_action || "No recommendation stored.";
+  v84RenderVisualEvidence(index);
 
   v81RenderLineChart(
     intelligenceEl("v81-replay-chart"),
@@ -626,6 +676,24 @@ async function v81CompareSessions() {
 
 intelligenceEl("v81-replay-slider")?.addEventListener("input", event => {
   v81RenderReplay(Number(event.currentTarget.value));
+});
+
+intelligenceEl("v84-delete-evidence")?.addEventListener("click", async () => {
+  if (!v81SelectedMemory?.id) return;
+  const confirmed = window.confirm(
+    "Delete all local visual evidence for this session? Decision Memory metrics will be preserved."
+  );
+  if (!confirmed) return;
+  try {
+    const response = await fetch(
+      `/api/intelligence/memory/${encodeURIComponent(v81SelectedMemory.id)}/evidence`,
+      {method: "DELETE"}
+    );
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    await v81LoadMemorySession(v81SelectedMemory.id);
+  } catch (error) {
+    console.error("Could not delete visual evidence", error);
+  }
 });
 
 intelligenceEl("v81-memory-refresh")?.addEventListener("click", async () => {

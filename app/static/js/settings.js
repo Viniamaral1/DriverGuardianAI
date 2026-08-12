@@ -54,6 +54,7 @@ form.addEventListener("submit", async event => {
     driver_name: form.elements.driver_name.value.trim(),
     automatic_reports: form.elements.automatic_reports.checked,
     persistent_calibration_enabled: form.elements.persistent_calibration_enabled.checked,
+    visual_evidence_enabled: form.elements.visual_evidence_enabled.checked,
   };
 
   try {

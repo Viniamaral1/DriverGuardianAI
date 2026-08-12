@@ -71,6 +71,23 @@ def decision_memory_csv(session_id: str):
     )
 
 
+@router.get("/memory/{session_id}/evidence/{filename}")
+def decision_memory_visual_evidence(session_id: str, filename: str):
+    try:
+        path = service().decision_memory.resolve_visual_evidence(session_id, filename)
+        return FileResponse(path, media_type="image/jpeg", headers={"Cache-Control": "private, no-store"})
+    except (ValueError, FileNotFoundError) as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
+
+
+@router.delete("/memory/{session_id}/evidence")
+def decision_memory_delete_visual_evidence(session_id: str):
+    try:
+        return service().decision_memory.delete_visual_evidence(session_id)
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+
+
 @router.get("/memory/compare/{first_id}/{second_id}")
 def decision_memory_compare(first_id: str, second_id: str):
     try:

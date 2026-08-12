@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import importlib
 import os
+import json
+import re
 import threading
 import time
 import warnings
@@ -55,6 +57,8 @@ class LiveMonitoringService:
         self._metrics: dict[str, Any] = self.empty_metrics()
         self._previous_temporal_state = "READY"
         self._previous_alert_count = 0
+        self._evidence_buffer: deque[tuple[float, bytes]] = deque(maxlen=6)
+        self._last_evidence_buffer_clock = 0.0
 
     @staticmethod
     def empty_metrics() -> dict[str, Any]:
@@ -178,6 +182,8 @@ class LiveMonitoringService:
             self._camera_backend = None
             self._previous_temporal_state = "READY"
             self._previous_alert_count = 0
+            self._evidence_buffer.clear()
+            self._last_evidence_buffer_clock = 0.0
             self._startup_event.clear()
             self._stop_event.clear()
             self._metrics = self.empty_metrics()
@@ -329,6 +335,8 @@ class LiveMonitoringService:
         self._stopping = False
         self._capture = None
         self._jpeg = None
+        self._evidence_buffer.clear()
+        self._last_evidence_buffer_clock = 0.0
         self._thread = None
         self._stop_event.clear()
         self._metrics = self.empty_metrics()
@@ -342,7 +350,84 @@ class LiveMonitoringService:
     def _publish_frame(self, jpeg: bytes) -> None:
         with self._frame_condition:
             self._jpeg = jpeg
+            if bool(self.settings_provider().get("visual_evidence_enabled", False)):
+                now = time.monotonic()
+                if now - self._last_evidence_buffer_clock >= 1.0:
+                    self._evidence_buffer.append((now, bytes(jpeg)))
+                    self._last_evidence_buffer_clock = now
             self._frame_condition.notify_all()
+
+    def capture_visual_evidence(
+        self,
+        session_id: str,
+        event: dict[str, Any],
+    ) -> list[str]:
+        """Persist a small local JPEG burst around a Decision Memory event."""
+        if not bool(self.settings_provider().get("visual_evidence_enabled", False)):
+            return []
+        if not str(session_id).startswith("decision_"):
+            return []
+
+        event_type = re.sub(
+            r"[^a-z0-9_-]+", "_", str(event.get("type") or "event").lower()
+        ).strip("_") or "event"
+        event_index = int(event.get("index", 0) or 0)
+
+        with self._lock:
+            frames = list(self._evidence_buffer)[-4:]
+            if self._jpeg is not None:
+                frames.append((time.monotonic(), bytes(self._jpeg)))
+
+        unique, seen = [], set()
+        for stamp, jpeg in frames:
+            marker = hash(jpeg)
+            if marker not in seen:
+                seen.add(marker)
+                unique.append((stamp, jpeg))
+        frames = unique[-5:]
+        if not frames:
+            return []
+
+        evidence_dir = self.root / "guardian_data" / "visual_evidence" / session_id
+        evidence_dir.mkdir(parents=True, exist_ok=True)
+
+        saved = []
+        for order, (_, jpeg) in enumerate(frames):
+            filename = f"event_{event_index:04d}_{event_type}_{order:02d}.jpg"
+            (evidence_dir / filename).write_bytes(jpeg)
+            saved.append(filename)
+
+        manifest_path = evidence_dir / "manifest.json"
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            if not isinstance(manifest, dict):
+                manifest = {}
+        except (FileNotFoundError, json.JSONDecodeError, OSError):
+            manifest = {}
+
+        groups = [
+            item for item in manifest.get("events", [])
+            if not (
+                int(item.get("index", -1)) == event_index
+                and str(item.get("type")) == event_type
+            )
+        ]
+        groups.append({
+            "index": event_index,
+            "type": event_type,
+            "timestamp": event.get("timestamp"),
+            "title": event.get("title"),
+            "detail": event.get("detail"),
+            "files": saved,
+        })
+        manifest["events"] = groups
+        manifest["session_id"] = session_id
+        manifest["privacy_note"] = (
+            "Optional local event-linked evidence. Decision Memory metrics remain "
+            "available if these images are deleted."
+        )
+        manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+        return saved
 
     def _publish_error(self, message: str, source: str = "MONITOR") -> None:
         with self._lock:

@@ -242,6 +242,16 @@
         <b>Recorded recommendation</b>
         <span id="v81-replay-action">Select a session to replay its decisions.</span>
       </div>
+      <div class="v84-evidence-replay">
+        <div class="v84-evidence-head">
+          <div><span>Visual evidence</span><b id="v84-evidence-status">No evidence for this replay point</b></div>
+          <button type="button" class="button secondary" id="v84-delete-evidence" disabled>Delete session evidence</button>
+        </div>
+        <div id="v84-evidence-strip" class="v84-evidence-strip">
+          <div class="empty-state">Visual evidence is optional and disabled by default in Settings.</div>
+        </div>
+        <p class="muted v84-evidence-note">Local explainability evidence only; not continuous video or medical proof.</p>
+      </div>
     </section>
   </div>
 
@@ -433,5 +443,5 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="/static/js/intelligence.js?v=8.3.3"></script>
+<script src="/static/js/intelligence.js?v=8.4.0"></script>
 {% endblock %}

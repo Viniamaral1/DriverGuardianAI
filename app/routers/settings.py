@@ -16,6 +16,7 @@ class SettingsUpdate(BaseModel):
     driver_name: str | None = Field(default=None, max_length=40)
     automatic_reports: bool | None = None
     persistent_calibration_enabled: bool | None = None
+    visual_evidence_enabled: bool | None = None
 
 
 @router.get("")

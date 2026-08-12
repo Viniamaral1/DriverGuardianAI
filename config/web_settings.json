@@ -1,5 +1,5 @@
 {
-  "theme": "dark",
+  "theme": "light",
   "accent": "cyan",
   "voice_output": true,
   "wake_word_enabled": false,
@@ -8,5 +8,6 @@
   "sensitivity": 65,
   "driver_name": "Vini",
   "automatic_reports": true,
-  "persistent_calibration_enabled": true
+  "persistent_calibration_enabled": true,
+  "visual_evidence_enabled": true
 }

@@ -31,6 +31,7 @@ class GuardianState:
             "driver_name": "",
             "automatic_reports": True,
             "persistent_calibration_enabled": True,
+            "visual_evidence_enabled": False,
         }
         self.voice_service = None
         self.monitoring_service: LiveMonitoringService | None = None
@@ -154,6 +155,24 @@ class GuardianState:
 
             try:
                 service.snapshot(record_memory=True)
+                pending = service.decision_memory.pop_visual_events()
+                if (
+                    pending
+                    and self.monitoring_service is not None
+                    and bool(self.settings.get("visual_evidence_enabled", False))
+                ):
+                    session_id = service.decision_memory.status().get("active_session_id")
+                    if session_id:
+                        for event in pending:
+                            files = self.monitoring_service.capture_visual_evidence(
+                                str(session_id), event
+                            )
+                            if files:
+                                self.add_event(
+                                    "EVIDENCE",
+                                    f"Visual evidence captured for {event.get('type', 'event')}",
+                                    "info",
+                                )
             except Exception as error:
                 # Decision Memory is research/explainability telemetry only.
                 # It must never interrupt the safety-critical live path.
