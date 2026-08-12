@@ -3883,3 +3883,75 @@ html.sidebar-collapsed .sidebar-toggle {
   .v841-evidence-player{max-width:100%}
   .v84-evidence-strip{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+
+
+/* Guardian OS V8.4.3 — sidebar accessibility + Visual Evidence consent */
+.sidebar .nav{
+  flex:1 1 auto;
+  min-height:0;
+  align-content:start;
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior:contain;
+  padding-right:5px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--line) transparent;
+}
+.sidebar .nav::-webkit-scrollbar{width:6px}
+.sidebar .nav::-webkit-scrollbar-track{background:transparent}
+.sidebar .nav::-webkit-scrollbar-thumb{
+  background:var(--line);
+  border-radius:999px;
+}
+.sidebar .nav::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+.sidebar-status{flex:0 0 auto}
+
+.settings-privacy-reminder{
+  line-height:1.55;
+}
+.settings-privacy-reminder b{
+  color:var(--text);
+}
+
+.visual-evidence-consent-dialog{
+  width:min(620px,100%);
+}
+.visual-evidence-consent-points article b,
+.visual-evidence-consent-points article small{
+  display:block;
+}
+.visual-evidence-consent-points article small{
+  margin-top:5px;
+  color:var(--muted);
+  line-height:1.45;
+}
+.visual-evidence-consent-copy{
+  padding:11px 12px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--surface-2);
+}
+.visual-evidence-consent-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:9px;
+  margin-top:18px;
+}
+
+@media(max-width:620px){
+  .visual-evidence-consent-points{grid-template-columns:1fr}
+  .visual-evidence-consent-actions{
+    flex-direction:column-reverse;
+  }
+  .visual-evidence-consent-actions .button{width:100%}
+}
+
+/* Existing mobile bottom navigation remains horizontal; no sidebar scrolling there. */
+@media(max-width:700px){
+  .sidebar .nav{
+    overflow:visible;
+    padding-right:0;
+    scrollbar-width:none;
+  }
+  .sidebar .nav::-webkit-scrollbar{display:none}
+}

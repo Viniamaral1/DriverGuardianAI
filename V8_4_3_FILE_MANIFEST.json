@@ -1,0 +1,56 @@
+{
+  "release": "Guardian OS V8.4.3 UX & Privacy Patch",
+  "source_checkpoint": "GuardianOS-V8.5-Near-Miss-Memory-20260812-215408.zip",
+  "scope": "Sidebar accessibility and Visual Evidence consent only",
+  "features": {
+    "scrollable_sidebar_navigation": true,
+    "settings_reachable_on_short_screens": true,
+    "visual_evidence_first_enable_consent": true,
+    "visual_evidence_default_off": true,
+    "local_storage_explained": true,
+    "continuous_video_explained_as_false": true,
+    "independent_evidence_deletion_explained": true,
+    "cancel_keeps_capture_disabled": true,
+    "consent_acknowledgement_storage": "browser localStorage"
+  },
+  "validation": {
+    "python_syntax": "passed",
+    "javascript_syntax": "passed",
+    "settings_consent_dom_contract": "passed",
+    "sidebar_scroll_css_contract": "passed",
+    "fastapi_smoke": "8.4.3 / 65 routes"
+  },
+  "protected_unchanged": [
+    "trained fatigue model",
+    "PersonalCalibration",
+    "TemporalStateEngine",
+    "AlertManager",
+    "camera ownership",
+    "Visual Evidence capture backend",
+    "event thresholds",
+    "Decision Memory sampling",
+    "replay functionality"
+  ],
+  "changed_files": {
+    "app/templates/settings.html": {
+      "bytes": 6808,
+      "sha256": "94fc0de1cd34dd7d79861828157c28232cfb16a65345bccd793f41a3dcd6efeb"
+    },
+    "app/static/js/settings.js": {
+      "bytes": 5510,
+      "sha256": "762aceb0664460ec6eb1ca102fa4a35ff5cf391292540678b44136ba9fc0fa8b"
+    },
+    "app/static/css/app.css": {
+      "bytes": 109524,
+      "sha256": "9e905a7a8322f1b8774b4af4e704613953ea8bc5d96f0d2ab4b194d4ffdf235c"
+    },
+    "app/main.py": {
+      "bytes": 1849,
+      "sha256": "2224e907f4c9c136e443d5bd3afbf55973a2033f804d923c935ec3012b49912e"
+    },
+    "GUARDIAN_OS_V8_4_3_UX_PRIVACY_PATCH.md": {
+      "bytes": 1358,
+      "sha256": "9afa39629b9241747b331ae1b6c2a220fd402db0a91d772effcc59f823134a9b"
+    }
+  }
+}

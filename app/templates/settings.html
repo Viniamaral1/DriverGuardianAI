@@ -69,10 +69,17 @@
     <div class="settings-icon">◫</div>
     <div class="panel-head"><div><p class="eyebrow">VISUAL EVIDENCE</p><h2>Event-linked camera evidence</h2></div></div>
     <label class="switch-row">
-      <span><b>Capture visual evidence</b><small>Save a tiny local JPEG burst around significant Decision Memory events</small></span>
+      <span>
+        <b>Capture visual evidence</b>
+        <small>Save a small local image burst around significant Decision Memory events</small>
+      </span>
       <input name="visual_evidence_enabled" type="checkbox"><i></i>
     </label>
-    <p class="muted">Off by default. Guardian does not record full-session video. Evidence can be deleted without deleting Decision Memory metrics.</p>
+    <p class="muted settings-privacy-reminder">
+      <b>Privacy:</b> When enabled, Guardian may capture camera images around
+      safety events. Images are stored locally on this device, are not continuous
+      video, and can be deleted independently without deleting Decision Memory metrics.
+    </p>
   </section>
 
   <section class="panel settings-section settings-information">
@@ -89,5 +96,46 @@
     <button class="button primary" type="submit">Save settings</button>
   </section>
 </form>
+
+<div class="privacy-modal hidden" id="visual-evidence-consent" role="dialog"
+  aria-modal="true" aria-labelledby="visual-evidence-consent-title">
+  <section class="panel privacy-dialog visual-evidence-consent-dialog">
+    <p class="eyebrow">VISUAL EVIDENCE PRIVACY</p>
+    <h2 id="visual-evidence-consent-title">Enable event-linked camera evidence?</h2>
+    <p>
+      Guardian will be allowed to capture a small number of camera images around
+      significant safety events such as yawns, alerts, eye-related events or risk changes.
+    </p>
+    <div class="privacy-points visual-evidence-consent-points">
+      <article>
+        <b>Local storage</b>
+        <small>Captured images remain on this Guardian OS device/project storage.</small>
+      </article>
+      <article>
+        <b>Not continuous video</b>
+        <small>Guardian stores event-linked evidence images rather than recording the full session.</small>
+      </article>
+      <article>
+        <b>Deletion control</b>
+        <small>Visual evidence can be deleted later without deleting Decision Memory metrics.</small>
+      </article>
+      <article>
+        <b>Optional feature</b>
+        <small>Cancel now and Visual Evidence will remain disabled.</small>
+      </article>
+    </div>
+    <p class="visual-evidence-consent-copy">
+      By enabling Visual Evidence, you understand that your camera image may be
+      captured and stored locally for event replay and explainability.
+    </p>
+    <div class="visual-evidence-consent-actions">
+      <button class="button secondary" type="button"
+        id="visual-evidence-consent-cancel">Cancel</button>
+      <button class="button primary" type="button"
+        id="visual-evidence-consent-enable">Enable Visual Evidence</button>
+    </div>
+  </section>
+</div>
+
 {% endblock %}
-{% block scripts %}<script src="/static/js/settings.js?v=8.4.0"></script>{% endblock %}
+{% block scripts %}<script src="/static/js/settings.js?v=8.4.3"></script>{% endblock %}
