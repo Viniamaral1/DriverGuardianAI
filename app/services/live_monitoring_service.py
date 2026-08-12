@@ -557,6 +557,11 @@ class LiveMonitoringService:
 
             temporal_engine = v3.TemporalStateEngine()
             environmental_perception = EnvironmentalPerceptionService()
+            # Explicitly clear any temporal occlusion state at the beginning
+            # of every Monitoring session. The service is currently recreated
+            # per session as well, but this keeps the lifecycle contract clear.
+            environmental_perception.reset_temporal_state()
+
             calibration = PersistentCalibrationAdapter(
                 v3.PersonalCalibration,
                 profile=active_profile,

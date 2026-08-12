@@ -27,6 +27,14 @@ class EnvironmentalPerceptionService:
         self._candidate_occlusion: str | None = None
         self._candidate_count = 0
 
+    def reset_temporal_state(self) -> None:
+        """Reset occlusion persistence at the start of a Monitoring session."""
+        self._occlusion_history.clear()
+        self._stable_occlusion = "none"
+        self._stable_occlusion_confidence = 0.72
+        self._candidate_occlusion = None
+        self._candidate_count = 0
+
     @staticmethod
     def _clip(value: float) -> float:
         return max(0.0, min(1.0, float(value)))
@@ -235,15 +243,41 @@ class EnvironmentalPerceptionService:
             self._landmark_xy(face_landmarks, i, width, height)
             for i in range(min(468, len(face_landmarks.landmark)))
         ]
-        xs, ys = [p[0] for p in points], [p[1] for p in points]
-        bbox = (max(0, min(xs)), max(0, min(ys)), min(width, max(xs)), min(height, max(ys)))
-        bx1, by1, bx2, by2 = bbox
-        face_w, face_h = max(1, bx2 - bx1), max(1, by2 - by1)
+        xs = sorted(p[0] for p in points)
+        ys = sorted(p[1] for p in points)
 
-        # If the landmarked face touches the image border, part of the face may
-        # simply be outside the camera frame rather than covered by an object.
-        margin_x, margin_y = width * 0.018, height * 0.018
-        clipped = bx1 <= margin_x or by1 <= margin_y or bx2 >= width - margin_x or by2 >= height - margin_y
+        # Use a robust face box for reference patches so one outlying landmark
+        # cannot stretch the face box to the image boundary.
+        trim_x = max(0, int(len(xs) * 0.02))
+        trim_y = max(0, int(len(ys) * 0.02))
+        x_low = xs[min(trim_x, len(xs) - 1)]
+        x_high = xs[max(0, len(xs) - 1 - trim_x)]
+        y_low = ys[min(trim_y, len(ys) - 1)]
+        y_high = ys[max(0, len(ys) - 1 - trim_y)]
+        bbox = (
+            max(0, x_low),
+            max(0, y_low),
+            min(width, x_high),
+            min(height, y_high),
+        )
+        bx1, by1, bx2, by2 = bbox
+
+        # Partial-face evidence must come from stable anatomical boundary
+        # anchors, not the minimum/maximum of every FaceMesh point.
+        boundary_indices = (10, 152, 234, 454)  # forehead, chin, left/right cheek
+        boundary_points = [
+            self._landmark_xy(face_landmarks, idx, width, height)
+            for idx in boundary_indices
+            if idx < len(face_landmarks.landmark)
+        ]
+        margin_x, margin_y = width * 0.012, height * 0.012
+        clipped = any(
+            x <= margin_x
+            or y <= margin_y
+            or x >= width - 1 - margin_x
+            or y >= height - 1 - margin_y
+            for x, y in boundary_points
+        )
 
         left = self._eye_roi(gray, face_landmarks, self.LEFT_EYE)
         right = self._eye_roi(gray, face_landmarks, self.RIGHT_EYE)
@@ -281,36 +315,108 @@ class EnvironmentalPerceptionService:
                 + symmetry * 0.16
             )
 
+            visibility = self._clip(
+                1.0 - max(sunglasses_strength * 0.75, dark_ratio * 0.45)
+            )
             exposure_unreliable = lighting in {"too_dark", "too_bright", "glare"}
+
+            # Strong clear-eye evidence is allowed to override a global glare
+            # flag. V8.3.3 incorrectly returned "uncertain" for frames with
+            # visibility ~1.0, darkness ~0 and a normal eye/cheek ratio.
+            clear_eye_evidence = (
+                visibility >= 0.82
+                and 0.76 <= ratio <= 1.35
+                and dark_ratio <= 0.22
+                and symmetry >= 0.35
+            )
+
+            sunglasses_evidence = (
+                ratio < 0.58
+                and dark_ratio > 0.48
+                and symmetry > 0.55
+                and cheek_median > 55
+            )
+
+            generic_occlusion_evidence = (
+                ratio < 0.72
+                and dark_ratio > 0.34
+                and symmetry > 0.40
+            )
 
             if clipped:
                 label = "partial_face"
                 confidence = 0.72
-                summary = "Part of the landmarked face is close to the camera boundary."
+                summary = (
+                    "Stable facial boundary landmarks indicate that part of "
+                    "the face is close to the camera boundary."
+                )
+            elif clear_eye_evidence:
+                label = "none"
+                confidence = max(
+                    0.70,
+                    min(
+                        0.94,
+                        0.76
+                        + (visibility - 0.82) * 0.45
+                        + max(0.0, 0.22 - dark_ratio) * 0.18,
+                    ),
+                )
+                summary = (
+                    "Eye visibility is strong and the eye-region measurements "
+                    "support a clear, unobstructed face."
+                )
+            elif sunglasses_evidence:
+                # Strong bilateral dark-eye evidence is still measurable under
+                # moderate glare. Global exposure lowers confidence rather than
+                # erasing the physical evidence.
+                label = "sunglasses"
+                confidence = max(
+                    0.68,
+                    min(
+                        0.93,
+                        0.70
+                        + sunglasses_strength * 0.25
+                        - (0.08 if exposure_unreliable else 0.0),
+                    ),
+                )
+                summary = (
+                    "Both eye regions are persistently much darker than the "
+                    "visible face, consistent with sunglasses or dark eye covering."
+                )
+            elif generic_occlusion_evidence:
+                label = "eye_occlusion"
+                confidence = max(
+                    0.56,
+                    min(
+                        0.80,
+                        0.52
+                        + sunglasses_strength * 0.28
+                        - (0.06 if exposure_unreliable else 0.0),
+                    ),
+                )
+                summary = (
+                    "Eye visibility is reduced, but the image is not specific "
+                    "enough to label the covering as sunglasses."
+                )
             elif exposure_unreliable:
-                # V8.3.2: still calculate and retain real eye-region measurements
-                # under difficult exposure, but do not promote a physical
-                # occlusion label from those measurements alone.
                 label = "uncertain"
                 confidence = 0.45
                 summary = (
-                    "Eye-region measurements were captured, but physical "
-                    f"occlusion cannot be classified reliably while lighting is {lighting.replace('_', ' ')}."
+                    "Eye-region evidence is ambiguous while lighting is "
+                    f"{lighting.replace('_', ' ')}."
                 )
-            elif ratio < 0.58 and dark_ratio > 0.48 and symmetry > 0.55 and cheek_median > 55:
-                label = "sunglasses"
-                confidence = max(0.72, min(0.95, 0.70 + sunglasses_strength * 0.25))
-                summary = "Both eye regions are substantially darker than the visible face, consistent with sunglasses or dark eye covering."
-            elif ratio < 0.72 and dark_ratio > 0.34 and symmetry > 0.40:
-                label = "eye_occlusion"
-                confidence = max(0.58, min(0.82, 0.52 + sunglasses_strength * 0.28))
-                summary = "Eye visibility is reduced, but the image is not specific enough to label the covering as sunglasses."
             else:
                 label = "none"
-                confidence = max(0.62, min(0.90, 0.72 + (ratio - 0.72) * 0.30 - max(0.0, dark_ratio - 0.25) * 0.15))
+                confidence = max(
+                    0.62,
+                    min(
+                        0.90,
+                        0.72
+                        + (ratio - 0.72) * 0.30
+                        - max(0.0, dark_ratio - 0.25) * 0.15,
+                    ),
+                )
                 summary = "No strong automatic eye-region occlusion pattern is detected."
-
-            visibility = self._clip(1.0 - max(sunglasses_strength * 0.75, dark_ratio * 0.45))
             result_metrics = {
                 "eye_visibility_score": round(visibility, 4),
                 "eye_region_brightness_ratio": round(ratio, 4),

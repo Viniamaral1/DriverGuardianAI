@@ -1,0 +1,38 @@
+{
+  "release": "Guardian OS V8.3.4 Raw Occlusion Classifier Redesign",
+  "source_checkpoint": "GuardianOS-V8.3.4-Raw-Occlusion-Classifier-20260812-125654.zip",
+  "changed_files": {
+    "app/services/environmental_perception_service.py": {
+      "bytes": 26136,
+      "sha256": "8e8de0ed2cbb1cce33d3c996ee7e4834fa1798e9cc0dbce5a9ef8f8346aa9a79"
+    },
+    "app/services/live_monitoring_service.py": {
+      "bytes": 34739,
+      "sha256": "86902ae9ea446e9902116a0c5cf44e37ab79827581fc701fd1c338060f15ad49"
+    },
+    "app/main.py": {
+      "bytes": 1849,
+      "sha256": "c92b063eba8d38349cc38914aa91457e08516e8fc67609de2d588634c2e1c9d2"
+    },
+    "GUARDIAN_OS_V8_3_4_RAW_OCCLUSION_CLASSIFIER.md": {
+      "bytes": 1624,
+      "sha256": "30f19a10aaa703dc01a8f8c247f3190615990e7daf738817a1968737624fe4e7"
+    }
+  },
+  "protected_unchanged": [
+    "realtime_driver_guardian_v3_alerts.py",
+    "app/services/persistent_calibration.py",
+    "app/services/decision_memory_service.py",
+    "app/services/intelligence_service.py",
+    "TemporalStateEngine",
+    "AlertManager"
+  ],
+  "validation": {
+    "python_syntax": "passed",
+    "clear_eye_under_global_glare_resolves_none": "passed",
+    "single_noisy_landmark_does_not_create_partial_face": "passed",
+    "real_boundary_anchor_creates_partial_face": "passed",
+    "temporal_state_reset": "passed",
+    "fastapi_smoke_import": "8.3.4 63"
+  }
+}
