@@ -1,0 +1,78 @@
+{
+  "release": "Guardian OS V8.5 Near-Miss Memory",
+  "source_checkpoint": "GuardianOS-V8.5-Near-Miss-Memory-20260812-223345.zip",
+  "architecture": "Retrospective derived analysis over Decision Memory; no live safety-path changes.",
+  "near_miss_categories": [
+    "near_alert",
+    "recovery",
+    "escalation",
+    "weak_signal_accumulation",
+    "repeated_uncertainty",
+    "baseline_drift"
+  ],
+  "episode_fields": [
+    "type",
+    "start_timestamp",
+    "peak_timestamp",
+    "recovery_timestamp",
+    "duration_seconds",
+    "peak_risk",
+    "confidence",
+    "contributing_evidence",
+    "outcome",
+    "explanation",
+    "peak_index",
+    "visual_evidence_available"
+  ],
+  "validation": {
+    "python_syntax": "passed",
+    "javascript_syntax": "passed",
+    "real_decision_memory_sessions_analysed": 23,
+    "maximum_surfaced_episodes_in_one_session": 21,
+    "known_session_visual_evidence_linkage": "passed",
+    "ui_contract": "passed",
+    "fastapi_smoke": "8.5.0 / 69 routes"
+  },
+  "protected_unchanged": [
+    "trained fatigue model",
+    "PersonalCalibration",
+    "TemporalStateEngine",
+    "AlertManager",
+    "camera ownership",
+    "Visual Evidence capture backend",
+    "event thresholds",
+    "model thresholds",
+    "alert/beep/voice behaviour",
+    "Decision Memory numerical sampling"
+  ],
+  "changed_files": {
+    "app/services/near_miss_memory_service.py": {
+      "bytes": 26381,
+      "sha256": "7c78b2d6b874bd2991d6faa0af718e32e709066ba20f4977df8cdb4be416b229"
+    },
+    "app/services/decision_memory_service.py": {
+      "bytes": 26128,
+      "sha256": "0bb53470da8f114e47f16fee1bc6a170d14995ddac01890e11323c45a878c6ef"
+    },
+    "app/templates/intelligence.html": {
+      "bytes": 19302,
+      "sha256": "797e90b29878d3c94ae4c9db0c92afd5622eaf0ee7e3aebbc4a6d680984245c9"
+    },
+    "app/static/js/intelligence.js": {
+      "bytes": 39559,
+      "sha256": "a4c40f164ecbdb366b2263d4da570969652122a181af5da2101bdd4d68cb68a0"
+    },
+    "app/static/css/app.css": {
+      "bytes": 111463,
+      "sha256": "9b4de9b97a68ba00e776eca196421f2e33a8d43dd0889a611b168bf4dbd8f99b"
+    },
+    "app/main.py": {
+      "bytes": 1845,
+      "sha256": "31749179eb6723033e4f1fbce1ad585f6de2172f8cff1cbb73437e8660c06843"
+    },
+    "GUARDIAN_OS_V8_5_NEAR_MISS_MEMORY.md": {
+      "bytes": 1186,
+      "sha256": "16d9d7c968a43c39d5c2f3b0f864a37162730f03479c8c749950b0043d9c0228"
+    }
+  }
+}

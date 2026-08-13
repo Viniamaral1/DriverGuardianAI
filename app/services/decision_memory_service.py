@@ -11,6 +11,8 @@ from pathlib import Path
 from time import monotonic
 from typing import Any
 
+from app.services.near_miss_memory_service import NearMissMemoryService
+
 
 class DecisionMemoryService:
     """Persistent research trace for Guardian's advisory Intelligence layer.
@@ -400,7 +402,7 @@ class DecisionMemoryService:
                 'maximum_advisory_risk':float(summary.get('maximum_advisory_risk',0) or 0),'average_advisory_risk':float(summary.get('average_advisory_risk',0) or 0),
                 'average_confidence':float(summary.get('average_confidence',0) or 0),'minimum_confidence':float(summary.get('minimum_confidence',0) or 0),
                 'average_ear':float(summary.get('average_ear',0) or 0),'alert_count':int(summary.get('alert_count',0) or 0),
-                'dominant_evidence':summary.get('dominant_evidence','none'),'event_count':len(self.events(payload.get('samples',[]) or [])),'visual_evidence_count':self.visual_evidence(str(payload.get('id',path.stem))).get('file_count',0),
+                'dominant_evidence':summary.get('dominant_evidence','none'),'event_count':len(self.events(payload.get('samples',[]) or [])),'visual_evidence_count':self.visual_evidence(str(payload.get('id',path.stem))).get('file_count',0),'near_miss_count':NearMissMemoryService.analyse(payload.get('samples',[]) or []).get('episode_count',0),
                 'active':payload.get('id')==self._active_id,
             })
         return rows
@@ -451,8 +453,13 @@ class DecisionMemoryService:
 
     def get_session(self,session_id:str)->dict[str,Any]:
         payload=self._read(session_id)
-        payload['events']=self.events(payload.get('samples',[]) or [])
+        samples=payload.get('samples',[]) or []
+        payload['events']=self.events(samples)
         payload['visual_evidence']=self.visual_evidence(session_id)
+        payload['near_miss_memory']=NearMissMemoryService.analyse(
+            samples,
+            visual_evidence=payload['visual_evidence'],
+        )
         return payload
 
     def update_metadata(self,session_id:str,*,label:str='',condition:str='',notes:str='')->dict[str,Any]:

@@ -493,7 +493,7 @@ function v81RenderMemoryList() {
         </div>
         <div>
           <strong>${intelligencePercent(session.maximum_advisory_risk)}</strong>
-          <small>${session.sample_count} samples · ${session.active ? "LIVE" : "saved"}</small>
+          <small>${session.sample_count} samples · ${Number(session.near_miss_count || 0)} near-miss · ${session.active ? "LIVE" : "saved"}</small>
         </div>
       </button>
     `).join("")
@@ -502,6 +502,86 @@ function v81RenderMemoryList() {
   container.querySelectorAll("[data-memory-id]").forEach(button => {
     button.addEventListener("click", () => v81LoadMemorySession(button.dataset.memoryId));
   });
+}
+
+function v85NearMissLabel(type) {
+  const labels = {
+    near_alert: "Near-alert",
+    recovery: "Recovery",
+    escalation: "Escalation",
+    weak_signal_accumulation: "Weak-signal accumulation",
+    repeated_uncertainty: "Repeated uncertainty",
+    baseline_drift: "Baseline drift",
+  };
+  return labels[type] || intelligenceLabel(type || "Near miss");
+}
+
+function v85RenderNearMissMemory(activeIndex = null) {
+  const memory = v81SelectedMemory?.near_miss_memory || {};
+  const episodes = memory.episodes || [];
+  const count = intelligenceEl("v85-near-miss-count");
+  const summary = intelligenceEl("v85-near-miss-summary");
+  const list = intelligenceEl("v85-near-miss-list");
+  if (!count || !summary || !list) return;
+
+  count.textContent =
+    `${Number(memory.episode_count || 0)} episode${Number(memory.episode_count || 0) === 1 ? "" : "s"}`;
+  summary.textContent =
+    memory.summary || "No Near-Miss analysis is available for this session.";
+
+  if (!episodes.length) {
+    list.innerHTML = `
+      <div class="empty-state">
+        No Near-Miss pattern met the current retrospective criteria.
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = episodes.map((episode, order) => {
+    const peakIndex = Number(episode.peak_index || 0);
+    const active = activeIndex !== null
+      && Math.abs(Number(activeIndex) - peakIndex) <= 1;
+    const contributors = (episode.contributing_evidence || [])
+      .slice(0, 3)
+      .map(item => `${item.label} ${intelligencePercent(item.peak)}`)
+      .join(" · ");
+    const peakTime = episode.peak_timestamp
+      ? new Date(episode.peak_timestamp).toLocaleTimeString("en-GB")
+      : `Sample ${peakIndex + 1}`;
+    const evidence = episode.visual_evidence_available
+      ? " · Visual evidence nearby"
+      : "";
+    const repeat = episode.repeated_in_session
+      ? ` · repeated ${episode.same_type_episode_count}×`
+      : "";
+
+    return `
+      <button type="button"
+        class="v85-near-miss-card${active ? " is-active" : ""}"
+        data-near-miss-index="${peakIndex}"
+        data-near-miss-order="${order}">
+        <div class="v85-near-miss-card-head">
+          <span>${v85NearMissLabel(episode.type)}</span>
+          <b>${intelligencePercent(episode.peak_risk)}</b>
+        </div>
+        <strong>${episode.title || "Near-Miss episode"}</strong>
+        <small>${peakTime} · ${Number(episode.duration_seconds || 0)}s · confidence ${intelligencePercent(episode.confidence)}${repeat}${evidence}</small>
+        <p>${episode.explanation || ""}</p>
+        ${contributors ? `<em>${contributors}</em>` : ""}
+      </button>`;
+  }).join("");
+}
+
+function v85NearMissMarkers() {
+  return (v81SelectedMemory?.near_miss_memory?.episodes || []).map(
+    episode => ({
+      index: Number(episode.peak_index || 0),
+      type: "near_miss",
+      title: episode.title || "Near-Miss episode",
+      detail: episode.explanation || "",
+      level: episode.type || "near_miss",
+    })
+  );
 }
 
 async function v81LoadMemorySession(sessionId) {
@@ -531,6 +611,7 @@ async function v81LoadMemorySession(sessionId) {
     v841StopEvidencePlayback();
     v841EvidenceGroup = null;
     v841EvidenceFrameIndex = 0;
+    v85RenderNearMissMemory(Number(slider.value));
     v81RenderReplay(Number(slider.value));
   } catch (error) {
     DG.toast("Decision Memory session could not be loaded", "error");
@@ -591,7 +672,12 @@ function v842RenderReplayTooltip(event) {
   const index = v842ReplayIndexFromPointer(event);
   if (index === null) return;
   const row = samples[index];
-  const events = v842ReplayEventAtIndex(index);
+  const events = [
+    ...v842ReplayEventAtIndex(index),
+    ...v85NearMissMarkers().filter(
+      item => Number(item.index || 0) === Number(index)
+    ),
+  ];
   const eventMarkup = events.length
     ? `<div class="v842-tooltip-events">${events.map(item =>
         `<b>${String(item.title || item.type || "Event")}</b>`
@@ -795,6 +881,7 @@ function v81RenderReplay(index) {
   intelligenceEl("v81-replay-action").textContent =
     row.recommended_action || "No recommendation stored.";
   v84RenderVisualEvidence(index);
+  v85RenderNearMissMemory(index);
 
   v81RenderLineChart(
     intelligenceEl("v81-replay-chart"),
@@ -810,7 +897,10 @@ function v81RenderReplay(index) {
       width: 900,
       height: 220,
       markerIndex: index,
-      eventMarkers: v81SelectedMemory?.events || [],
+      eventMarkers: [
+        ...(v81SelectedMemory?.events || []),
+        ...v85NearMissMarkers(),
+      ],
       formatY: value => `${Math.round(value * 100)}%`,
     }
   );
@@ -889,6 +979,12 @@ async function v81CompareSessions() {
     console.error(error);
   }
 }
+
+intelligenceEl("v85-near-miss-list")?.addEventListener("click", event => {
+  const card = event.target.closest("[data-near-miss-index]");
+  if (!card) return;
+  v841JumpToReplayIndex(Number(card.dataset.nearMissIndex));
+});
 
 intelligenceEl("v81-replay-slider")?.addEventListener("input", event => {
   v841JumpToReplayIndex(Number(event.currentTarget.value));

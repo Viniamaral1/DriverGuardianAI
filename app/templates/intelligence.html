@@ -225,6 +225,23 @@
       <input id="v81-replay-slider" type="range" min="0" max="0" value="0"
         aria-label="Decision Memory replay position">
 
+      <section class="v85-near-miss-memory" aria-labelledby="v85-near-miss-title">
+        <div class="v85-near-miss-head">
+          <div>
+            <span class="eyebrow">NEAR-MISS MEMORY</span>
+            <b id="v85-near-miss-title">Retrospective safety patterns</b>
+          </div>
+          <span class="badge" id="v85-near-miss-count">0 episodes</span>
+        </div>
+        <p class="muted" id="v85-near-miss-summary">
+          Select a Decision Memory session to analyse near-alerts, recoveries,
+          escalation, uncertainty and personal-baseline drift.
+        </p>
+        <div id="v85-near-miss-list" class="v85-near-miss-list">
+          <div class="empty-state">No session selected.</div>
+        </div>
+      </section>
+
       <div class="v81-replay-metrics">
         <div><span>Time</span><b id="v81-replay-time">—</b></div>
         <div><span>Risk</span><b id="v81-replay-risk">—</b></div>
@@ -461,5 +478,5 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="/static/js/intelligence.js?v=8.4.2"></script>
+<script src="/static/js/intelligence.js?v=8.5.0"></script>
 {% endblock %}
