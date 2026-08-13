@@ -1,6 +1,7 @@
 const profileEl = id => document.getElementById(id);
 let profileSnapshot = null;
 let passportSnapshot = null;
+let passportValidationSnapshot = null;
 
 async function profileError(response, fallback) {
   try {
@@ -29,6 +30,88 @@ function passportTags(items, emptyText, keyName) {
     const label = item[keyName] || item.code || "Unknown";
     return `<span>${label}${item.count ? ` · ${item.count}` : ""}</span>`;
   }).join("");
+}
+
+function validationPercent(value) {
+  return `${(Number(value || 0) * 100).toFixed(1)}%`;
+}
+
+function renderPassportValidation(validation) {
+  passportValidationSnapshot = validation;
+  const active = profileSnapshot?.active_profile;
+  const available = Boolean(active && validation);
+  const state = String(validation?.state || "waiting").toLowerCase();
+
+  const badge = profileEl("passport-validation-badge");
+  badge.textContent = validation?.label || "WAITING";
+  badge.className = `badge ${
+    state === "valid" ? "success" :
+    state === "watch" ? "warning" :
+    state === "drift_detected" ? "warning" :
+    state === "recalibration_recommended" ? "danger" : ""
+  }`;
+
+  profileEl("passport-validation-state").textContent =
+    validation?.label || "Waiting";
+  profileEl("passport-drift-score").textContent =
+    validation ? validationPercent(validation.drift_score) : "0%";
+
+  const recent = validation?.recent_evidence || {};
+  profileEl("passport-validation-samples").textContent =
+    `${recent.sample_count || 0} samples`;
+  profileEl("passport-calibration-age").textContent =
+    recent.calibration_age_days !== null
+    && recent.calibration_age_days !== undefined
+      ? `${Number(recent.calibration_age_days).toFixed(1)} days`
+      : "—";
+
+  profileEl("passport-validation-summary").textContent =
+    validation?.summary
+      || "Select a calibrated profile to evaluate Passport drift.";
+  profileEl("passport-validation-action").textContent =
+    validation?.recommended_action
+      || "Guardian will provide an advisory recommendation after validation.";
+  profileEl("passport-validation-boundary").textContent =
+    validation?.safety_boundary
+      || "Validation never rewrites your baseline or changes Guardian alerts.";
+
+  const factors = validation?.factors || [];
+  profileEl("passport-validation-factors").innerHTML = factors.length
+    ? factors.map(item => `
+      <article class="passport-validation-factor ${item.severity}">
+        <div>
+          <b>${item.label}</b>
+          <span>${String(item.severity || "ok").toUpperCase()}</span>
+        </div>
+        <p>${item.detail || ""}</p>
+        ${
+          item.observed !== null && item.observed !== undefined
+            ? `<small>Observed: ${item.observed} · Reference: ${item.reference ?? "—"}</small>`
+            : ""
+        }
+      </article>
+    `).join("")
+    : `<div class="empty-state">No drift factor is currently available.</div>`;
+
+  profileEl("passport-validation-refresh").disabled = !available;
+}
+
+async function loadPassportValidation() {
+  const profileId = profileSnapshot?.active_profile_id;
+  if (!profileId) {
+    renderPassportValidation(null);
+    return;
+  }
+  const response = await fetch(
+    `/api/profiles/${encodeURIComponent(profileId)}/passport/validation`,
+    {cache: "no-store"},
+  );
+  if (!response.ok) {
+    throw new Error(
+      await profileError(response, "Passport validation could not be loaded.")
+    );
+  }
+  renderPassportValidation(await response.json());
 }
 
 function renderPassport(passport) {
@@ -198,6 +281,7 @@ async function loadProfiles() {
   }
   renderProfiles(await response.json());
   await loadPassport();
+  await loadPassportValidation();
 }
 
 async function setActiveProfile(profileId) {
@@ -209,6 +293,7 @@ async function setActiveProfile(profileId) {
   if (!response.ok) throw new Error(await response.text());
   renderProfiles(await response.json());
   await loadPassport();
+  await loadPassportValidation();
 }
 
 profileEl("profile-create-form")?.addEventListener("submit", async event => {
@@ -235,6 +320,7 @@ profileEl("profile-create-form")?.addEventListener("submit", async event => {
 
     renderProfiles(payload);
     await loadPassport();
+    await loadPassportValidation();
     form.reset();
     DG.toast("Driver profile created and selected", "success");
   } catch (error) {
@@ -269,6 +355,7 @@ profileEl("profiles-list")?.addEventListener("click", async event => {
       if (!response.ok) throw new Error(await response.text());
       renderProfiles(await response.json());
       await loadPassport();
+      await loadPassportValidation();
       DG.toast("Driver profile deleted", "success");
     }
   } catch (error) {
@@ -302,6 +389,7 @@ profileEl("profiles-reset-active")?.addEventListener("click", async () => {
     if (!response.ok) throw new Error(await response.text());
     renderProfiles(await response.json());
     await loadPassport();
+    await loadPassportValidation();
     DG.toast("Saved calibration reset", "success");
   } catch (error) {
     DG.toast("Calibration could not be reset", "error");
@@ -421,9 +509,20 @@ profileEl("passport-reset")?.addEventListener("click", async () => {
       throw new Error(await profileError(response, "Passport reset failed."));
     }
     renderPassport(await response.json());
+    await loadPassportValidation();
     DG.toast("Passport metadata reset", "success");
   } catch (error) {
     DG.toast(error.message || "Passport reset failed", "error");
+    console.error(error);
+  }
+});
+
+profileEl("passport-validation-refresh")?.addEventListener("click", async () => {
+  try {
+    await loadPassportValidation();
+    DG.toast("Passport validation refreshed", "success");
+  } catch (error) {
+    DG.toast(error.message || "Passport validation failed", "error");
     console.error(error);
   }
 });

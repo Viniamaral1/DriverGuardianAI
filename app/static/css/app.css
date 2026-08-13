@@ -4136,3 +4136,100 @@ html.sidebar-collapsed .sidebar-toggle {
   .passport-grid,.passport-visibility{grid-template-columns:1fr}
   .passport-actions .button,.passport-import-label{width:100%}
 }
+
+
+/* Guardian OS V8.8 — Passport Validation & Drift Management */
+.passport-validation{
+  margin-top:14px;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--surface-2);
+}
+.passport-validation-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+.passport-validation-head h3{margin-top:3px}
+.passport-validation-score{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+  margin-top:12px;
+}
+.passport-validation-score>div{
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:var(--surface);
+}
+.passport-validation-score span,
+.passport-validation-score strong{display:block}
+.passport-validation-score span{font-size:9px;color:var(--muted)}
+.passport-validation-score strong{margin-top:5px;font-size:14px}
+.passport-validation-summary{
+  margin:10px 0;
+  padding:10px;
+  border-radius:9px;
+  background:var(--surface);
+  line-height:1.5;
+}
+.passport-validation-factors{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+.passport-validation-factor{
+  padding:10px;
+  border:1px solid var(--line);
+  border-left-width:4px;
+  border-radius:9px;
+  background:var(--surface);
+}
+.passport-validation-factor.ok{border-left-color:var(--success)}
+.passport-validation-factor.watch{border-left-color:var(--warning)}
+.passport-validation-factor.high,
+.passport-validation-factor.critical{border-left-color:var(--danger)}
+.passport-validation-factor>div{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+}
+.passport-validation-factor>div span{
+  color:var(--muted);
+  font-size:8px;
+  font-weight:800;
+}
+.passport-validation-factor p{
+  margin-top:5px;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.45;
+}
+.passport-validation-factor small{
+  display:block;
+  margin-top:5px;
+  font-size:8px;
+  color:var(--muted);
+}
+.passport-validation-action{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:var(--surface);
+}
+.passport-validation-action span{color:var(--muted)}
+#passport-validation-refresh{margin-top:10px}
+@media(max-width:900px){
+  .passport-validation-score{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:620px){
+  .passport-validation-score,
+  .passport-validation-factors{grid-template-columns:1fr}
+  .passport-validation-action{flex-direction:column}
+}

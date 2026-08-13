@@ -1,0 +1,88 @@
+{
+  "release": "Guardian OS V8.8 Passport Validation & Drift Management",
+  "source_checkpoint": "GuardianOS-V8.8-Passport-Validation-Drift-20260813-162455.zip",
+  "architecture": "Read-only advisory trust assessment over V8.7 Passport + recent Decision Memory.",
+  "states": [
+    "VALID",
+    "WATCH",
+    "DRIFT DETECTED",
+    "RECALIBRATION RECOMMENDED"
+  ],
+  "validation_signals": [
+    "recent reliable EAR versus saved baseline",
+    "recent head pose versus saved baseline",
+    "V8.6 perception insufficient rate",
+    "recent perception confidence",
+    "last quick-verification result",
+    "verification fallback rate",
+    "camera configuration change",
+    "calibration age",
+    "recent evidence volume"
+  ],
+  "safety_contract": {
+    "automatic_baseline_changes": false,
+    "model_weight_changes": false,
+    "alert_threshold_changes": false,
+    "biometric_identity": false,
+    "poor_visibility_equals_fatigue": false
+  },
+  "validation": {
+    "python_syntax": "passed",
+    "javascript_syntax": "passed",
+    "real_profile_evaluation": "passed",
+    "real_profile_state_in_supplied_checkpoint": "WATCH",
+    "synthetic_VALID": "passed",
+    "synthetic_WATCH": "passed",
+    "synthetic_DRIFT_DETECTED": "passed",
+    "synthetic_RECALIBRATION_RECOMMENDED": "passed",
+    "read_only_storage_hash_check": "passed",
+    "profiles_ui_contract": "passed",
+    "fastapi_smoke": "8.8.0 / 71 routes"
+  },
+  "protected_unchanged": [
+    "trained fatigue model",
+    "PersonalCalibration calculation",
+    "TemporalStateEngine",
+    "AlertManager",
+    "camera ownership",
+    "MediaPipe ownership",
+    "Decision Memory sampling",
+    "V8.6 Perception Confidence semantics",
+    "V8.7 Passport import/export semantics",
+    "Visual Evidence capture"
+  ],
+  "changed_files": {
+    "app/services/passport_validation_service.py": {
+      "bytes": 17480,
+      "sha256": "d42be09e87684740bb88660499719f202fdb85b22cbbe855f17b83f8ef9bdff1"
+    },
+    "app/services/app_state.py": {
+      "bytes": 13200,
+      "sha256": "2243e65733d78bf9e6ae6410db291c4e381bee3b00fc65fe09634aeef0297d61"
+    },
+    "app/routers/profiles.py": {
+      "bytes": 7087,
+      "sha256": "94cf73144b42623d1cccef172a6b2dc65b699487eb5d2365e8098e98cb1717c6"
+    },
+    "app/templates/profiles.html": {
+      "bytes": 9738,
+      "sha256": "20d239cb24f3f7380670c3ad31d6b5edcbb1a42300ce16d29ebb0c4bd6ff93dd"
+    },
+    "app/static/js/profiles.js": {
+      "bytes": 18628,
+      "sha256": "b456e18a77aa3cf934c469d37dfa1403ce9f42e5066b129fedc812246476167f"
+    },
+    "app/static/css/app.css": {
+      "bytes": 117436,
+      "sha256": "72310d6892336323db96fabaf7632ec25690d012c55bf119691ebf452fd4550c"
+    },
+    "app/main.py": {
+      "bytes": 1845,
+      "sha256": "0c588f339a69b306a61bed103120094b71e7f002deea025d6c4530eb4601165e"
+    },
+    "GUARDIAN_OS_V8_8_PASSPORT_VALIDATION_DRIFT.md": {
+      "bytes": 950,
+      "sha256": "af7de1a3be132bb54f955c7972a0069203ea34bfc00e7e5babb78ecf6c2c35ef"
+    }
+  }
+}

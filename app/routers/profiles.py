@@ -43,6 +43,15 @@ def passport_service():
     return guardian_state.calibration_passport_service
 
 
+def validation_service():
+    if guardian_state.passport_validation_service is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Passport Validation is unavailable.",
+        )
+    return guardian_state.passport_validation_service
+
+
 @router.get("")
 def snapshot():
     return service().snapshot()
@@ -87,6 +96,14 @@ def set_active(payload: ActiveProfileUpdate):
 def get_passport(profile_id: str):
     try:
         return passport_service().build(profile_id)
+    except KeyError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
+
+
+@router.get("/{profile_id}/passport/validation")
+def passport_validation(profile_id: str):
+    try:
+        return validation_service().evaluate(profile_id)
     except KeyError as error:
         raise HTTPException(status_code=404, detail=str(error)) from error
 

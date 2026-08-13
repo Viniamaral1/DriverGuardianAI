@@ -124,6 +124,57 @@
         </div>
       </div>
 
+      <section class="passport-validation">
+        <div class="passport-validation-head">
+          <div>
+            <p class="eyebrow">PASSPORT VALIDATION & DRIFT</p>
+            <h3>Can Guardian still trust this calibration?</h3>
+          </div>
+          <span class="badge" id="passport-validation-badge">WAITING</span>
+        </div>
+
+        <div class="passport-validation-score">
+          <div>
+            <span>Passport state</span>
+            <strong id="passport-validation-state">Waiting</strong>
+          </div>
+          <div>
+            <span>Drift score</span>
+            <strong id="passport-drift-score">0%</strong>
+          </div>
+          <div>
+            <span>Recent evidence</span>
+            <strong id="passport-validation-samples">0 samples</strong>
+          </div>
+          <div>
+            <span>Calibration age</span>
+            <strong id="passport-calibration-age">—</strong>
+          </div>
+        </div>
+
+        <p class="passport-validation-summary" id="passport-validation-summary">
+          Select a calibrated profile to evaluate Passport drift.
+        </p>
+        <div id="passport-validation-factors" class="passport-validation-factors">
+          <div class="empty-state">No validation has been run yet.</div>
+        </div>
+        <div class="passport-validation-action">
+          <b>Recommended action</b>
+          <span id="passport-validation-action">
+            Guardian will provide an advisory recommendation after validation.
+          </span>
+        </div>
+        <div class="passport-safety-note">
+          <b>Advisory only.</b>
+          <span id="passport-validation-boundary">
+            Validation never rewrites your baseline or changes Guardian alerts.
+          </span>
+        </div>
+        <button class="button secondary" id="passport-validation-refresh" type="button" disabled>
+          Re-run Passport validation
+        </button>
+      </section>
+
       <div class="passport-privacy">
         <p class="eyebrow">PRIVACY & PORTABILITY</p>
         <label class="switch-row">
@@ -183,5 +234,5 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="/static/js/profiles.js?v=8.7.0"></script>
+<script src="/static/js/profiles.js?v=8.8.0"></script>
 {% endblock %}
