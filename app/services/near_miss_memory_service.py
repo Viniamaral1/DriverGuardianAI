@@ -377,17 +377,25 @@ class NearMissMemoryService:
             confidence = cls._number(sample.get("decision_confidence"))
             signal = cls._number(sample.get("signal_quality"))
             image = cls._number(sample.get("image_quality"))
+            perception = cls._number(sample.get("perception_confidence"))
+            perception_state = str(sample.get("perception_state") or "").lower()
             occlusion = str(
                 sample.get("raw_automatic_occlusion")
                 or sample.get("automatic_occlusion")
                 or ""
             ).lower()
-            bad.append(
-                confidence < 0.58
-                or (signal > 0 and signal < 0.55)
-                or (image > 0 and image < 0.50)
-                or occlusion == "uncertain"
-            )
+            if perception_state:
+                bad.append(
+                    perception_state == "insufficient"
+                    or (perception > 0 and perception < 0.45)
+                )
+            else:
+                bad.append(
+                    confidence < 0.58
+                    or (signal > 0 and signal < 0.55)
+                    or (image > 0 and image < 0.50)
+                    or occlusion == "uncertain"
+                )
 
         runs: list[tuple[int, int]] = []
         start: int | None = None

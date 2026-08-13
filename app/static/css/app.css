@@ -4045,3 +4045,19 @@ html.sidebar-collapsed .sidebar-toggle {
 @media(max-width:760px){
   .v85-near-miss-list{grid-template-columns:1fr;max-height:360px}
 }
+
+/* Guardian OS V8.6 — Perception Confidence Layer */
+.v86-perception-panel{margin-bottom:14px}
+.v86-perception-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.v86-perception-grid>div{padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);min-width:0}
+.v86-perception-grid span,.v86-perception-grid b,.v86-perception-grid strong,.v86-perception-grid small{display:block}
+.v86-perception-grid span{color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.06em}
+.v86-perception-grid strong{margin:5px 0 2px;font-size:clamp(24px,3vw,36px)}
+.v86-perception-grid b{margin-top:5px}.v86-perception-grid small{margin-top:5px;color:var(--muted);line-height:1.4}
+.v86-perception-summary{margin:10px 0;padding:11px 12px;border:1px solid color-mix(in srgb,var(--accent) 42%,var(--line));border-radius:10px;background:var(--accent-soft);line-height:1.5}
+.v86-perception-reasons{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+.v86-reason{display:grid;gap:2px;max-width:330px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.v86-reason b{font-size:9px;text-transform:uppercase;letter-spacing:.04em}.v86-reason small{color:var(--muted);font-size:9px;line-height:1.35}
+.v86-reason.warning{border-left:4px solid var(--warning)}.v86-reason.critical{border-left:4px solid var(--danger)}.v86-reason.success{border-left:4px solid var(--success)}
+@media(max-width:900px){.v86-perception-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.v86-perception-grid{grid-template-columns:1fr}}

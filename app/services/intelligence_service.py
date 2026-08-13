@@ -6,6 +6,7 @@ from typing import Any, TYPE_CHECKING
 
 from app.services.decision_engine_service import DecisionEngineService
 from app.services.decision_memory_service import DecisionMemoryService
+from app.services.perception_confidence_service import PerceptionConfidenceService
 
 if TYPE_CHECKING:
     from app.services.app_state import GuardianState
@@ -395,6 +396,8 @@ class IntelligenceService:
             metrics,
             decision_context,
         )
+        signal_quality = self._signal_quality(metrics)
+        perception_confidence = PerceptionConfidenceService.snapshot(metrics)
 
         payload = {
             "available": True,
@@ -416,7 +419,8 @@ class IntelligenceService:
                 "summary": dominant_text,
                 "contributions": contributions,
             },
-            "signal_quality": self._signal_quality(metrics),
+            "signal_quality": signal_quality,
+            "perception_confidence": perception_confidence,
             "baseline_comparison": self._baseline_comparison(metrics, insights),
             "outlook": self._outlook(metrics, insights),
             "context": effective_context,

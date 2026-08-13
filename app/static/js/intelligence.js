@@ -38,6 +38,7 @@ function renderIntelligence(snapshot) {
   const history = snapshot.history || {};
   const explanation = snapshot.explanation || {};
   const environment = snapshot.environment || {};
+  const perception = snapshot.perception_confidence || {};
 
   intelligenceEl("intelligence-generated").textContent =
     `Updated ${new Date(snapshot.generated_at).toLocaleTimeString("en-GB")}`;
@@ -169,6 +170,46 @@ function renderIntelligence(snapshot) {
     intelligencePercent(environment.quality_score);
   intelligenceEl("environment-summary").textContent =
     environment.summary || "No image-quality assessment is available.";
+
+  const perceptionState = String(perception.state || "standby").toLowerCase();
+  const perceptionBadge = intelligenceEl("v86-perception-badge");
+  perceptionBadge.textContent = perceptionState.toUpperCase();
+  perceptionBadge.className = `badge ${
+    perceptionState === "trusted" ? "success" :
+    perceptionState === "degraded" ? "warning" :
+    perceptionState === "insufficient" ? "danger" : ""
+  }`;
+  intelligenceEl("v86-perception-score").textContent =
+    intelligencePercent(perception.score || 0);
+  intelligenceEl("v86-perception-state").textContent =
+    intelligenceLabel(perception.state || "standby");
+  intelligenceEl("v86-perception-policy").textContent =
+    intelligenceLabel(perception.observation_mode || "standby");
+  intelligenceEl("v86-perception-absence").textContent =
+    perception.absence_interpretation || "No live visual observation.";
+  intelligenceEl("v86-perception-eyes").textContent =
+    intelligencePercent(perception.components?.eye_visibility || 0);
+  intelligenceEl("v86-perception-eye-note").textContent =
+    perception.can_trust_absence
+      ? "Eye-region non-detection can be interpreted normally."
+      : "Missing eye cues may reflect limited visibility.";
+  intelligenceEl("v86-perception-frame").textContent =
+    intelligencePercent(perception.components?.image_quality || 0);
+  intelligenceEl("v86-perception-frame-note").textContent =
+    environment.summary || "No image-quality assessment is available.";
+  intelligenceEl("v86-perception-summary").textContent =
+    perception.summary || "No perception-confidence assessment is available.";
+  intelligenceEl("v86-perception-boundary").textContent =
+    perception.safety_boundary ||
+    "Perception Confidence does not alter fatigue probability or alerts.";
+  const perceptionReasons = perception.reason_codes || [];
+  intelligenceEl("v86-perception-reasons").innerHTML = perceptionReasons.length
+    ? perceptionReasons.map(item => `
+      <span class="v86-reason ${item.severity || "info"}">
+        <b>${intelligenceLabel(item.code || "reason")}</b>
+        <small>${item.message || ""}</small>
+      </span>`).join("")
+    : `<span class="v86-reason success"><b>Observation clear</b><small>No current perception limitation was identified.</small></span>`;
 
   intelligenceEl("history-average-risk").textContent =
     intelligencePercent(history.average_risk);
@@ -688,6 +729,7 @@ function v842RenderReplayTooltip(event) {
     <strong>${new Date(row.timestamp).toLocaleTimeString("en-GB")}</strong>
     <div><span>Risk</span><b>${intelligencePercent(row.advisory_risk)}</b></div>
     <div><span>Confidence</span><b>${intelligencePercent(row.decision_confidence)}</b></div>
+    ${row.perception_state ? `<div><span>Perception</span><b>${intelligenceLabel(row.perception_state)} · ${intelligencePercent(row.perception_confidence)}</b></div>` : ""}
     <div><span>EAR</span><b>${Number(row.ear || 0).toFixed(3)}</b></div>
     <div><span>Baseline</span><b>${Number(row.baseline_ear || 0).toFixed(3)}</b></div>
     ${eventMarkup}
@@ -871,6 +913,9 @@ function v81RenderReplay(index) {
     intelligencePercent(row.advisory_risk);
   intelligenceEl("v81-replay-confidence").textContent =
     intelligencePercent(row.decision_confidence);
+  intelligenceEl("v86-replay-perception").textContent = row.perception_state
+    ? `${intelligenceLabel(row.perception_state)} · ${intelligencePercent(row.perception_confidence)}`
+    : "Legacy session";
   intelligenceEl("v81-replay-ear").textContent =
     Number(row.ear || 0).toFixed(3);
   intelligenceEl("v81-replay-evidence").textContent =

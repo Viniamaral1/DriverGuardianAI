@@ -32,6 +32,9 @@ class DecisionMemoryService:
         "raw_model_probability", "existing_decision_probability",
         "existing_smoothed_probability", "advisory_risk", "risk_band",
         "decision_confidence", "confidence_level", "signal_quality", "image_quality",
+        "perception_confidence", "perception_state", "perception_observation_mode",
+        "perception_can_trust_presence", "perception_can_trust_absence",
+        "perception_reason_codes",
         "weather", "road_condition", "external_light", "occlusion",
         "raw_automatic_occlusion", "raw_automatic_occlusion_confidence",
         "automatic_occlusion", "automatic_occlusion_confidence",
@@ -70,7 +73,7 @@ class DecisionMemoryService:
         now = self._now()
         session_id = f"decision_{now.strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
         return {
-            "schema_version": "8.4-decision-memory-v5",
+            "schema_version": "8.6-decision-memory-v6",
             "id": session_id,
             "started_at": now.isoformat(timespec="seconds"),
             "ended_at": None,
@@ -95,6 +98,7 @@ class DecisionMemoryService:
         context = intelligence.get("context", {}) or {}
         quality = intelligence.get("signal_quality", {}) or {}
         environment = intelligence.get("environment", {}) or {}
+        perception = intelligence.get("perception_confidence", {}) or {}
         evidence = engine.get("evidence", []) or []
         strongest = max(evidence, key=lambda item: self._number(item.get("contribution")), default={})
         legacy = engine.get("legacy_reference", {}) or {}
@@ -118,6 +122,16 @@ class DecisionMemoryService:
             "confidence_level": str(confidence.get("level") or "standby"),
             "signal_quality": round(self._number(quality.get("score")), 6),
             "image_quality": round(self._number(environment.get("quality_score")), 6),
+            "perception_confidence": round(self._number(perception.get("score")), 6),
+            "perception_state": str(perception.get("state") or "standby"),
+            "perception_observation_mode": str(perception.get("observation_mode") or "standby"),
+            "perception_can_trust_presence": bool(perception.get("can_trust_presence")),
+            "perception_can_trust_absence": bool(perception.get("can_trust_absence")),
+            "perception_reason_codes": ";".join(
+                str(item.get("code") or "")
+                for item in perception.get("reason_codes", []) or []
+                if item.get("code")
+            ),
             "weather": str(context.get("weather") or "unknown"),
             "road_condition": str(context.get("road_condition") or "unknown"),
             "external_light": str(context.get("external_light") or "unknown"),
@@ -227,7 +241,7 @@ class DecisionMemoryService:
 
     @classmethod
     def events(cls, samples: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        events=[]; previous_band=None; previous_alerts=0; yawn_active=False; eye_active=False; low_conf=False
+        events=[]; previous_band=None; previous_alerts=0; yawn_active=False; eye_active=False; low_conf=False; previous_perception=None
         for index,sample in enumerate(samples):
             band=str(sample.get("risk_band") or "standby")
             if previous_band is not None and band != previous_band:
@@ -252,6 +266,18 @@ class DecisionMemoryService:
                 events.append({"index":index,"timestamp":sample.get("timestamp"),"type":"confidence","level":"warning","title":"Decision confidence reduced","detail":f"Confidence fell to {conf:.0%}."})
                 low_conf=True
             elif conf >= .68: low_conf=False
+            perception=str(sample.get("perception_state") or "").lower()
+            if perception in {"trusted","degraded","insufficient"}:
+                if previous_perception is not None and perception != previous_perception:
+                    events.append({
+                        "index":index,
+                        "timestamp":sample.get("timestamp"),
+                        "type":"perception",
+                        "level":perception,
+                        "title":f"Perception changed to {perception}",
+                        "detail":str(sample.get("perception_reason_codes") or "No perception limitation recorded."),
+                    })
+                previous_perception=perception
         return events
 
     def begin(self, metrics: dict[str, Any]) -> dict[str, Any]:

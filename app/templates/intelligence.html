@@ -48,6 +48,50 @@
     </article>
   </section>
 
+  <section class="panel v86-perception-panel">
+    <div class="panel-head">
+      <div>
+        <p class="eyebrow">PERCEPTION CONFIDENCE LAYER</p>
+        <h2>Can Guardian trust what the camera can see?</h2>
+      </div>
+      <span class="badge" id="v86-perception-badge">STANDBY</span>
+    </div>
+    <div class="v86-perception-grid">
+      <div class="v86-perception-score">
+        <span>Perception confidence</span>
+        <strong id="v86-perception-score">0%</strong>
+        <b id="v86-perception-state">Standby</b>
+      </div>
+      <div>
+        <span>Evidence semantics</span>
+        <b id="v86-perception-policy">Standby</b>
+        <small id="v86-perception-absence">No live visual observation.</small>
+      </div>
+      <div>
+        <span>Eye visibility</span>
+        <b id="v86-perception-eyes">0%</b>
+        <small id="v86-perception-eye-note">Waiting for camera evidence.</small>
+      </div>
+      <div>
+        <span>Frame quality</span>
+        <b id="v86-perception-frame">0%</b>
+        <small id="v86-perception-frame-note">Waiting for image-quality analysis.</small>
+      </div>
+    </div>
+    <p class="v86-perception-summary" id="v86-perception-summary">
+      Start Monitoring to calculate perception confidence.
+    </p>
+    <div id="v86-perception-reasons" class="v86-perception-reasons">
+      <span class="muted">No live perception reasons.</span>
+    </div>
+    <div class="intelligence-method-note">
+      <b>Safety boundary</b>
+      <span id="v86-perception-boundary">
+        This layer describes visual observability only; it does not alter fatigue probability or alerts.
+      </span>
+    </div>
+  </section>
+
   <section class="panel v8-decision-engine">
   <div class="panel-head">
     <div>
@@ -246,6 +290,7 @@
         <div><span>Time</span><b id="v81-replay-time">—</b></div>
         <div><span>Risk</span><b id="v81-replay-risk">—</b></div>
         <div><span>Confidence</span><b id="v81-replay-confidence">—</b></div>
+        <div><span>Perception</span><b id="v86-replay-perception">—</b></div>
         <div><span>EAR</span><b id="v81-replay-ear">—</b></div>
         <div><span>Dominant evidence</span><b id="v81-replay-evidence">—</b></div>
         <div><span>Context</span><b id="v81-replay-context">—</b></div>
@@ -478,5 +523,5 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="/static/js/intelligence.js?v=8.5.0"></script>
+<script src="/static/js/intelligence.js?v=8.6.0"></script>
 {% endblock %}

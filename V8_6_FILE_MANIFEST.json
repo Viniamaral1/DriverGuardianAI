@@ -1,0 +1,109 @@
+{
+  "release": "Guardian OS V8.6 Perception Confidence Layer",
+  "source_checkpoint": "GuardianOS-V8.6-Perception-Confidence-Layer-20260813-131211.zip",
+  "architecture": "Read-only perception observability layer over the existing camera pipeline; no second camera or MediaPipe instance.",
+  "states": [
+    "trusted",
+    "degraded",
+    "insufficient"
+  ],
+  "core_semantics": {
+    "trusted": "Detected cues and non-detection may both be interpreted normally.",
+    "degraded": "Positive cues remain useful; missing cues are not strong negative evidence.",
+    "insufficient": "Visual observability is too limited to interpret absence of a cue."
+  },
+  "inputs_reused": [
+    "face availability",
+    "image quality",
+    "under/overexposure",
+    "glare",
+    "sharpness",
+    "eye visibility",
+    "automatic occlusion confidence",
+    "raw occlusion uncertainty",
+    "occlusion temporal window",
+    "frame rate",
+    "head pose"
+  ],
+  "outputs": [
+    "perception confidence score",
+    "state",
+    "observation mode",
+    "evidence policy",
+    "absence interpretation",
+    "can_trust_presence",
+    "can_trust_absence",
+    "component scores",
+    "reason codes",
+    "affected regions"
+  ],
+  "decision_memory": {
+    "schema": "8.6-decision-memory-v6",
+    "stores_perception_fields": true,
+    "perception_state_transition_events": true,
+    "legacy_sessions_supported": true
+  },
+  "near_miss_compatibility": "V8.6 perception INSUFFICIENT states are used for repeated-uncertainty analysis when available; legacy sessions keep the prior fallback.",
+  "validation": {
+    "python_syntax": "passed",
+    "javascript_syntax": "passed",
+    "trusted_state_synthetic": "passed",
+    "degraded_state_synthetic": "passed",
+    "insufficient_state_synthetic": "passed",
+    "decision_memory_perception_fields": "passed",
+    "perception_transition_event": "passed",
+    "legacy_decision_memory_sessions": "23 sessions readable",
+    "fastapi_smoke": "8.6.0 / 69 routes"
+  },
+  "protected_unchanged": [
+    "trained fatigue model",
+    "PersonalCalibration",
+    "TemporalStateEngine",
+    "AlertManager",
+    "camera ownership",
+    "MediaPipe ownership",
+    "fatigue probability",
+    "model thresholds",
+    "alert thresholds",
+    "alert/beep/voice behaviour",
+    "Visual Evidence capture backend"
+  ],
+  "changed_files": {
+    "app/services/perception_confidence_service.py": {
+      "bytes": 10565,
+      "sha256": "3d14386e5645b225883a86653ab0472758b6213235c0f2d2eeca8adfe9338728"
+    },
+    "app/services/intelligence_service.py": {
+      "bytes": 20791,
+      "sha256": "20af357c52355dcd2717117c0409c14db54c7720f24d530867e17b5e4b668270"
+    },
+    "app/services/decision_memory_service.py": {
+      "bytes": 27780,
+      "sha256": "a68a1086850c4c1a8c85c42e8b96a2d64f3d676f74fcbd2e66ff38e45bcf97f7"
+    },
+    "app/services/near_miss_memory_service.py": {
+      "bytes": 26774,
+      "sha256": "fb90ff81cb91ac8411e48acdd9aa2880937e6134aea1ec30edeebd7d3e6d3272"
+    },
+    "app/templates/intelligence.html": {
+      "bytes": 21037,
+      "sha256": "9cd2329da0ccc71b644adbd64b952cfedb62e9f3b5a27add9ffa6f62ee57f7b8"
+    },
+    "app/static/js/intelligence.js": {
+      "bytes": 42264,
+      "sha256": "039d69971359427a0f3611c456d31ee4fc9d6ff7c5bf4bf6cd7e0b6b59cbb384"
+    },
+    "app/static/css/app.css": {
+      "bytes": 113083,
+      "sha256": "b32bd429e39972a39c663be2628e5eba286a6e7d67349131cdae3b7552ac8430"
+    },
+    "app/main.py": {
+      "bytes": 1845,
+      "sha256": "6897f6815745a27aec26848f7943a299666b2d6c3d2dcfd8a5a4be669b7507b6"
+    },
+    "GUARDIAN_OS_V8_6_PERCEPTION_CONFIDENCE_LAYER.md": {
+      "bytes": 1850,
+      "sha256": "e36d30866c2a5343182fc436a43f3cd659f82bbe83057e97af5354bc740589bd"
+    }
+  }
+}
