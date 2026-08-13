@@ -85,6 +85,89 @@
       </div>
     </article>
 
+    <article class="panel passport-card">
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow">PERSONAL AI CALIBRATION PASSPORT</p>
+          <h2>Portable personalisation without raw biometric video</h2>
+        </div>
+        <span class="badge" id="passport-status">NO ACTIVE PROFILE</span>
+      </div>
+
+      <p class="muted" id="passport-summary">
+        Select a local driver profile to build a versioned Calibration Passport.
+      </p>
+
+      <div class="passport-grid">
+        <div><span>Passport ID</span><b id="passport-id">—</b></div>
+        <div><span>Schema</span><b id="passport-schema">—</b></div>
+        <div><span>Baseline EAR</span><b id="passport-ear">—</b></div>
+        <div><span>Observations</span><b id="passport-observations">0</b></div>
+        <div><span>Perception confidence</span><b id="passport-perception">—</b></div>
+        <div><span>Trusted observation</span><b id="passport-trusted">—</b></div>
+        <div><span>Eye visibility</span><b id="passport-eyes">—</b></div>
+        <div><span>History</span><b id="passport-history">0 sessions</b></div>
+      </div>
+
+      <div class="passport-visibility">
+        <div>
+          <span>Known visibility conditions</span>
+          <div id="passport-conditions" class="passport-tags">
+            <em>None recorded yet</em>
+          </div>
+        </div>
+        <div>
+          <span>Common perception limitations</span>
+          <div id="passport-limitations" class="passport-tags">
+            <em>None recorded yet</em>
+          </div>
+        </div>
+      </div>
+
+      <div class="passport-privacy">
+        <p class="eyebrow">PRIVACY & PORTABILITY</p>
+        <label class="switch-row">
+          <span>
+            <b>Allow Passport JSON export</b>
+            <small>Turn this off to block exporting this profile's Passport.</small>
+          </span>
+          <input id="passport-allow-export" type="checkbox"><i></i>
+        </label>
+        <label class="switch-row">
+          <span>
+            <b>Include perception-history summaries in exports</b>
+            <small>Exports summary statistics and reason codes, never raw camera images.</small>
+          </span>
+          <input id="passport-include-perception" type="checkbox"><i></i>
+        </label>
+        <div class="passport-safety-note">
+          <b>Local-only by design.</b>
+          <span>No face embeddings, biometric identity templates or raw video are required by the Passport.</span>
+        </div>
+      </div>
+
+      <div class="button-row passport-actions">
+        <button class="button secondary" id="passport-save-privacy" type="button" disabled>
+          Save privacy choices
+        </button>
+        <button class="button primary" id="passport-export" type="button" disabled>
+          Export Passport JSON
+        </button>
+        <label class="button secondary passport-import-label">
+          Import Passport JSON
+          <input id="passport-import-file" type="file" accept=".json,application/json" hidden>
+        </label>
+        <button class="button secondary" id="passport-reset" type="button" disabled>
+          Reset Passport metadata
+        </button>
+      </div>
+
+      <p class="muted passport-import-warning">
+        Importing is explicit and replaces the selected profile's saved behavioural
+        baseline. It does not alter Guardian's trained model or alert thresholds.
+      </p>
+    </article>
+
     <article class="panel profiles-flow-card">
       <p class="eyebrow">CALIBRATION FLOW</p>
       <h2>Safe reuse, never blind reuse</h2>
@@ -100,5 +183,5 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="/static/js/profiles.js?v=6.1.0"></script>
+<script src="/static/js/profiles.js?v=8.7.0"></script>
 {% endblock %}

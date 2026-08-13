@@ -11,6 +11,7 @@ from app.services.automatic_report_service import AutomaticReportService
 from app.services.live_monitoring_service import LiveMonitoringService
 from app.services.edge_memory_service import EdgeMemoryService
 from app.services.driver_profile_service import DriverProfileService
+from app.services.calibration_passport_service import CalibrationPassportService
 
 
 class GuardianState:
@@ -38,6 +39,7 @@ class GuardianState:
         self.report_service: AutomaticReportService | None = None
         self.edge_memory_service: EdgeMemoryService | None = None
         self.driver_profile_service: DriverProfileService | None = None
+        self.calibration_passport_service: CalibrationPassportService | None = None
         self.intelligence_service = None
         self._decision_memory_thread: threading.Thread | None = None
         self._decision_memory_stop = threading.Event()
@@ -46,6 +48,11 @@ class GuardianState:
         self.root = root
         self._load_settings()
         self.driver_profile_service = DriverProfileService(root)
+        self.calibration_passport_service = CalibrationPassportService(
+            root,
+            self.driver_profile_service,
+            lambda: dict(self.settings),
+        )
         self.driver_profile_service.ensure_default_profile(
             str(self.settings.get("driver_name", "")).strip()
         )

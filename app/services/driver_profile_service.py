@@ -222,6 +222,40 @@ class DriverProfileService:
             self._save()
             return dict(profile)
 
+    def import_calibration(
+        self,
+        profile_id: str,
+        *,
+        baseline_ear: float,
+        baseline_yawn: float,
+        baseline_tilt: float,
+        camera_index: int,
+        observation_count: int,
+        source_passport_id: str,
+    ) -> dict[str, Any]:
+        """Explicitly replace the saved baseline from an imported passport.
+
+        This does not count as a completed local full calibration.
+        """
+        with self._lock:
+            profile = self._data.get("profiles", {}).get(profile_id)
+            if not profile:
+                raise KeyError("Driver profile was not found.")
+            profile["calibration"] = {
+                "baseline_ear": round(float(baseline_ear), 6),
+                "baseline_yawn": round(float(baseline_yawn), 6),
+                "baseline_tilt": round(float(baseline_tilt), 4),
+                "camera_index": int(camera_index),
+                "observation_count": max(1, int(observation_count or 1)),
+                "last_source": "passport_import",
+                "source_passport_id": str(source_passport_id),
+                "updated_at": self._now(),
+            }
+            profile["last_used_at"] = self._now()
+            profile["updated_at"] = self._now()
+            self._save()
+            return dict(profile)
+
     def record_verification(
         self,
         profile_id: str,

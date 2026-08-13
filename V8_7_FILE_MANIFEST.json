@@ -1,0 +1,90 @@
+{
+  "release": "Guardian OS V8.7 Personal AI Calibration Passport",
+  "source_checkpoint": "GuardianOS-V8.7-Personal-AI-Calibration-Passport-20260813-141737.zip",
+  "schema": "guardian-calibration-passport-v1",
+  "architecture": "Local, versioned passport layered over existing manual driver profiles, persistent calibration, Decision Memory and V8.6 perception history.",
+  "features": {
+    "stable_anonymous_passport_id": true,
+    "personal_visual_baseline": true,
+    "visibility_profile": true,
+    "perception_reliability_profile": true,
+    "calibration_history": true,
+    "privacy_and_retention_metadata": true,
+    "json_export": true,
+    "json_import": true,
+    "reset_passport_metadata": true,
+    "cloud_sync": false,
+    "face_identity_matching": false,
+    "raw_video_required": false
+  },
+  "import_safety": {
+    "monitoring_must_be_stopped": true,
+    "schema_validation": true,
+    "baseline_ear_range_validation": true,
+    "selected_profile_only": true,
+    "model_weights_unchanged": true,
+    "alert_thresholds_unchanged": true
+  },
+  "validation": {
+    "python_syntax": "passed",
+    "javascript_syntax": "passed",
+    "real_profile_passport_build": "passed",
+    "privacy_export_controls": "passed",
+    "import_validation_and_application": "passed",
+    "metadata_reset_preserves_calibration": "passed",
+    "profiles_ui_contract": "passed",
+    "real_profile_history_sessions": 24,
+    "fastapi_smoke": "8.7.0 / 70 routes"
+  },
+  "protected_unchanged": [
+    "trained fatigue model",
+    "PersonalCalibration logic",
+    "TemporalStateEngine",
+    "AlertManager",
+    "camera ownership",
+    "MediaPipe ownership",
+    "fatigue probability",
+    "model thresholds",
+    "alert thresholds",
+    "Decision Memory numerical sampling",
+    "Visual Evidence capture backend"
+  ],
+  "changed_files": {
+    "app/services/calibration_passport_service.py": {
+      "bytes": 15442,
+      "sha256": "8a385c8f94f04200ff722deb0a77251d0f1219d63346fcfa90ab443ebd14763b"
+    },
+    "app/services/driver_profile_service.py": {
+      "bytes": 11159,
+      "sha256": "4be8c9acc73c858ce3a0ad91980714e3876ada4a0675dc76d0d5efdfea428175"
+    },
+    "app/services/app_state.py": {
+      "bytes": 12812,
+      "sha256": "a6a9d9d55e28a9435d84885488319ca4653b6d34ef8e235e559571bd9b9b5683"
+    },
+    "app/routers/profiles.py": {
+      "bytes": 6556,
+      "sha256": "27f0c7c8a880267fd4195f86e990bbb20e4854aa785ed0ffb2decbb407b820a3"
+    },
+    "app/templates/profiles.html": {
+      "bytes": 7792,
+      "sha256": "1d67f9325a9d833e464b3cfea9ba4d0cd8d3e254fce445ed40073a62363726d2"
+    },
+    "app/static/js/profiles.js": {
+      "bytes": 15058,
+      "sha256": "e20b31a6c71751d67e15a9068fdd678c1b267e14678bf0b5edce03d2837882c6"
+    },
+    "app/static/css/app.css": {
+      "bytes": 115000,
+      "sha256": "2f1befd8c47ac7378e16e2a7a807a61e4c0c28109e33d78e03d7c22b2fababa5"
+    },
+    "app/main.py": {
+      "bytes": 1845,
+      "sha256": "7dad280e60ddd7a3a93e76bb8f749c375c1637d230ac9bcc47eb223b6f634d38"
+    },
+    "GUARDIAN_OS_V8_7_PERSONAL_AI_CALIBRATION_PASSPORT.md": {
+      "bytes": 1384,
+      "sha256": "5522b62189e7f9786c2a30c5678c25a5a5803af86a6b0bc1108e714c302a05f0"
+    }
+  }
+}
