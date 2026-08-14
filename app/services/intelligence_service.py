@@ -7,6 +7,7 @@ from typing import Any, TYPE_CHECKING
 from app.services.decision_engine_service import DecisionEngineService
 from app.services.decision_memory_service import DecisionMemoryService
 from app.services.perception_confidence_service import PerceptionConfidenceService
+from app.services.predictive_guardian_service import PredictiveGuardianService
 
 if TYPE_CHECKING:
     from app.services.app_state import GuardianState
@@ -28,6 +29,7 @@ class IntelligenceService:
         self.state = state
         self.decision_engine = DecisionEngineService()
         self.decision_memory = decision_memory or DecisionMemoryService(state.root)
+        self.predictive_guardian = PredictiveGuardianService(state.root)
 
     @staticmethod
     def _number(value: Any, default: float = 0.0) -> float:
@@ -399,6 +401,33 @@ class IntelligenceService:
         signal_quality = self._signal_quality(metrics)
         perception_confidence = PerceptionConfidenceService.snapshot(metrics)
 
+        passport_validation = None
+        active_profile = (
+            self.state.driver_profile_service.active_profile()
+            if self.state.driver_profile_service is not None
+            else None
+        )
+        if (
+            active_profile
+            and self.state.passport_validation_service is not None
+        ):
+            try:
+                passport_validation = (
+                    self.state.passport_validation_service.evaluate(
+                        active_profile["id"]
+                    )
+                )
+            except (KeyError, ValueError):
+                passport_validation = None
+
+        predictive_guardian = self.predictive_guardian.snapshot(
+            metrics=metrics,
+            decision_engine=decision_engine,
+            perception=perception_confidence,
+            passport_validation=passport_validation,
+            history_insights=insights,
+        )
+
         payload = {
             "available": True,
             "decision_engine": decision_engine,
@@ -421,6 +450,8 @@ class IntelligenceService:
             },
             "signal_quality": signal_quality,
             "perception_confidence": perception_confidence,
+            "passport_validation": passport_validation,
+            "predictive_guardian": predictive_guardian,
             "baseline_comparison": self._baseline_comparison(metrics, insights),
             "outlook": self._outlook(metrics, insights),
             "context": effective_context,

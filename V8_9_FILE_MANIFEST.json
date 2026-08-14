@@ -1,0 +1,82 @@
+{
+  "release": "Guardian OS V8.9 Predictive Guardian",
+  "source_checkpoint": "GuardianOS-V8.9-Predictive-Guardian-20260813-204310.zip",
+  "architecture": "Transparent advisory forecasting layer; no live safety-path mutation.",
+  "forecast_outputs": [
+    "STABLE / RISING / FALLING / UNCERTAIN direction",
+    "forecast confidence",
+    "projected advisory risk",
+    "10\u201315 minute horizon",
+    "time-to-elevated-risk estimate when justified",
+    "historical escalation timing",
+    "withholding reasons",
+    "recommended advisory action"
+  ],
+  "trust_controls": [
+    "withhold if monitoring inactive",
+    "withhold if calibration incomplete",
+    "withhold if session too short",
+    "withhold if Perception Confidence is INSUFFICIENT",
+    "withhold if Passport is DRIFT DETECTED",
+    "withhold if Passport is RECALIBRATION RECOMMENDED",
+    "withhold personalised forecast with insufficient history",
+    "cap confidence for WATCH Passport",
+    "cap confidence for DEGRADED perception"
+  ],
+  "validation": {
+    "python_syntax": "passed",
+    "javascript_syntax": "passed",
+    "synthetic_stable_trajectory": "passed",
+    "synthetic_rising_trajectory": "passed",
+    "synthetic_falling_trajectory": "passed",
+    "insufficient_perception_withholding": "passed",
+    "passport_drift_withholding": "passed",
+    "short_session_withholding": "passed",
+    "ui_contract": "passed",
+    "fastapi_smoke": "APP 8.9.0 ROUTES 75"
+  },
+  "protected_unchanged": [
+    "trained fatigue model",
+    "PersonalCalibration",
+    "TemporalStateEngine",
+    "AlertManager",
+    "camera ownership",
+    "MediaPipe ownership",
+    "alert thresholds",
+    "Decision Memory sampling",
+    "Perception Confidence semantics",
+    "Passport baseline",
+    "Passport Validation state logic",
+    "Visual Evidence capture"
+  ],
+  "changed_files": {
+    "app/services/predictive_guardian_service.py": {
+      "bytes": 19010,
+      "sha256": "6bc600402e967e7dddee66a04f8cee8046e8a603a350a529d0d1975e9aa340ff"
+    },
+    "app/services/intelligence_service.py": {
+      "bytes": 21977,
+      "sha256": "76eaac22b5e5e8ae73622c8447b9290e1e233eda5ef21c19474aa9283b52dfb4"
+    },
+    "app/templates/intelligence.html": {
+      "bytes": 23174,
+      "sha256": "6e276ea51f8cabf8dd347f16c0e861ea0512f18671b81bc4486aaa5b4ff8bd9a"
+    },
+    "app/static/js/intelligence.js": {
+      "bytes": 47330,
+      "sha256": "8da7439434475209e03ebf2c768074fa590c2b08cecb0bc573d1bea967dda8f0"
+    },
+    "app/static/css/app.css": {
+      "bytes": 120051,
+      "sha256": "9b4bb574d38696df55741228fdd8d12ac595b3d9e4bb1ea57e9b10245ccc3a88"
+    },
+    "app/main.py": {
+      "bytes": 1845,
+      "sha256": "a01546ffa4ef49728494e1362bc8b0095f4f656271881dfdd66f3008e6e0882c"
+    },
+    "GUARDIAN_OS_V8_9_PREDICTIVE_GUARDIAN.md": {
+      "bytes": 1346,
+      "sha256": "aa8e20092e0bd3620c4a024452e1d850524b7edc5065a6d5083ee617ca3ca39d"
+    }
+  }
+}

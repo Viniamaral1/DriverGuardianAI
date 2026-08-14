@@ -39,6 +39,8 @@ function renderIntelligence(snapshot) {
   const explanation = snapshot.explanation || {};
   const environment = snapshot.environment || {};
   const perception = snapshot.perception_confidence || {};
+  const predictive = snapshot.predictive_guardian || {};
+  const passportValidation = snapshot.passport_validation || {};
 
   intelligenceEl("intelligence-generated").textContent =
     `Updated ${new Date(snapshot.generated_at).toLocaleTimeString("en-GB")}`;
@@ -211,6 +213,8 @@ function renderIntelligence(snapshot) {
       </span>`).join("")
     : `<span class="v86-reason success"><b>Observation clear</b><small>No current perception limitation was identified.</small></span>`;
 
+  renderV89PredictiveGuardian(predictive, passportValidation);
+
   intelligenceEl("history-average-risk").textContent =
     intelligencePercent(history.average_risk);
   intelligenceEl("history-highest-risk").textContent =
@@ -226,6 +230,122 @@ function renderIntelligence(snapshot) {
   renderV8DecisionEngine(snapshot.decision_engine || {});
   v81AddLivePoint(snapshot);
   v81RenderMemoryStatus(snapshot.decision_memory || {});
+}
+
+function renderV89ForecastChart(projection) {
+  const svg = intelligenceEl("v89-forecast-chart");
+  if (!svg) return;
+  const points = Array.isArray(projection) ? projection : [];
+  if (!points.length) {
+    svg.innerHTML = `<text x="20" y="90" class="v81-axis-label">No forecast projection available.</text>`;
+    return;
+  }
+
+  const width = 620, height = 180;
+  const left = 42, right = 18, top = 18, bottom = 30;
+  const plotW = width - left - right;
+  const plotH = height - top - bottom;
+  const maxMinute = Math.max(15, ...points.map(p => Number(p.minute || 0)));
+  const x = minute => left + (Number(minute || 0) / maxMinute) * plotW;
+  const y = risk => top + (1 - Math.max(0, Math.min(1, Number(risk || 0)))) * plotH;
+
+  let markup = "";
+  [0, .25, .5, .75, 1].forEach(value => {
+    const yy = y(value);
+    markup += `<line x1="${left}" y1="${yy}" x2="${width-right}" y2="${yy}" class="v81-grid-line"></line>`;
+    markup += `<text x="3" y="${yy+4}" class="v81-axis-label">${Math.round(value*100)}%</text>`;
+  });
+  const thresholdY = y(.65);
+  markup += `<line x1="${left}" y1="${thresholdY}" x2="${width-right}" y2="${thresholdY}" class="v89-threshold"></line>`;
+  markup += `<text x="${width-right-88}" y="${thresholdY-5}" class="v89-threshold-label">elevated 65%</text>`;
+
+  const path = points.map((p, i) =>
+    `${i ? "L" : "M"} ${x(p.minute).toFixed(1)} ${y(p.risk).toFixed(1)}`
+  ).join(" ");
+  markup += `<path d="${path}" class="v89-forecast-line"></path>`;
+  points.forEach(p => {
+    markup += `<circle cx="${x(p.minute)}" cy="${y(p.risk)}" r="5" class="v89-forecast-point"></circle>`;
+    markup += `<text x="${x(p.minute)-8}" y="${height-8}" class="v81-axis-label">${p.minute}m</text>`;
+  });
+  svg.innerHTML = markup;
+}
+
+function renderV89PredictiveGuardian(predictive, passportValidation) {
+  const status = String(predictive.status || "standby").toLowerCase();
+  const direction = String(
+    predictive.direction || predictive.forecast_state || "uncertain"
+  ).toLowerCase();
+  const badge = intelligenceEl("v89-predictive-status");
+  badge.textContent = status === "withheld"
+    ? "WITHHELD"
+    : direction.toUpperCase();
+  badge.className = `badge ${
+    status === "withheld" ? "danger" :
+    direction === "rising" ? "warning" :
+    direction === "falling" ? "success" :
+    direction === "stable" ? "success" : ""
+  }`;
+
+  intelligenceEl("v89-direction").textContent =
+    intelligenceLabel(direction);
+  intelligenceEl("v89-horizon").textContent =
+    predictive.horizon || "No forecast";
+  intelligenceEl("v89-confidence").textContent =
+    intelligencePercent(predictive.confidence || 0);
+  intelligenceEl("v89-forecast-risk").textContent =
+    intelligencePercent(predictive.forecast_risk || 0);
+
+  const timeTo = predictive.time_to_elevated_minutes;
+  intelligenceEl("v89-time-to-risk").textContent =
+    timeTo !== null && timeTo !== undefined
+      ? `Estimated elevated-risk window ~${Number(timeTo).toFixed(1)} min`
+      : "No justified escalation-time estimate";
+
+  const historical = predictive.historical_pattern || {};
+  intelligenceEl("v89-history-count").textContent =
+    `${historical.session_count || 0} sessions`;
+  intelligenceEl("v89-history-window").textContent =
+    historical.median_first_elevated_minutes !== null
+    && historical.median_first_elevated_minutes !== undefined
+      ? `Median elevated-risk timing ${historical.median_first_elevated_minutes} min`
+      : "No historical escalation window yet";
+
+  intelligenceEl("v89-passport-trust").textContent =
+    passportValidation?.label
+      ? `Passport: ${passportValidation.label}`
+      : "Passport trust unavailable";
+  intelligenceEl("v89-summary").textContent =
+    predictive.summary || "Predictive Guardian is waiting for evidence.";
+  intelligenceEl("v89-action").textContent =
+    predictive.recommended_action
+      || "Live Guardian monitoring remains authoritative.";
+  intelligenceEl("v89-boundary").textContent =
+    predictive.safety_boundary
+      || "Predictive Guardian does not replace the trained model or existing alerts.";
+
+  const withheld = intelligenceEl("v89-withheld");
+  const reasons = predictive.withheld_reasons || [];
+  if (reasons.length) {
+    withheld.hidden = false;
+    withheld.innerHTML = `<b>Forecast withheld</b>${reasons.map(reason =>
+      `<span>${reason}</span>`
+    ).join("")}`;
+  } else {
+    withheld.hidden = true;
+    withheld.innerHTML = "";
+  }
+
+  const factors = predictive.factors || [];
+  intelligenceEl("v89-factors").innerHTML = factors.length
+    ? factors.map(item => `
+      <div class="v89-factor">
+        <div><span>${item.label}</span><b>${intelligencePercent(item.value || 0)}</b></div>
+        <small>${item.detail || ""}</small>
+      </div>
+    `).join("")
+    : `<div class="empty-state">Waiting for predictive evidence.</div>`;
+
+  renderV89ForecastChart(predictive.projection || []);
 }
 
 function renderV8DecisionEngine(engine) {

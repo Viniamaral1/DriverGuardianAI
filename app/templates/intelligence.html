@@ -354,6 +354,71 @@
   </div>
 </section>
 
+<section class="panel v89-predictive-panel">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">V8.9 PREDICTIVE GUARDIAN</p>
+      <h2>What is likely to happen next?</h2>
+    </div>
+    <span class="badge" id="v89-predictive-status">STANDBY</span>
+  </div>
+
+  <div class="v89-predictive-grid">
+    <div>
+      <span>Forecast direction</span>
+      <strong id="v89-direction">Uncertain</strong>
+      <small id="v89-horizon">No forecast</small>
+    </div>
+    <div>
+      <span>Forecast confidence</span>
+      <strong id="v89-confidence">0%</strong>
+      <small id="v89-passport-trust">Passport trust unavailable</small>
+    </div>
+    <div>
+      <span>Projected advisory risk</span>
+      <strong id="v89-forecast-risk">0%</strong>
+      <small id="v89-time-to-risk">No escalation estimate</small>
+    </div>
+    <div>
+      <span>History used</span>
+      <strong id="v89-history-count">0 sessions</strong>
+      <small id="v89-history-window">No historical window yet</small>
+    </div>
+  </div>
+
+  <div class="v89-predictive-body">
+    <div class="v89-forecast-chart-card">
+      <div>
+        <b>Near-term advisory projection</b>
+        <small>Scenario projection, not a medical probability</small>
+      </div>
+      <svg id="v89-forecast-chart" class="v89-forecast-chart"
+        viewBox="0 0 620 180" role="img"
+        aria-label="Predictive Guardian near-term advisory projection"></svg>
+    </div>
+    <div class="v89-predictive-copy">
+      <p id="v89-summary">
+        Start Monitoring to build a near-term advisory forecast.
+      </p>
+      <div id="v89-withheld" class="v89-withheld" hidden></div>
+      <div id="v89-factors" class="v89-factors">
+        <div class="empty-state">Waiting for predictive evidence.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="v89-action">
+    <b>Recommended action</b>
+    <span id="v89-action">Live Guardian monitoring remains authoritative.</span>
+  </div>
+  <div class="passport-safety-note">
+    <b>Safety boundary</b>
+    <span id="v89-boundary">
+      Predictive Guardian does not replace the trained model or existing alerts.
+    </span>
+  </div>
+</section>
+
 <section class="intelligence-main-grid">
     <article class="panel intelligence-explanation">
       <div class="panel-head">
@@ -523,5 +588,5 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="/static/js/intelligence.js?v=8.6.0"></script>
+<script src="/static/js/intelligence.js?v=8.9.0"></script>
 {% endblock %}
