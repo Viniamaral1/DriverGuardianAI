@@ -298,16 +298,21 @@ function renderV89PredictiveGuardian(predictive, passportValidation) {
   const timeTo = predictive.time_to_elevated_minutes;
   intelligenceEl("v89-time-to-risk").textContent =
     timeTo !== null && timeTo !== undefined
-      ? `Estimated elevated-risk window ~${Number(timeTo).toFixed(1)} min`
+      ? Number(timeTo) < 1
+        ? `Estimated elevated-risk window ~${Math.max(1, Math.round(Number(timeTo) * 60))} sec`
+        : `Estimated elevated-risk window ~${Number(timeTo).toFixed(1)} min`
       : "No justified escalation-time estimate";
 
   const historical = predictive.historical_pattern || {};
   intelligenceEl("v89-history-count").textContent =
     `${historical.session_count || 0} sessions`;
+  const medianElevatedSeconds = historical.median_first_elevated_seconds;
+  const medianElevatedMinutes = historical.median_first_elevated_minutes;
   intelligenceEl("v89-history-window").textContent =
-    historical.median_first_elevated_minutes !== null
-    && historical.median_first_elevated_minutes !== undefined
-      ? `Median elevated-risk timing ${historical.median_first_elevated_minutes} min`
+    medianElevatedSeconds !== null && medianElevatedSeconds !== undefined
+      ? Number(medianElevatedSeconds) < 60
+        ? `Median elevated-risk timing ${Math.round(Number(medianElevatedSeconds))} sec`
+        : `Median elevated-risk timing ${Number(medianElevatedMinutes).toFixed(1)} min`
       : "No historical escalation window yet";
 
   intelligenceEl("v89-passport-trust").textContent =

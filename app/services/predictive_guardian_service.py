@@ -134,11 +134,20 @@ class PredictiveGuardianService:
                             )
                             break
 
+        median_first_elevated_seconds = (
+            median(first_elevated_minutes) * 60.0
+            if first_elevated_minutes else None
+        )
+
         return {
             "session_count": len(recent),
+            "median_first_elevated_seconds": (
+                round(median_first_elevated_seconds, 1)
+                if median_first_elevated_seconds is not None else None
+            ),
             "median_first_elevated_minutes": (
-                round(median(first_elevated_minutes), 1)
-                if first_elevated_minutes else None
+                round(median_first_elevated_seconds / 60.0, 3)
+                if median_first_elevated_seconds is not None else None
             ),
             "median_peak_risk": (
                 round(median(peak_risks), 4) if peak_risks else 0.0
@@ -250,6 +259,20 @@ class PredictiveGuardianService:
             session_seconds=session_seconds,
         )
         trajectory = self._trajectory()
+
+        # A short, steep live change can be real, but extrapolating that raw
+        # slope several minutes forward creates implausible 0%→100% jumps.
+        # Preserve the measured slope for explanation/direction while using a
+        # bounded slope only for the scenario projection.
+        raw_slope = self._number(trajectory.get("slope_per_minute"))
+        projection_slope = max(-0.08, min(0.08, raw_slope))
+        trajectory["projection_slope_per_minute"] = round(
+            projection_slope, 4
+        )
+        trajectory["projection_slope_limited"] = (
+            abs(raw_slope - projection_slope) > 1e-9
+        )
+
         period = self._period(datetime.now().hour)
         historical = self._history(profile_name, period)
 
@@ -325,12 +348,12 @@ class PredictiveGuardianService:
         time_to_elevated = None
         if (
             trajectory["direction"] == "rising"
-            and trajectory["slope_per_minute"] > 0
+            and projection_slope > 0
             and risk < self.ELEVATED_THRESHOLD
         ):
             estimate = (
                 self.ELEVATED_THRESHOLD - risk
-            ) / trajectory["slope_per_minute"]
+            ) / projection_slope
             if 0 < estimate <= 45:
                 time_to_elevated = round(estimate, 1)
 
@@ -349,7 +372,7 @@ class PredictiveGuardianService:
         forecast_risk = risk
         horizon_minutes = 10
         if direction in {"rising", "falling"}:
-            forecast_risk += trajectory["slope_per_minute"] * min(
+            forecast_risk += projection_slope * min(
                 horizon_minutes, 5
             )
         forecast_risk = max(0.0, min(1.0, forecast_risk))
@@ -410,8 +433,15 @@ class PredictiveGuardianService:
                     4,
                 ),
                 "detail": (
-                    f"Risk slope is {trajectory['slope_per_minute']:+.1%} "
-                    "per minute."
+                    f"Measured risk slope is "
+                    f"{trajectory['slope_per_minute']:+.1%} per minute."
+                    + (
+                        f" Forecast projection is bounded to "
+                        f"{projection_slope:+.1%} per minute to avoid "
+                        "over-extrapolating short spikes."
+                        if trajectory["projection_slope_limited"]
+                        else ""
+                    )
                 ),
             },
         ]
@@ -429,7 +459,19 @@ class PredictiveGuardianService:
                     ),
                     "detail": (
                         "Historical sessions reached elevated advisory risk "
-                        f"at a median {historical['median_first_elevated_minutes']:.1f} minutes."
+                        + (
+                            f"at a median "
+                            f"{historical['median_first_elevated_seconds']:.0f} seconds."
+                            if (
+                                historical.get("median_first_elevated_seconds")
+                                is not None
+                                and historical["median_first_elevated_seconds"] < 60
+                            )
+                            else (
+                                f"at a median "
+                                f"{historical['median_first_elevated_minutes']:.1f} minutes."
+                            )
+                        )
                     ),
                 }
             )
@@ -457,7 +499,7 @@ class PredictiveGuardianService:
 
         projection = []
         for minute in (0, 5, 10, 15):
-            projected = risk + trajectory["slope_per_minute"] * min(minute, 5)
+            projected = risk + projection_slope * min(minute, 5)
             if historical["same_period_session_count"] >= 2:
                 weight = min(0.28, minute / 15 * 0.28)
                 projected = (

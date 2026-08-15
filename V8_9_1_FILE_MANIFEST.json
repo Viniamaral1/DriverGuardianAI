@@ -1,0 +1,56 @@
+{
+  "release": "Guardian OS V8.9.1 Predictive Guardian Refinement",
+  "source_checkpoint": "GuardianOS-V8.9-Predictive-Refinement-20260814-131242.zip",
+  "verified_findings": {
+    "zero_minute_root_cause": "Correct sub-minute timing rounded to one decimal minute.",
+    "median_first_elevated_seconds_by_profile": {
+      "vinitest1": 2.0,
+      "passpor test": 2.0,
+      "vini2": 2.0
+    },
+    "projection_refinement": "Scenario extrapolation slope bounded to \u00b10.08 risk/minute; measured slope remains visible."
+  },
+  "validation": {
+    "python_syntax": "passed",
+    "javascript_syntax": "passed",
+    "stable_trajectory": "passed",
+    "rising_trajectory": "passed",
+    "falling_trajectory": "passed",
+    "insufficient_perception_withholding": "passed",
+    "passport_drift_withholding": "passed",
+    "historical_seconds_display_contract": "passed",
+    "fastapi_smoke": "APP 8.9.1 ROUTES 75"
+  },
+  "protected_unchanged": [
+    "trained fatigue model",
+    "V8 Decision Engine",
+    "PersonalCalibration",
+    "Passport baseline",
+    "Passport Validation logic",
+    "Perception Confidence semantics",
+    "alert thresholds",
+    "alert behaviour",
+    "camera pipeline",
+    "MediaPipe",
+    "Decision Memory sampling",
+    "Visual Evidence"
+  ],
+  "changed_files": {
+    "app/services/predictive_guardian_service.py": {
+      "bytes": 20872,
+      "sha256": "e5e745702e22e715e549bd39aeb0f51ef878828306ffecba9dc2ca551a513107"
+    },
+    "app/static/js/intelligence.js": {
+      "bytes": 47695,
+      "sha256": "6333950b5963b213f90d459b131d60bc7ec92ed8a73feafaede421c1b8e6f279"
+    },
+    "app/main.py": {
+      "bytes": 1845,
+      "sha256": "0a3ebd036ec0d0857024308f7a42a11af3aed26e4d676443e244f10b5532978a"
+    },
+    "GUARDIAN_OS_V8_9_1_PREDICTIVE_REFINEMENT.md": {
+      "bytes": 1314,
+      "sha256": "092f97bcfcb387b71f1b61f83515ed1360fd7d6b6bb44da492ced6ee3fb6c12b"
+    }
+  }
+}
