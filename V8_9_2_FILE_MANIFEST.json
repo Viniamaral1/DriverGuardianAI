@@ -1,0 +1,60 @@
+{
+  "release": "Guardian OS V8.9.2 Calibration / Passport Trust Fix",
+  "root_cause": "Pre-calibration quick-verification mismatch and cumulative fallback history were still being applied after a successful replacement calibration.",
+  "actual_debug_findings": {
+    "passpor test_saved_baseline_ear": 0.199894,
+    "passpor test_recent_reliable_ear_median": 0.2042,
+    "passpor test_old_state": "DRIFT DETECTED",
+    "passpor test_corrected_state": "VALID",
+    "vinitest1_saved_baseline_ear": 0.243573,
+    "vinitest1_recent_reliable_ear_median": 0.24115,
+    "vinitest1_old_state": "DRIFT DETECTED",
+    "vinitest1_corrected_state": "VALID"
+  },
+  "changes": [
+    "clear obsolete last_verification when calibration is reset",
+    "clear mismatch when a new full calibration resolves it",
+    "snapshot verification/fallback counters at calibration creation",
+    "only evaluate last verification when it is newer than current calibration",
+    "calculate fallback rate from checks since current calibration",
+    "apply same generation semantics to Passport import"
+  ],
+  "validation": {
+    "python_syntax": "passed",
+    "actual_profile_revalidation": "passed",
+    "pre-calibration_mismatch_resolved_by_new_calibration": "passed",
+    "new_post-calibration_mismatch_still_triggers_drift": "passed",
+    "reset_clears_obsolete_verification": "passed",
+    "fastapi_smoke": "8.9.2 / 75 routes"
+  },
+  "protected_unchanged": [
+    "fatigue model",
+    "V8 Decision Engine",
+    "EAR drift thresholds",
+    "head-pose drift thresholds",
+    "Perception Confidence",
+    "Predictive Guardian withholding rules",
+    "alerts",
+    "camera/MediaPipe",
+    "Decision Memory sampling",
+    "Visual Evidence"
+  ],
+  "changed_files": {
+    "app/services/driver_profile_service.py": {
+      "bytes": 12209,
+      "sha256": "7033dc8a4246b0ec9975811182b51a1b88725da40086ff736fc5d9576d2e3894"
+    },
+    "app/services/passport_validation_service.py": {
+      "bytes": 19255,
+      "sha256": "6126a137a291ea2ebf280a63b2eed547e8b107025bd82876d593ca8fe29d4d49"
+    },
+    "app/main.py": {
+      "bytes": 1845,
+      "sha256": "5e803f75ab1cb5444e8dc8b70244a7f17aa90ea01f8a1f812b6a49714952e77d"
+    },
+    "GUARDIAN_OS_V8_9_2_CALIBRATION_PASSPORT_TRUST_FIX.md": {
+      "bytes": 1716,
+      "sha256": "6eefd56bd580bdb3aef69cb4fbacab9d4139345d653ea605cc250f33ff3f0267"
+    }
+  }
+}

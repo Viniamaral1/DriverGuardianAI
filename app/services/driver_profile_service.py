@@ -172,6 +172,10 @@ class DriverProfileService:
             if not profile:
                 raise KeyError("Driver profile was not found.")
             profile["calibration"] = None
+            # A verification result belongs to the calibration it evaluated.
+            # Once that calibration is explicitly reset, the result must not be
+            # carried forward as evidence against the next baseline.
+            profile["last_verification"] = None
             profile["updated_at"] = self._now()
             self._save()
             return dict(profile)
@@ -212,8 +216,17 @@ class DriverProfileService:
                 "camera_index": int(camera_index),
                 "observation_count": total_count,
                 "last_source": str(source),
+                "verification_count_at_calibration": int(
+                    profile.get("verification_count", 0) or 0
+                ),
+                "fallback_count_at_calibration": int(
+                    profile.get("fallback_count", 0) or 0
+                ),
                 "updated_at": self._now(),
             }
+            # Any quick-verification mismatch that triggered this full
+            # calibration has now been resolved by the new baseline.
+            profile["last_verification"] = None
             profile["full_calibration_count"] = (
                 int(profile.get("full_calibration_count", 0) or 0) + 1
             )
@@ -249,8 +262,15 @@ class DriverProfileService:
                 "observation_count": max(1, int(observation_count or 1)),
                 "last_source": "passport_import",
                 "source_passport_id": str(source_passport_id),
+                "verification_count_at_calibration": int(
+                    profile.get("verification_count", 0) or 0
+                ),
+                "fallback_count_at_calibration": int(
+                    profile.get("fallback_count", 0) or 0
+                ),
                 "updated_at": self._now(),
             }
+            profile["last_verification"] = None
             profile["last_used_at"] = self._now()
             profile["updated_at"] = self._now()
             self._save()

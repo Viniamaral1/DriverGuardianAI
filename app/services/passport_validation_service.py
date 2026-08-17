@@ -240,11 +240,44 @@ class PassportValidationService:
             )
 
         last_verification = profile.get("last_verification") or {}
-        fallback_count = int(profile.get("fallback_count", 0) or 0)
-        verification_count = int(profile.get("verification_count", 0) or 0)
+        calibrated_at_for_checks = self._parse_time(calibration.get("updated_at"))
+        verification_at = self._parse_time(last_verification.get("at"))
+
+        # Verification is calibration-version-specific. A mismatch that occurred
+        # before a later full calibration/import is resolved evidence and must
+        # not invalidate the replacement baseline.
+        verification_is_current = bool(last_verification)
+        if calibrated_at_for_checks is not None and verification_at is not None:
+            verification_is_current = verification_at >= calibrated_at_for_checks
+        elif calibrated_at_for_checks is not None and last_verification:
+            # If an old record has no parseable timestamp, do not use it against
+            # a known newer calibration.
+            verification_is_current = False
+
+        cumulative_fallbacks = int(profile.get("fallback_count", 0) or 0)
+        cumulative_verifications = int(profile.get("verification_count", 0) or 0)
+        fallback_snapshot = calibration.get("fallback_count_at_calibration")
+        verification_snapshot = calibration.get("verification_count_at_calibration")
+
+        if fallback_snapshot is not None and verification_snapshot is not None:
+            fallback_count = max(
+                0, cumulative_fallbacks - int(fallback_snapshot or 0)
+            )
+            verification_count = max(
+                0, cumulative_verifications - int(verification_snapshot or 0)
+            )
+        elif calibrated_at_for_checks is not None and not verification_is_current:
+            # Legacy calibration created before per-calibration counter snapshots:
+            # historical fallback totals cannot be attributed to the new baseline.
+            fallback_count = 0
+            verification_count = 0
+        else:
+            fallback_count = cumulative_fallbacks
+            verification_count = cumulative_verifications
+
         total_checks = fallback_count + verification_count
         fallback_rate = fallback_count / total_checks if total_checks else 0.0
-        if last_verification:
+        if verification_is_current:
             matched = bool(last_verification.get("matched"))
             difference = abs(self._number(last_verification.get("difference_percent")))
             if not matched:
