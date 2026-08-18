@@ -8,6 +8,7 @@ from app.services.decision_engine_service import DecisionEngineService
 from app.services.decision_memory_service import DecisionMemoryService
 from app.services.perception_confidence_service import PerceptionConfidenceService
 from app.services.predictive_guardian_service import PredictiveGuardianService
+from app.services.safety_intelligence_service import SafetyIntelligenceService
 
 if TYPE_CHECKING:
     from app.services.app_state import GuardianState
@@ -530,4 +531,15 @@ class IntelligenceService:
             )
         else:
             payload["decision_memory"] = self.decision_memory.status()
+
+        payload["safety_intelligence"] = SafetyIntelligenceService.snapshot(
+            live=payload["live"],
+            decision_engine=decision_engine,
+            perception=perception_confidence,
+            passport_validation=passport_validation,
+            predictive=predictive_guardian,
+            decision_memory=payload.get("decision_memory"),
+            journey_caution=payload["journey_caution"],
+            signal_quality=signal_quality,
+        )
         return payload

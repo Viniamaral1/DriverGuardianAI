@@ -1,0 +1,91 @@
+﻿GrowthOS
+v0.22.1 LIVE EXTERNAL RESEARCH TEST CHECKPOINT
+
+Created:
+2026-08-18 21:39:43
+
+STATUS
+======
+
+PASSED
+- Internal-only routing
+- Live external research execution
+- External evidence cards
+- Inline web-source preview
+- Open original web source
+- Internal handling of project-current questions
+- Explicit web-search routing
+- Conversation evidence persistence
+- No-guess behaviour when useful evidence is unavailable
+
+ISSUES IDENTIFIED
+=================
+
+1. External search relevance
+
+Search queries can overemphasise ambiguous individual words.
+
+Observed examples:
+- "current" returned electric-current and banking results
+- recycled-paper competitor research returned airline-related results
+
+Required repair:
+- preserve complete search meaning
+- generate commercially focused queries
+- reject irrelevant sources
+- retry using a reformulated query
+- score semantic relevance before synthesis
+
+2. Hybrid response completion
+
+GrowthOS successfully retrieved:
+- 4 internal sources
+- 4 external sources
+
+However, qwen3:4b-instruct could not always complete the combined
+Hybrid assessment.
+
+Required repair:
+- compact evidence before synthesis
+- reduce redundant prompt content
+- improve retry behaviour
+- evaluate Gemini as a stronger optional provider
+
+3. Knowledge and memory suggestions
+
+External-search instructions should not automatically be treated
+as durable organisational knowledge.
+
+Required repair:
+- avoid capturing raw search instructions
+- use explicit Capture insight confirmation
+- move detailed diagnostics into Why this answer?
+- never silently merge external research into internal Knowledge
+
+NEXT BUILD
+==========
+
+v0.22.1a
+External Search Relevance + Hybrid Reliability Repair
+
+FOLLOWING BUILD
+===============
+
+v0.22.2
+Gemini + Ollama Multi-LLM Provider Architecture
+
+PRODUCT DIRECTION
+=================
+
+GrowthOS is an evidence-backed organisational decision-intelligence
+system.
+
+Core lifecycle:
+
+Evidence
+-> Assessment
+-> Decision
+-> Outcome
+-> Organisational learning
+
+GrowthOS should not become a generic ChatGPT replacement.

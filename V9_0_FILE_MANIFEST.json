@@ -1,0 +1,82 @@
+{
+  "release": "Guardian OS V9.0 Safety Intelligence Engine",
+  "source_checkpoint": "GuardianOS-V9.0-Safety-Intelligence-Engine-20260817-161323.zip",
+  "architecture": "Read-only unification layer over validated Guardian intelligence; no new fatigue detector and no live safety-path mutation.",
+  "unified_layers": [
+    "Perception Confidence",
+    "Behaviour / signal quality",
+    "Learned fatigue model",
+    "Personalisation / Passport Validation",
+    "Explainable Decision Engine",
+    "Decision / Near-Miss / Visual Evidence memory",
+    "Predictive Guardian"
+  ],
+  "new_contracts": {
+    "safety_intelligence_state": true,
+    "trust_states": [
+      "TRUSTED",
+      "GUARDED",
+      "LIMITED",
+      "STANDBY"
+    ],
+    "standard_reason_codes": true,
+    "explicit_dependencies": true,
+    "central_safety_contract": true,
+    "cag_context_schema": "guardian-cag-context-v1",
+    "llm_dependency": false
+  },
+  "validation": {
+    "python_syntax": "passed",
+    "javascript_syntax": "passed",
+    "trusted_chain_synthetic": "passed",
+    "limited_chain_synthetic": "passed",
+    "ui_contract": "passed",
+    "fastapi_smoke": "APP 9.0.0 ROUTES 75"
+  },
+  "protected_unchanged": [
+    "trained fatigue model",
+    "PersonalCalibration semantics",
+    "TemporalStateEngine",
+    "V8 Decision Engine calculations",
+    "AlertManager",
+    "alert thresholds",
+    "camera ownership",
+    "MediaPipe ownership",
+    "Perception Confidence semantics",
+    "Passport Validation logic",
+    "Decision Memory sampling",
+    "Near-Miss Memory analysis",
+    "Predictive Guardian trust gates",
+    "Visual Evidence capture"
+  ],
+  "changed_files": {
+    "app/services/safety_intelligence_service.py": {
+      "bytes": 12909,
+      "sha256": "a0cc0ac1f8f72ea3b9f7cd89f725327285efa4df8b1583969321164af7762f3b"
+    },
+    "app/services/intelligence_service.py": {
+      "bytes": 22525,
+      "sha256": "4e5cf21f095ba7de65acb0e9c44c8e44c345d855e67144383e9017a86f8f37c3"
+    },
+    "app/templates/intelligence.html": {
+      "bytes": 25128,
+      "sha256": "2e0b0a06faa985c6482b5759d251e93f3cfaed6e4f48ae19bcffe713a2ec63b0"
+    },
+    "app/static/js/intelligence.js": {
+      "bytes": 51362,
+      "sha256": "8bfc0c76a7d3e14c6f35cd8b608312b90d068953e5a21af6972b5577d829c0a5"
+    },
+    "app/static/css/app.css": {
+      "bytes": 123495,
+      "sha256": "1edc2f455074ef53d996bb3d86cc1dac9215a00d27ed745dab598d1fe251deed"
+    },
+    "app/main.py": {
+      "bytes": 1845,
+      "sha256": "9aaa8141688452cbc1b11476401f5b160c3070c1a0407efda2a95b421349c7b9"
+    },
+    "GUARDIAN_OS_V9_0_SAFETY_INTELLIGENCE_ENGINE.md": {
+      "bytes": 1087,
+      "sha256": "7f082fc1f6f8588065caa08b05caf287179e9a768f8ccf0fece7887729c97b1a"
+    }
+  }
+}

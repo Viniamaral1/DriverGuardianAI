@@ -41,6 +41,7 @@ function renderIntelligence(snapshot) {
   const perception = snapshot.perception_confidence || {};
   const predictive = snapshot.predictive_guardian || {};
   const passportValidation = snapshot.passport_validation || {};
+  const safetyIntelligence = snapshot.safety_intelligence || {};
 
   intelligenceEl("intelligence-generated").textContent =
     `Updated ${new Date(snapshot.generated_at).toLocaleTimeString("en-GB")}`;
@@ -213,6 +214,7 @@ function renderIntelligence(snapshot) {
       </span>`).join("")
     : `<span class="v86-reason success"><b>Observation clear</b><small>No current perception limitation was identified.</small></span>`;
 
+  renderV90SafetyIntelligence(safetyIntelligence);
   renderV89PredictiveGuardian(predictive, passportValidation);
 
   intelligenceEl("history-average-risk").textContent =
@@ -230,6 +232,82 @@ function renderIntelligence(snapshot) {
   renderV8DecisionEngine(snapshot.decision_engine || {});
   v81AddLivePoint(snapshot);
   v81RenderMemoryStatus(snapshot.decision_memory || {});
+}
+
+function renderV90SafetyIntelligence(safety) {
+  const trust = safety.trust_chain || {};
+  const current = safety.current_assessment || {};
+  const state = String(trust.state || "standby").toLowerCase();
+  const badge = intelligenceEl("v90-trust-badge");
+  badge.textContent = state.toUpperCase();
+  badge.className = `badge ${
+    state === "trusted" ? "success" :
+    state === "guarded" ? "warning" :
+    state === "limited" ? "danger" : ""
+  }`;
+
+  intelligenceEl("v90-trust-state").textContent = intelligenceLabel(state);
+  intelligenceEl("v90-trust-score").textContent =
+    `${intelligencePercent(trust.score || 0)} trust`;
+  intelligenceEl("v90-risk").textContent =
+    intelligencePercent(current.advisory_risk || 0);
+  intelligenceEl("v90-decision-level").textContent =
+    `Decision ${intelligenceLabel(current.decision_level || "standby")}`;
+  intelligenceEl("v90-forecast").textContent =
+    intelligenceLabel(current.forecast_direction || "uncertain");
+  intelligenceEl("v90-forecast-confidence").textContent =
+    `${intelligencePercent(current.forecast_confidence || 0)} confidence`;
+  intelligenceEl("v90-blockers").textContent =
+    `${trust.blocking_reason_count || 0} blocker${Number(trust.blocking_reason_count || 0) === 1 ? "" : "s"}`;
+  intelligenceEl("v90-reason-count").textContent =
+    `${trust.reason_count || 0} active reason${Number(trust.reason_count || 0) === 1 ? "" : "s"}`;
+  intelligenceEl("v90-headline").textContent =
+    trust.headline || "Guardian Intelligence is waiting for live monitoring.";
+  intelligenceEl("v90-action").textContent =
+    current.recommended_action || "Live Guardian monitoring remains authoritative.";
+  intelligenceEl("v90-safety-contract").textContent =
+    safety.safety_contract?.statement ||
+    "V9 unifies existing Guardian intelligence; it does not control the live alert path.";
+
+  const layers = safety.layers || [];
+  intelligenceEl("v90-layer-strip").innerHTML = layers.length
+    ? layers.map(layer => `
+      <div class="v90-layer-card" data-state="${String(layer.state || "standby").toLowerCase()}">
+        <span>${layer.label || "Layer"}</span>
+        <b>${intelligenceLabel(layer.state || "standby")}</b>
+        <small>${intelligencePercent(layer.score || 0)}</small>
+      </div>
+    `).join("")
+    : `<span class="muted">No Safety Intelligence layers are available.</span>`;
+
+  const reasons = safety.reason_codes || [];
+  intelligenceEl("v90-reasons").innerHTML = reasons.length
+    ? reasons.map(item => `
+      <article class="v90-reason ${item.severity || "info"}">
+        <div><b>${intelligenceLabel(item.code || "reason")}</b><span>${intelligenceLabel(item.layer || "system")}</span></div>
+        <p>${item.message || ""}</p>
+      </article>
+    `).join("")
+    : `<span class="v90-reason success"><b>Trust chain clear</b><p>No active trust limitation is recorded.</p></span>`;
+
+  const technical = {
+    version: safety.version,
+    dependencies: safety.dependencies,
+    cag_context: safety.cag_context,
+    safety_contract: safety.safety_contract,
+  };
+  intelligenceEl("v90-technical-json").textContent = JSON.stringify(technical, null, 2);
+}
+
+if (!window.__guardianV90TechnicalBound) {
+  window.__guardianV90TechnicalBound = true;
+  document.addEventListener("click", event => {
+    const button = event.target.closest("#v90-technical-toggle");
+    if (!button) return;
+    const panel = intelligenceEl("v90-technical");
+    panel.hidden = !panel.hidden;
+    button.textContent = panel.hidden ? "Technical details" : "Hide technical details";
+  });
 }
 
 function renderV89ForecastChart(projection) {

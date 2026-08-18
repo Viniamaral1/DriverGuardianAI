@@ -48,7 +48,51 @@
     </article>
   </section>
 
-  <section class="panel v86-perception-panel">
+  <section class="panel v90-safety-intelligence-panel">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">V9.0 GUARDIAN SAFETY INTELLIGENCE</p>
+      <h2>One trust chain across every intelligence layer</h2>
+    </div>
+    <span class="badge" id="v90-trust-badge">STANDBY</span>
+  </div>
+
+  <div class="v90-overview-grid">
+    <div><span>Trust chain</span><strong id="v90-trust-state">Standby</strong><small id="v90-trust-score">0% confidence</small></div>
+    <div><span>Current advisory risk</span><strong id="v90-risk">0%</strong><small id="v90-decision-level">Decision standby</small></div>
+    <div><span>Forecast</span><strong id="v90-forecast">Uncertain</strong><small id="v90-forecast-confidence">0% confidence</small></div>
+    <div><span>Attention</span><strong id="v90-blockers">0 blockers</strong><small id="v90-reason-count">0 active reasons</small></div>
+  </div>
+
+  <p id="v90-headline" class="v90-headline">Guardian Intelligence is waiting for live monitoring.</p>
+
+  <div id="v90-layer-strip" class="v90-layer-strip"></div>
+
+  <details class="v90-details">
+    <summary>Why? <span>View trust-chain explanation</span></summary>
+    <div class="v90-details-body">
+      <div>
+        <h3>Active reason codes</h3>
+        <div id="v90-reasons" class="v90-reasons"><span class="muted">No active reason codes.</span></div>
+      </div>
+      <div>
+        <h3>Recommended action</h3>
+        <p id="v90-action">Live Guardian monitoring remains authoritative.</p>
+        <button class="button secondary" id="v90-technical-toggle" type="button">Technical details</button>
+      </div>
+    </div>
+    <div id="v90-technical" class="v90-technical" hidden>
+      <pre id="v90-technical-json">{}</pre>
+    </div>
+  </details>
+
+  <div class="passport-safety-note">
+    <b>Safety contract</b>
+    <span id="v90-safety-contract">V9 unifies existing Guardian intelligence; it does not control the live alert path.</span>
+  </div>
+</section>
+
+<section class="panel v86-perception-panel">
     <div class="panel-head">
       <div>
         <p class="eyebrow">PERCEPTION CONFIDENCE LAYER</p>
@@ -588,5 +632,5 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="/static/js/intelligence.js?v=8.9.0"></script>
+<script src="/static/js/intelligence.js?v=9.0.0"></script>
 {% endblock %}
