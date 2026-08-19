@@ -1,0 +1,45 @@
+{
+  "release": "Guardian OS V9.2.1 Monitoring Continuity & UX Reliability",
+  "source": "GuardianOS-V9.2.1-UX-Patch-2026-08-19_17-19-17.zip",
+  "completed": [
+    "Expanded Cross-Session Evidence / Why matched panels persist across live refreshes.",
+    "Floating live-monitoring preview appears on non-Monitoring pages while monitoring is active.",
+    "Floating preview supports expand, return-to-Monitoring, and hide-without-stopping-monitoring.",
+    "Back-to-top control added for long pages.",
+    "Monitoring/calibration fallback wording made less destructive/confusing.",
+    "Application version bumped to 9.2.1."
+  ],
+  "important_calibration_note": "The supplied patch does not contain the backend service that decides when quick profile verification falls back to a full calibration. Therefore this package does not weaken or alter that safety-critical fallback timing. The visible calibration messaging is improved, but changing the actual 3-second fallback requires the backend monitoring/calibration lifecycle service from the full project.",
+  "protected_unchanged": [
+    "trained fatigue model",
+    "V8 Decision Engine",
+    "alert thresholds",
+    "Passport Validation semantics",
+    "Perception Confidence semantics",
+    "Decision Memory sampling",
+    "Predictive Guardian trust gates",
+    "Visual Evidence capture"
+  ],
+  "changed_files": {
+    "app/templates/base.html": {
+      "bytes": 7901,
+      "sha256": "b0aeabe41ec8d3239e2368d3b01735b235b31bcfed241382bc351b69a8a461b0"
+    },
+    "app/static/js/intelligence.js": {
+      "bytes": 57202,
+      "sha256": "668b04259b5be2f9fa0b8591cbfd96a9ac74761fe96b63f82bc5fa8911b3f8e7"
+    },
+    "app/static/js/monitoring.js": {
+      "bytes": 12708,
+      "sha256": "7b782ffa10946b5439758799694ce2ee04d0493422e35f88e06426a8bad16b42"
+    },
+    "app/static/css/app.css": {
+      "bytes": 130168,
+      "sha256": "82525d781fafd3b91e17489a954ce581265f14321fb0de77d20e009520ca1c17"
+    },
+    "app/main.py": {
+      "bytes": 1849,
+      "sha256": "cc23fcd908b186c8286c329f8123c70562e743ecebabd83224df159de5b1ae69"
+    }
+  }
+}

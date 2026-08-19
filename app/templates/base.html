@@ -75,7 +75,98 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <aside id="floating-monitor" class="floating-monitor" hidden aria-label="Live Monitoring preview">
+    <div class="floating-monitor-head">
+      <span><i></i> LIVE MONITORING</span>
+      <div class="floating-monitor-actions">
+        <button type="button" id="floating-monitor-expand" title="Expand preview" aria-label="Expand preview">⤢</button>
+        <a href="/monitoring" title="Return to Monitoring" aria-label="Return to Monitoring">↗</a>
+        <button type="button" id="floating-monitor-close" title="Hide preview" aria-label="Hide preview">×</button>
+      </div>
+    </div>
+    <a class="floating-monitor-feed-wrap" href="/monitoring" aria-label="Open Live Monitoring">
+      <img id="floating-monitor-feed" alt="Live Guardian monitoring preview">
+      <span id="floating-monitor-state">MONITORING</span>
+    </a>
+  </aside>
+
+  <button id="back-to-top" class="back-to-top" type="button" aria-label="Back to top" title="Back to top">↑</button>
+
   <script src="/static/js/core.js"></script>
+  <script>
+    (() => {
+      const page = document.body.dataset.page || "";
+      const floating = document.getElementById("floating-monitor");
+      const feed = document.getElementById("floating-monitor-feed");
+      const state = document.getElementById("floating-monitor-state");
+      const close = document.getElementById("floating-monitor-close");
+      const expand = document.getElementById("floating-monitor-expand");
+      const top = document.getElementById("back-to-top");
+      let previewHidden = sessionStorage.getItem("dg-floating-monitor-hidden") === "true";
+      let streamActive = false;
+      let lastMonitoring = false;
+
+      function setStream(active) {
+        if (!feed) return;
+        if (active && !streamActive) {
+          streamActive = true;
+          feed.src = `/api/camera/stream?floating=1&ts=${Date.now()}`;
+        } else if (!active && streamActive) {
+          streamActive = false;
+          feed.removeAttribute("src");
+        }
+      }
+
+      function applyMetrics(metrics = {}) {
+        const monitoring = Boolean(metrics.monitoring);
+        if (!monitoring && lastMonitoring) {
+          previewHidden = false;
+          sessionStorage.removeItem("dg-floating-monitor-hidden");
+        }
+        lastMonitoring = monitoring;
+        const show = monitoring && page !== "monitoring" && !previewHidden;
+        if (floating) floating.hidden = !show;
+        setStream(show && String(metrics.camera_status || "").toUpperCase() === "CONNECTED");
+        if (state) state.textContent = String(metrics.state || "MONITORING").toUpperCase();
+      }
+
+      close?.addEventListener("click", () => {
+        previewHidden = true;
+        sessionStorage.setItem("dg-floating-monitor-hidden", "true");
+        floating.hidden = true;
+        setStream(false);
+      });
+
+      expand?.addEventListener("click", () => {
+        floating?.classList.toggle("expanded");
+        expand.textContent = floating?.classList.contains("expanded") ? "⤡" : "⤢";
+      });
+
+      async function pollMonitoring() {
+        try {
+          const response = await fetch("/api/monitoring/status", {cache: "no-store"});
+          if (response.ok) applyMetrics(await response.json());
+        } catch (_) {}
+      }
+
+      if (page !== "monitoring") {
+        pollMonitoring();
+        window.setInterval(pollMonitoring, 2500);
+      }
+
+      if (typeof DG !== "undefined" && DG.subscribe) {
+        DG.subscribe(({metrics}) => applyMetrics(metrics || {}));
+      }
+
+      function updateBackToTop() {
+        top?.classList.toggle("visible", window.scrollY > 560);
+      }
+      window.addEventListener("scroll", updateBackToTop, {passive: true});
+      top?.addEventListener("click", () => window.scrollTo({top: 0, behavior: "smooth"}));
+      updateBackToTop();
+    })();
+  </script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

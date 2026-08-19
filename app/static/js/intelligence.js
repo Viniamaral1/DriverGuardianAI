@@ -242,10 +242,38 @@ function v91Date(value) {
   catch { return String(value); }
 }
 
+const v921OpenDetails = new Set();
+
+function v921RememberDetailState(container) {
+  container?.querySelectorAll("details[data-v921-detail-key]").forEach(detail => {
+    const key = detail.dataset.v921DetailKey;
+    if (!key) return;
+    if (detail.open) v921OpenDetails.add(key);
+    else v921OpenDetails.delete(key);
+  });
+}
+
+function v921RestoreDetailState(container) {
+  container?.querySelectorAll("details[data-v921-detail-key]").forEach(detail => {
+    detail.open = v921OpenDetails.has(detail.dataset.v921DetailKey);
+    detail.addEventListener("toggle", () => {
+      const key = detail.dataset.v921DetailKey;
+      if (!key) return;
+      if (detail.open) v921OpenDetails.add(key);
+      else v921OpenDetails.delete(key);
+    });
+  });
+}
+
 function renderV91CrossSessionPatterns(data) {
   const status = String(data.status || "waiting").toLowerCase();
   const badge = intelligenceEl("v91-pattern-status");
   if (!badge) return;
+
+  const patternContainer = intelligenceEl("v91-pattern-list");
+  const similarContainer = intelligenceEl("v91-similar-list");
+  v921RememberDetailState(patternContainer);
+  v921RememberDetailState(similarContainer);
   badge.textContent = status.replaceAll("_", " ").toUpperCase();
   badge.className = `badge ${
     status === "available" ? "success" :
@@ -281,7 +309,7 @@ function renderV91CrossSessionPatterns(data) {
         </div>
         <p>${item.detail || ""}</p>
         <small>${item.supporting_sessions || 0} supporting session(s) · ${item.trust_note || "Correlation only."}</small>
-        <details>
+        <details data-v921-detail-key="pattern:${item.code || item.title || 'pattern'}">
           <summary>Evidence</summary>
           <ul>${(item.evidence || []).map(value => `<li>${value}</li>`).join("") || "<li>No supporting detail available.</li>"}</ul>
           ${(item.supporting_session_ids || []).length ? `<div class="v92-evidence-links">${item.supporting_session_ids.slice(0,5).map((id,index) => `<button type="button" class="v92-session-link" data-v92-session-id="${id}">View supporting session ${index+1} →</button>`).join("")}</div>` : ""}
@@ -298,10 +326,13 @@ function renderV91CrossSessionPatterns(data) {
           <p>${String(item.period || "unknown").toUpperCase()} · avg risk ${intelligencePercent(item.average_risk || 0)} · peak ${intelligencePercent(item.peak_risk || 0)}</p>
           <span>View historical session →</span>
         </button>
-        <details class="v92-why-match"><summary>Why matched?</summary><small>${(item.evidence || []).join(" · ")}</small></details>
+        <details class="v92-why-match" data-v921-detail-key="similar:${item.session_id || item.started_at || 'session'}"><summary>Why matched?</summary><small>${(item.evidence || []).join(" · ")}</small></details>
       </article>
     `).join("")
     : `<div class="empty-state">No comparable historical session is available yet.</div>`;
+
+  v921RestoreDetailState(patternContainer);
+  v921RestoreDetailState(similarContainer);
 
   document.querySelectorAll("[data-v92-session-id]").forEach(button => {
     button.addEventListener("click", async () => {

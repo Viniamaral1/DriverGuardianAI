@@ -58,7 +58,7 @@ function renderCalibration(metrics) {
     heading.textContent = mode === "quick"
       ? `Verifying ${metrics.driver_profile_name || "saved profile"}`
       : mode === "full" && metrics.calibration_fallback_reason
-        ? "Saved profile did not match — recalibrating"
+        ? "Saved profile needs a fresh verification"
         : "Keep your face relaxed and look forward";
   }
 
@@ -67,7 +67,7 @@ function renderCalibration(metrics) {
     : mode === "quick"
       ? "Guardian is checking the current neutral eye measurement against the saved local baseline."
       : metrics.calibration_fallback_reason
-        ? `${metrics.calibration_fallback_reason}. The original full calibration is now running.`
+        ? `${metrics.calibration_fallback_reason}. Guardian is protecting the saved profile while verification is resolved.`
         : "Guardian OS is learning your normal eye, mouth and head position.";
 }
 
