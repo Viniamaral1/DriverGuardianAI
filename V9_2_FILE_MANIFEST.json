@@ -1,0 +1,26 @@
+{
+  "release": "Guardian OS V9.2 Historical Evidence & Pattern Explainability",
+  "source": "V9.1 TESTED-PASSED checkpoint",
+  "changed_files": {
+    "app/services/cross_session_pattern_service.py": {
+      "bytes": 17536,
+      "sha256": "c2901378e49ab27c85422ea45aad14f581ef2eb8de9b43f0b629e9d1b75b269a"
+    },
+    "app/static/js/intelligence.js": {
+      "bytes": 55995,
+      "sha256": "f987e6121d617fb56773aa3d3b546b69079de61c4e3764fa5857a222253804e2"
+    },
+    "app/static/css/app.css": {
+      "bytes": 127882,
+      "sha256": "d5127aab9113970cc1558b820967eb1dccf289110bb9cc5cba9515bdfa19b7a9"
+    },
+    "app/main.py": {
+      "bytes": 1845,
+      "sha256": "139c907e2b111c63e3a240f31d3ac28bf42d61f42793f1b653fa54dd6df6ebe0"
+    },
+    "GUARDIAN_OS_V9_2_HISTORICAL_EVIDENCE_EXPLAINABILITY.md": {
+      "bytes": 844,
+      "sha256": "f52489531feddf406e4b646e91f381f1819d5b93a012a8a2740d9ffd56578997"
+    }
+  }
+}

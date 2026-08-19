@@ -521,10 +521,16 @@ class PredictiveGuardianService:
             "authoritative safety path."
         )
         if status == "withheld":
-            recommended_action = (
-                "Do not rely on a personalised forecast until the stated "
-                "trust limitation is resolved. Live monitoring remains active."
-            )
+            if not monitoring:
+                recommended_action = (
+                    "Start live monitoring to restore live assessment and "
+                    "personalised forecasting."
+                )
+            else:
+                recommended_action = (
+                    "Do not rely on a personalised forecast until the stated "
+                    "trust limitation is resolved. Live monitoring remains active."
+                )
         elif risk >= 0.82 or (
             direction == "rising"
             and time_to_elevated is not None

@@ -51,7 +51,7 @@
   <section class="panel v90-safety-intelligence-panel">
   <div class="panel-head">
     <div>
-      <p class="eyebrow">V9.0 GUARDIAN SAFETY INTELLIGENCE</p>
+      <p class="eyebrow">V9.1 GUARDIAN SAFETY INTELLIGENCE</p>
       <h2>One trust chain across every intelligence layer</h2>
     </div>
     <span class="badge" id="v90-trust-badge">STANDBY</span>
@@ -89,6 +89,44 @@
   <div class="passport-safety-note">
     <b>Safety contract</b>
     <span id="v90-safety-contract">V9 unifies existing Guardian intelligence; it does not control the live alert path.</span>
+  </div>
+</section>
+
+<section class="panel v91-cross-session-panel">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">V9.1 CROSS-SESSION PATTERN INTELLIGENCE</p>
+      <h2>What keeps happening across this driver's sessions?</h2>
+    </div>
+    <span class="badge" id="v91-pattern-status">WAITING</span>
+  </div>
+
+  <div class="v91-summary-grid">
+    <div><span>Usable history</span><strong id="v91-session-count">0 sessions</strong><small id="v91-history-trust">History trust unavailable</small></div>
+    <div><span>Patterns found</span><strong id="v91-pattern-count">0</strong><small>Deterministic local analysis</small></div>
+    <div><span>Strongest pattern</span><strong id="v91-top-pattern">Developing</strong><small id="v91-top-confidence">0% confidence</small></div>
+    <div><span>Closest history</span><strong id="v91-similar-count">0 matches</strong><small id="v91-similar-best">No comparable session yet</small></div>
+  </div>
+
+  <p class="v91-summary" id="v91-summary">Guardian is waiting for enough local Decision Memory history.</p>
+
+  <details class="v91-details" open>
+    <summary>Patterns <span>View supporting cross-session evidence</span></summary>
+    <div id="v91-pattern-list" class="v91-pattern-list">
+      <div class="empty-state">No cross-session pattern is available yet.</div>
+    </div>
+  </details>
+
+  <details class="v91-details">
+    <summary>Similar historical sessions <span>See which previous sessions most resemble the current state</span></summary>
+    <div id="v91-similar-list" class="v91-similar-list">
+      <div class="empty-state">No comparable historical session is available yet.</div>
+    </div>
+  </details>
+
+  <div class="passport-safety-note">
+    <b>Safety boundary</b>
+    <span id="v91-boundary">Cross-session patterns describe associations only; they do not retrain the model or establish medical causation.</span>
   </div>
 </section>
 
@@ -632,5 +670,5 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="/static/js/intelligence.js?v=9.0.0"></script>
+<script src="/static/js/intelligence.js?v=9.1.0"></script>
 {% endblock %}

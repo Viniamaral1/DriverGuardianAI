@@ -42,6 +42,7 @@ function renderIntelligence(snapshot) {
   const predictive = snapshot.predictive_guardian || {};
   const passportValidation = snapshot.passport_validation || {};
   const safetyIntelligence = snapshot.safety_intelligence || {};
+  const crossSession = snapshot.cross_session_patterns || {};
 
   intelligenceEl("intelligence-generated").textContent =
     `Updated ${new Date(snapshot.generated_at).toLocaleTimeString("en-GB")}`;
@@ -215,6 +216,7 @@ function renderIntelligence(snapshot) {
     : `<span class="v86-reason success"><b>Observation clear</b><small>No current perception limitation was identified.</small></span>`;
 
   renderV90SafetyIntelligence(safetyIntelligence);
+  renderV91CrossSessionPatterns(crossSession);
   renderV89PredictiveGuardian(predictive, passportValidation);
 
   intelligenceEl("history-average-risk").textContent =
@@ -232,6 +234,90 @@ function renderIntelligence(snapshot) {
   renderV8DecisionEngine(snapshot.decision_engine || {});
   v81AddLivePoint(snapshot);
   v81RenderMemoryStatus(snapshot.decision_memory || {});
+}
+
+function v91Date(value) {
+  if (!value) return "Unknown date";
+  try { return new Date(value).toLocaleString("en-GB"); }
+  catch { return String(value); }
+}
+
+function renderV91CrossSessionPatterns(data) {
+  const status = String(data.status || "waiting").toLowerCase();
+  const badge = intelligenceEl("v91-pattern-status");
+  if (!badge) return;
+  badge.textContent = status.replaceAll("_", " ").toUpperCase();
+  badge.className = `badge ${
+    status === "available" ? "success" :
+    status === "restricted" ? "danger" :
+    status === "developing" ? "warning" : ""
+  }`;
+
+  intelligenceEl("v91-session-count").textContent = `${data.session_count || 0} sessions`;
+  intelligenceEl("v91-history-trust").textContent = `History trust: ${String(data.history_trust || "unavailable").toUpperCase()}`;
+  intelligenceEl("v91-pattern-count").textContent = String(data.pattern_count || 0);
+  intelligenceEl("v91-summary").textContent = data.summary || "No cross-session summary is available.";
+  intelligenceEl("v91-boundary").textContent = data.safety_boundary || "Cross-session patterns are advisory only.";
+
+  const top = data.top_pattern || null;
+  intelligenceEl("v91-top-pattern").textContent = top?.title || "Developing";
+  intelligenceEl("v91-top-confidence").textContent = top
+    ? `${intelligencePercent(top.confidence)} confidence`
+    : "0% confidence";
+
+  const similar = data.similar_sessions || [];
+  intelligenceEl("v91-similar-count").textContent = `${similar.length} match${similar.length === 1 ? "" : "es"}`;
+  intelligenceEl("v91-similar-best").textContent = similar.length
+    ? `Best similarity ${intelligencePercent(similar[0].similarity)}`
+    : "No comparable session yet";
+
+  const patterns = data.patterns || [];
+  intelligenceEl("v91-pattern-list").innerHTML = patterns.length
+    ? patterns.map(item => `
+      <article class="v91-pattern-card" data-trend="${item.trend || "stable"}">
+        <div class="v91-pattern-head">
+          <div class="v92-pattern-title"><h3>${item.title}</h3><span class="v92-trend-badge">${String(item.trend || "pattern").replaceAll("_", " ").toUpperCase()}</span></div>
+          <strong>${intelligencePercent(item.confidence || 0)}</strong>
+        </div>
+        <p>${item.detail || ""}</p>
+        <small>${item.supporting_sessions || 0} supporting session(s) · ${item.trust_note || "Correlation only."}</small>
+        <details>
+          <summary>Evidence</summary>
+          <ul>${(item.evidence || []).map(value => `<li>${value}</li>`).join("") || "<li>No supporting detail available.</li>"}</ul>
+          ${(item.supporting_session_ids || []).length ? `<div class="v92-evidence-links">${item.supporting_session_ids.slice(0,5).map((id,index) => `<button type="button" class="v92-session-link" data-v92-session-id="${id}">View supporting session ${index+1} →</button>`).join("")}</div>` : ""}
+        </details>
+      </article>
+    `).join("")
+    : `<div class="empty-state">No strong repeated pattern is established yet.</div>`;
+
+  intelligenceEl("v91-similar-list").innerHTML = similar.length
+    ? similar.map(item => `
+      <article class="v91-similar-card">
+        <button type="button" class="v92-similar-open" data-v92-session-id="${item.session_id || ""}">
+          <div><b>${v91Date(item.started_at)}</b><strong>${intelligencePercent(item.similarity || 0)} similar</strong></div>
+          <p>${String(item.period || "unknown").toUpperCase()} · avg risk ${intelligencePercent(item.average_risk || 0)} · peak ${intelligencePercent(item.peak_risk || 0)}</p>
+          <span>View historical session →</span>
+        </button>
+        <details class="v92-why-match"><summary>Why matched?</summary><small>${(item.evidence || []).join(" · ")}</small></details>
+      </article>
+    `).join("")
+    : `<div class="empty-state">No comparable historical session is available yet.</div>`;
+
+  document.querySelectorAll("[data-v92-session-id]").forEach(button => {
+    button.addEventListener("click", async () => {
+      const sessionId = button.dataset.v92SessionId;
+      if (!sessionId) return;
+      await v81LoadMemorySession(sessionId);
+      const panel = document.querySelector(".v81-memory-panel");
+      if (panel) {
+        panel.classList.remove("v92-evidence-highlight");
+        void panel.offsetWidth;
+        panel.classList.add("v92-evidence-highlight");
+        panel.scrollIntoView({behavior: "smooth", block: "start"});
+        window.setTimeout(() => panel.classList.remove("v92-evidence-highlight"), 2200);
+      }
+    });
+  });
 }
 
 function renderV90SafetyIntelligence(safety) {

@@ -9,6 +9,7 @@ from app.services.decision_memory_service import DecisionMemoryService
 from app.services.perception_confidence_service import PerceptionConfidenceService
 from app.services.predictive_guardian_service import PredictiveGuardianService
 from app.services.safety_intelligence_service import SafetyIntelligenceService
+from app.services.cross_session_pattern_service import CrossSessionPatternService
 
 if TYPE_CHECKING:
     from app.services.app_state import GuardianState
@@ -31,6 +32,7 @@ class IntelligenceService:
         self.decision_engine = DecisionEngineService()
         self.decision_memory = decision_memory or DecisionMemoryService(state.root)
         self.predictive_guardian = PredictiveGuardianService(state.root)
+        self.cross_session_patterns = CrossSessionPatternService(state.root)
 
     @staticmethod
     def _number(value: Any, default: float = 0.0) -> float:
@@ -429,6 +431,17 @@ class IntelligenceService:
             history_insights=insights,
         )
 
+        cross_session_patterns = self.cross_session_patterns.snapshot(
+            profile_name=str(metrics.get("driver_profile_name") or "Guest"),
+            current={
+                "risk": decision_engine.get("risk_score", 0.0),
+                "ear": metrics.get("ear", 0.0),
+                "perception_state": perception_confidence.get("state", "standby"),
+                "period": self._period(datetime.now().hour),
+            },
+            passport_validation=passport_validation,
+        )
+
         payload = {
             "available": True,
             "decision_engine": decision_engine,
@@ -453,6 +466,7 @@ class IntelligenceService:
             "perception_confidence": perception_confidence,
             "passport_validation": passport_validation,
             "predictive_guardian": predictive_guardian,
+            "cross_session_patterns": cross_session_patterns,
             "baseline_comparison": self._baseline_comparison(metrics, insights),
             "outlook": self._outlook(metrics, insights),
             "context": effective_context,
@@ -538,6 +552,7 @@ class IntelligenceService:
             perception=perception_confidence,
             passport_validation=passport_validation,
             predictive=predictive_guardian,
+            cross_session=cross_session_patterns,
             decision_memory=payload.get("decision_memory"),
             journey_caution=payload["journey_caution"],
             signal_quality=signal_quality,

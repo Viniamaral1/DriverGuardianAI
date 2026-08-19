@@ -13,7 +13,7 @@ class SafetyIntelligenceService:
     can consume one stable, explainable state object.
     """
 
-    VERSION = "9.0-safety-intelligence-v1"
+    VERSION = "9.1-safety-intelligence-v1"
 
     @staticmethod
     def _number(value: Any, default: float = 0.0) -> float:
@@ -51,6 +51,7 @@ class SafetyIntelligenceService:
         perception: dict[str, Any],
         passport_validation: dict[str, Any] | None,
         predictive: dict[str, Any],
+        cross_session: dict[str, Any] | None,
         decision_memory: dict[str, Any] | None,
         journey_caution: dict[str, Any],
         signal_quality: dict[str, Any],
@@ -238,6 +239,8 @@ class SafetyIntelligenceService:
             headline = "Guardian Intelligence is waiting for live monitoring."
 
         current_action = predictive.get("recommended_action") or decision_engine.get("recommended_action")
+        if not monitoring:
+            current_action = "Start live monitoring to restore live assessment and personalised forecasting."
         if not current_action:
             current_action = "Use Guardian's existing live monitoring and alerts as the authoritative safety path."
 
@@ -266,6 +269,7 @@ class SafetyIntelligenceService:
                 "decision": ["perception", "behaviour", "learned_model", "personalisation", "context"],
                 "memory": ["decision", "perception", "personalisation"],
                 "predictive": ["decision", "memory", "perception", "personalisation"],
+                "cross_session": ["memory", "perception", "personalisation"],
             },
             "cag_context": {
                 "schema": "guardian-cag-context-v1",
@@ -279,6 +283,11 @@ class SafetyIntelligenceService:
                 "passport_state": passport_state,
                 "prediction_status": predictive_status,
                 "forecast_direction": str(predictive.get("direction") or "uncertain"),
+                "cross_session_status": str((cross_session or {}).get("status") or "unavailable"),
+                "cross_session_pattern_count": int((cross_session or {}).get("pattern_count", 0) or 0),
+                "top_cross_session_patterns": [
+                    item.get("code") for item in ((cross_session or {}).get("patterns", []) or [])[:3]
+                ],
                 "reason_codes": [item["code"] for item in reasons],
                 "safety_contract": "Explain existing deterministic Guardian outputs; do not invent safety calculations or override alerts.",
             },

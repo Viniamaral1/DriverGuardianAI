@@ -1,0 +1,81 @@
+{
+  "release": "Guardian OS V9.1 Cross-Session Pattern Intelligence",
+  "source_checkpoint": "GuardianOS-V9.1-Cross-Session-Pattern-Intelligence-20260819-134446.zip",
+  "included_fix": "V9.0.1 monitoring-off recommendation wording",
+  "pattern_types": [
+    "risk escalation timing",
+    "recovery behaviour",
+    "longitudinal EAR trend",
+    "recurring perception limitations",
+    "time-of-day risk association",
+    "escalation/recovery recurrence",
+    "current-session similarity"
+  ],
+  "validation": {
+    "python_syntax": "passed",
+    "javascript_syntax": "passed",
+    "real_project_history_analysis": "passed",
+    "synthetic_pattern_coverage": [
+      "EAR_LONGITUDINAL_TREND",
+      "PERCEPTION_RELIABILITY_PATTERN",
+      "RECOVERY_BEHAVIOUR",
+      "RISK_ESCALATION_TIMING",
+      "TIME_OF_DAY_RISK_PATTERN"
+    ],
+    "similar_session_matching": "passed",
+    "monitoring_off_ux_fix": "passed",
+    "ui_contract": "passed",
+    "fastapi_smoke": "APP 9.1.0 ROUTES 75"
+  },
+  "protected_unchanged": [
+    "trained fatigue model",
+    "PersonalCalibration semantics",
+    "V8 Decision Engine calculations",
+    "AlertManager and alert thresholds",
+    "camera and MediaPipe ownership",
+    "Perception Confidence semantics",
+    "Passport Validation logic",
+    "Decision Memory sampling",
+    "Near-Miss Memory engine",
+    "Predictive Guardian trust gates",
+    "Visual Evidence capture"
+  ],
+  "changed_files": {
+    "app/services/cross_session_pattern_service.py": {
+      "bytes": 16891,
+      "sha256": "377cceb7f90e4ed731a90f21b08b929da64399c95d08c41f1c54002c2ac97c3b"
+    },
+    "app/services/intelligence_service.py": {
+      "bytes": 23301,
+      "sha256": "62202e158060043ae1109f4ad3ecc0f6b859072d0243196be37fc22fa40d7ef1"
+    },
+    "app/services/safety_intelligence_service.py": {
+      "bytes": 13543,
+      "sha256": "374ee3e2f1de4c021eeb3ca88a56b20f9aa468edec826613d036494e3a3d2eb3"
+    },
+    "app/services/predictive_guardian_service.py": {
+      "bytes": 21118,
+      "sha256": "cef95055069685b9275d5eb33cbd0fa2829268393edbf29e05b1c6e5bd8dfc30"
+    },
+    "app/templates/intelligence.html": {
+      "bytes": 27011,
+      "sha256": "664f4396b2a44e3a8700b16939ce10b218d939fae6a305f3228e95d546a9b245"
+    },
+    "app/static/js/intelligence.js": {
+      "bytes": 54738,
+      "sha256": "9a0d3a3b3506e7adb6a3bf1ac09c40f2be93f6f22b4f141662c8183970399fb3"
+    },
+    "app/static/css/app.css": {
+      "bytes": 126148,
+      "sha256": "16c2fde425c20f78885360b26391b06dcb071cd1c9f29dba0986cbe1688c9cc7"
+    },
+    "app/main.py": {
+      "bytes": 1845,
+      "sha256": "92038f9f575eb9cc2e272bcd8415ad869034d940a870e8f9541b6b4d12e3c293"
+    },
+    "GUARDIAN_OS_V9_1_CROSS_SESSION_PATTERN_INTELLIGENCE.md": {
+      "bytes": 1044,
+      "sha256": "e38e754de1e0ad2abcd279d93effa9556dd1f7b79cb1286818426ff5709774c7"
+    }
+  }
+}
