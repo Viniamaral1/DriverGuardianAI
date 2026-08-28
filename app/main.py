@@ -19,7 +19,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Guardian OS V9.2.1",
-    version="9.2.1",
+    version="9.2.2",
     description="Automotive driver-monitoring dashboard and Commander interface.",
     lifespan=lifespan,
 )
@@ -45,5 +45,5 @@ def health() -> dict:
     return {
         "status": "ok",
         "application": "Guardian OS V9.2.1",
-        "version": "9.2.1",
+        "version": "9.2.2",
     }

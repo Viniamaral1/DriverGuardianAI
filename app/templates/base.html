@@ -76,10 +76,10 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <aside id="floating-monitor" class="floating-monitor" hidden aria-label="Live Monitoring preview">
+  <aside id="floating-monitor" class="floating-monitor" hidden aria-label="Live Monitoring picture-in-picture">
     <div class="floating-monitor-head">
-      <span><i></i> LIVE MONITORING</span>
-      <div class="floating-monitor-actions">
+      <span class="floating-monitor-title"><i></i> LIVE MONITORING</span>
+      <div class="floating-monitor-actions" aria-label="Floating monitor controls">
         <button type="button" id="floating-monitor-expand" title="Expand preview" aria-label="Expand preview">⤢</button>
         <a href="/monitoring" title="Return to Monitoring" aria-label="Return to Monitoring">↗</a>
         <button type="button" id="floating-monitor-close" title="Hide preview" aria-label="Hide preview">×</button>
@@ -87,7 +87,10 @@
     </div>
     <a class="floating-monitor-feed-wrap" href="/monitoring" aria-label="Open Live Monitoring">
       <img id="floating-monitor-feed" alt="Live Guardian monitoring preview">
-      <span id="floating-monitor-state">MONITORING</span>
+      <div class="floating-monitor-overlay">
+        <span id="floating-monitor-state">MONITORING</span>
+        <span id="floating-monitor-risk">Risk --</span>
+      </div>
     </a>
   </aside>
 
@@ -100,6 +103,7 @@
       const floating = document.getElementById("floating-monitor");
       const feed = document.getElementById("floating-monitor-feed");
       const state = document.getElementById("floating-monitor-state");
+      const risk = document.getElementById("floating-monitor-risk");
       const close = document.getElementById("floating-monitor-close");
       const expand = document.getElementById("floating-monitor-expand");
       const top = document.getElementById("back-to-top");
@@ -129,6 +133,8 @@
         if (floating) floating.hidden = !show;
         setStream(show && String(metrics.camera_status || "").toUpperCase() === "CONNECTED");
         if (state) state.textContent = String(metrics.state || "MONITORING").toUpperCase();
+        const rawRisk = Number(metrics.fatigue_probability ?? metrics.current_risk ?? metrics.risk ?? 0);
+        if (risk) risk.textContent = `Risk ${Math.max(0, Math.min(100, rawRisk <= 1 ? rawRisk * 100 : rawRisk)).toFixed(1)}%`;
       }
 
       close?.addEventListener("click", () => {
@@ -138,9 +144,21 @@
         setStream(false);
       });
 
+      function setExpanded(expanded) {
+        floating?.classList.toggle("expanded", Boolean(expanded));
+        if (expand) {
+          expand.textContent = expanded ? "⤡" : "⤢";
+          expand.setAttribute("aria-pressed", expanded ? "true" : "false");
+          expand.title = expanded ? "Minimise preview" : "Expand preview";
+        }
+      }
+
+      setExpanded(sessionStorage.getItem("dg-floating-monitor-expanded") === "true");
+
       expand?.addEventListener("click", () => {
-        floating?.classList.toggle("expanded");
-        expand.textContent = floating?.classList.contains("expanded") ? "⤡" : "⤢";
+        const next = !floating?.classList.contains("expanded");
+        setExpanded(next);
+        sessionStorage.setItem("dg-floating-monitor-expanded", next ? "true" : "false");
       });
 
       async function pollMonitoring() {

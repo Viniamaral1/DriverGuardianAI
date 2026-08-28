@@ -1,0 +1,56 @@
+{
+  "release": "Guardian OS V9.2.2 Floating Monitor V2",
+  "source_checkpoint": "GuardianOS-V9.2.2-Floating-Monitor-V2-2026-08-19_21-15-20.zip",
+  "root_cause": "The V9.2.1 floating-monitor CSS had been appended as literal backslash-n text instead of real line breaks, so the browser did not apply the intended fixed picture-in-picture styling reliably. The monitor therefore rendered like a large ordinary page element.",
+  "fixes": [
+    "Replaced malformed floating-monitor CSS with valid real CSS rules.",
+    "Detached preview from document flow using fixed positioning and a 360px compact PiP size.",
+    "Added 16:9 contained video geometry so the stream cannot stretch page width.",
+    "Controls are integrated into the preview and appear on hover/focus.",
+    "Expand/minimise toggles between compact 360px and larger 560px PiP modes.",
+    "Added compact live state and risk badges over the preview.",
+    "Hide preview stops only the preview stream element; monitoring itself remains active.",
+    "Back-to-top button is positioned independently from the floating monitor.",
+    "Floating preview remains absent on the full Monitoring page.",
+    "Application version bumped to 9.2.2."
+  ],
+  "performance_notes": [
+    "The preview attaches only when monitoring is active and the current page is not Monitoring.",
+    "The preview stream source is removed when the preview is hidden or monitoring stops.",
+    "This patch does not create a second camera/MediaPipe/inference service; it consumes the existing camera stream endpoint."
+  ],
+  "validation": {
+    "python_syntax": "passed",
+    "inline_javascript_syntax": "passed",
+    "malformed_css_removed": "passed",
+    "fixed_pip_geometry_contract": "passed",
+    "hover_controls_contract": "passed"
+  },
+  "protected_unchanged": [
+    "trained fatigue model",
+    "camera pipeline ownership",
+    "MediaPipe/inference lifecycle",
+    "V8 Decision Engine",
+    "alert thresholds",
+    "Passport Validation",
+    "Perception Confidence",
+    "calibration lifecycle",
+    "Decision Memory sampling",
+    "Predictive Guardian trust gates",
+    "Visual Evidence"
+  ],
+  "changed_files": {
+    "app/templates/base.html": {
+      "bytes": 8887,
+      "sha256": "9c8dea97415de87ab7d4061d6faeb79f4200f1280092f47da2fbf5798e9c4a8c"
+    },
+    "app/static/css/app.css": {
+      "bytes": 133092,
+      "sha256": "ea0d8760f2a63e994e6a2637f1103a9b8eaa75f46a2e76093211ca00bd60e648"
+    },
+    "app/main.py": {
+      "bytes": 1849,
+      "sha256": "4a19a18832c58f2ee0594bf9d761717bf127569fb22bb8fe15bf2218aedf25a6"
+    }
+  }
+}
